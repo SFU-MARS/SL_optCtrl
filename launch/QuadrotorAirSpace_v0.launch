@@ -1,0 +1,57 @@
+<launch>
+
+  <!-- this part is for world launching -->
+  <arg name="world_file"  default="$(env QUADROTOR_WORLD_AIR_SPACE)"/>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time" value="true"/>
+    <arg name="debug" value="false"/>
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="world_name" value="$(arg world_file)"/>
+    <arg name="paused" value="true"/>
+    <arg name="headless" value="false"/>
+  </include>
+
+  <param name="robot_description" command="$(find xacro)/xacro.py --inorder $(env PROJ_HOME_3)/urdfs/quadrotor.urdf.xacro"/>
+
+  <!--<node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -2.18232 -y -3.33973 -z 3 -model quadrotor"-->
+  <!--output="screen">-->
+  <!--</node>-->
+
+  <!--FOR TEST NEW WORLD. CHANGE BACK IF NECESSARY-->
+  <node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 3.18232 -y -3.33973 -z 3 -model quadrotor"
+  output="screen">
+  </node>
+
+
+  <!-- this part is for quadrotor launching -->
+  <!--<include file="$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor_with_laser.launch" />-->
+
+
+	<!-- IGNORE: this part is from hector_quadrotor package and proved infeasible -->
+	<!--<param name="/controller/attitude/roll/p" value="0.0" />-->
+	<!--<param name="/controller/attitude/roll/i" value="0.0" />-->
+	<!--<param name="/controller/attitude/roll/d" value="0.0" />-->
+	<!--* /controller/velocity/x/i: 1.0-->
+	<!--* /controller/velocity/x/i_clamp: 5.0-->
+	<!--* /controller/velocity/x/p: 2.0-->
+	<!--* /controller/velocity/x/publish_state: True-->
+	<!--* /controller/velocity/y/antiwindup: True-->
+	<!--* /controller/velocity/y/d: 0.0-->
+	<!--* /controller/velocity/y/i: 1.0-->
+	<!--* /controller/velocity/y/i_clamp: 5.0-->
+	<!--* /controller/velocity/y/p: 2.0-->
+	<!--* /controller/velocity/y/publish_state: True-->
+	<!--* /controller/velocity/z/antiwindup: True-->
+	<!--* /controller/velocity/z/d: 0.0-->
+	<!--* /controller/velocity/z/i: 1.0-->
+	<!--* /controller/velocity/z/i_clamp: 5.0-->
+	<!--* /controller/velocity/z/max: 5.0-->
+	<!--* /controller/velocity/z/p: 5.0-->
+
+
+
+
+
+</launch>
