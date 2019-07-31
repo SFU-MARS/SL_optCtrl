@@ -16,7 +16,6 @@ class world_env(object):
         self.gravity = 9.8
 
         self.obstacle = None
-        #####################################################
 
         ###################### Drone ########################
         self.phi = (-math.pi, math.pi)
@@ -34,17 +33,25 @@ class world_env(object):
         self.inertia = 1
         self.trans = 1
         self.rot = 1
-        #####################################################
 
         ############# Discreteness Coefficient ##############
         # 6D state + 2D action
         # (x, y, vx, vy, phi, omega, t1, t2)
         self.step_number = np.array([10, 10, 10, 10, 10, 10, 10, 10])
         self.ranges = np.array([self.x, self.y, self.vx, self.vy, self.phi, self.omega, self.t1, self.t2])
-        #####################################################
+
+        #Grid is used for storing the n-D arrays regard to the discret states after cutting
         self.grid = None
+
+
+        ############# Initial Points From Goal ##############
         self.init_point = None
-        
+
+        # How many points will sample on each dimension.
+        # 6D state + 2D action (n_x, n_y, n_vx, n_vy, n_phi, n_omega, n_t1, n_t2)
+        self.sample_number = np.array([2, 2, 2, 2, 2, 2, 2, 2])
+        self.goal_ranges = np.array([self.goal_x, self.goal_y, self.vx, self.vy, 
+                                    self.phi, self.omega, self.t1, self.t2])
 
     def add_obstacle(self, x1, x2, y1, y2):
         if ((x1 > x2) or (y1 > y2)):
@@ -52,10 +59,9 @@ class world_env(object):
             return
 
         if (self.obstacle is None):
-            self.obstacle = np.array([x1, x2, y1, y2], dtype=float)
+            self.obstacle = np.array([[x1, x2, y1, y2]], dtype=float)
         else:
-            self.obstacle = numpy.append(self.obstacle, [x1, y1, x2, y2], axis = 0)
-
+            self.obstacle = np.concatenate((self.obstacle, np.array([[x1, x2, y1, y2]])), axis = 0)
 
     def world_info(self):
         print("world_x: ", self.x)
@@ -71,51 +77,53 @@ class world_env(object):
             print(obs)
 
     def state_cutting(self, dim = 8):
+        # Initialize and declare array space
         self.grid = np.empty((dim, self.step_number.max()))
 
         for i in range(dim):
             if (self.ranges[i][0] < self.ranges[i][1]):
                 self.grid[i] = np.linspace(self.ranges[i][0], self.ranges[i][1], self.step_number[i])
+
+            # Range exception!
             else:
-                print("State {d} range error!".format(i))
+                print("State %d range error!" %(i))
                 self.grid = None
                 break
 
-    def sample_from_goal(self, n_x, n_y, n_vx, n_vy, n_phi, n_omega):
-        list_x = np.array([n_x, n_vx, n_phi, n_omega])
-        list_y = np.array([n_y, n_vy, n_phi, n_omega])
+    def sample_from_goal(self, dim = 8):
+        dim_x = [0, 2, 4, 5]  
+        dim_y = [1, 3, 4, 5]
+        dim_a = [6, 7]
+
+        self.init_point = np.empty((dim, self.sample_number.max()))
+
+        for i in range(dim):
+            if (self.goal_ranges[i][0] < self.goal_ranges[i][1]):
+                self.init_point[i] = np.linspace(self.goal_ranges[i][0], 
+                                                self.goal_ranges[i][1], 
+                                                self.sample_number[i]) 
+
+        # refer: https://stackoverflow.com/questions/1208118/using-numpy-to-build-an-array-of-all-combinations-of-two-arrays
+        self.init_point = np.array(np.meshgrid(self.init_point[0],
+                                                self.init_point[2],
+                                                self.init_point[4],
+                                                self.init_point[5],
+                                                self.init_point[6],
+                                                self.init_point[7])).T.reshape(-1, len(dim_x) + len(dim_a))
+        print(self.init_point.shape)
 
 
 
+        # print(np.array(np.meshgrid(temp_array, tt)).T.reshape(-1, 3))
+
+
+        # print(np.array(np.meshgrid(dim_x, dim_y)).T.reshape(-1,2))
 
     
 
 
 if __name__ == "__main__":
     env = world_env()
-    env.add_obstacle(2,3,1,3)
-    env.add_obstacle(2,3,1,3)
+    # env.state_cutting()
+    env.sample_from_goal()
 
-    # env.world_info()
-    env.state_cutting()
-    print(env.grid)
-
-
-    # a = np.linspace(1, 5, 5000000)
-    # b = np.linspace(2, 5, 4999999)
-    # print(a, b)
-    # c = np.array([a, b])
-    # import time
-
-
-    # t1 = time.time()
-    # a += 1
-    # t2 = time.time()
-    # print(t2 - t1)
-
-    # t1 = time.time()
-    # c[0] += 1
-    # t2 = time.time()
-    # print(t2 - t1)
-
-    # print(c[0].dtype)
