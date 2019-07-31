@@ -107,23 +107,32 @@ class world_env(object):
         self.init_point = np.array(np.meshgrid(self.init_point[0],
                                                 self.init_point[2],
                                                 self.init_point[4],
-                                                self.init_point[5],
-                                                self.init_point[6],
-                                                self.init_point[7])).T.reshape(-1, len(dim_x) + len(dim_a))
-        print(self.init_point.shape)
+                                                self.init_point[5])).T.reshape(-1, len(dim_x))
+
+    def find_nearest_position(self, state, dim):
+        # This function can find the nearest position on discrete world for one state
+        # The type of state is a row of numpy array, e.g. state = np.array([2, 3, 4, 5])
+        # The dim stores the corresponding dimension of state. 
+        for i in range(len(dim)):
+            state[i] = self.grid[dim[i]] [np.argmin(np.absolute(self.grid[dim[i]] - state[i]))]
+
+        return state
 
 
-
-        # print(np.array(np.meshgrid(temp_array, tt)).T.reshape(-1, 3))
-
-
-        # print(np.array(np.meshgrid(dim_x, dim_y)).T.reshape(-1,2))
+    def previous_state_generator(self):
+        # print(self.grid)
+        return
 
     
 
 
 if __name__ == "__main__":
     env = world_env()
-    # env.state_cutting()
-    env.sample_from_goal()
+    env.state_cutting()
+    # env.sample_from_goal()
 
+    x = np.array([4.2, 4.8])
+    dim = [0, 1]
+
+    env.previous_state_generator()
+    env.find_nearest_position(x, dim)
