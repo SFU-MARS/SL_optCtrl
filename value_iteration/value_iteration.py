@@ -40,6 +40,7 @@ class world_env(object):
         self.inertia = 1
         self.trans = 1
         self.rot = 1
+        self.delta = 1
 
         ############# Discreteness Coefficient ##############
         # 6D state + 2D action
@@ -64,8 +65,6 @@ class world_env(object):
 
         # reward = [none, obstacle or out of range, goal]
         self.type_reward = np.array([-1, -500, 1000])
-
-
 
     def add_obstacle(self, x1, x2, y1, y2):
         if ((x1 > x2) or (y1 > y2)):
@@ -107,11 +106,9 @@ class world_env(object):
         self.state_type = np.zeros([self.state.shape[0], self.n_state_type])
         self.state_type = self.state_evaluation(self.state, self.state_type, dim_x)
 
-
     def state_evaluation(self, state, state_type, dim):
         for i, s in enumerate(state):
             state_type[i][self.state_check(s, dim)] = 1
-            print(s, state_type[i])
 
         return state_type
 
@@ -168,8 +165,16 @@ class world_env(object):
 
         return state
 
+    def state_transition(self, state, action):
+        trans_mat = np.array([1, self.delta, 0, 0],
+                             [0, 1 - self.trans * self.delta / self.mass, 0, 0],
+                             [0, 0, 1, self.delta],
+                             [0, 0, 0, 1 - self.rot * self.delta / self.inertia])
 
-    
+        print(trans_mat)
+
+        # _state = np.matmul(state, trans_mat)
+        
 
     
 
@@ -181,8 +186,10 @@ if __name__ == "__main__":
     env.add_obstacle(3,4,3,4)
     env.state_cutting()
     env.state_generator()    
-    # env.seek_nearest_position(x, dim)
-
+    
+    
+    
+    
 
     # TODO List
     # state_check() function test
