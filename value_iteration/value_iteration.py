@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 
 
-
 class world_env(object):
     def __init__(self):
         ###################### World Env ####################
@@ -103,7 +102,8 @@ class world_env(object):
         self.state_type_x = np.zeros(self.step_number[self.dim_x])
         self.state_type_y = np.zeros(self.step_number[self.dim_y])
 
-        # self.state_type = self.state_evaluation(self.state, self.state_type, dim_x)
+        self.state_type_x = self.state_evaluation(self.state_type_x, self.dim_x)
+        self.state_type_y = self.state_evaluation(self.state_type_y, self.dim_y)
 
     def index_to_state(self, index, dim):
         state = np.zeros(len(dim), dtype = float)
@@ -120,9 +120,13 @@ class world_env(object):
 
         return grid.argmin(axis=1)
 
-    def state_evaluation(self, state, state_type, dim):
-        for i, s in enumerate(state):
-            state_type[i][self.state_check(s, dim)] = 1
+    def state_evaluation(self, state_type, dim):
+        for idx1 in range(self.step_number[dim[0]]):
+            for idx2 in range(self.step_number[dim[1]]):
+                for idx3 in range(self.step_number[dim[2]]):
+                    for idx4 in range(self.step_number[dim[3]]):
+                        s = self.index_to_state([idx1, idx2, idx3, idx4], dim)
+                        state_type[idx1, idx2, idx3, idx4] = self.state_check(s, dim)
 
         return state_type
 
@@ -143,23 +147,25 @@ class world_env(object):
             return temp
 
         # Check in obstacle
-        temp_obs = None
 
         # Get the corresponding dimension of obstacles
         # Due to dimension decomposition
-        if (dim[0] == 0):
-            temp_obs = self.obstacles[:, :2]
-        else:
-            temp_obs = self.obstacles[:, 2:]
+        if (self.obstacles is not None and len(self.obstacles)):
 
-        # Check in obstacle!
-        for obs in temp_obs:
-            if (s[0] >= obs[0]  and  s[0] <= obs[1]):
-                temp = 1
-                break
+            temp_obs = None
+            if (dim[0] == 0):
+                temp_obs = self.obstacles[:, :2]
+            else:
+                temp_obs = self.obstacles[:, 2:]
 
-        if (temp):
-            return temp
+            # Check in obstacle!
+            for obs in temp_obs:
+                if (s[0] >= obs[0]  and  s[0] <= obs[1]):
+                    temp = 1
+                    break
+
+            if (temp):
+                return temp
 
         temp = 0
         # Check out of range!
@@ -200,10 +206,9 @@ if __name__ == "__main__":
     # env.add_obstacle(1,3,2,4)
     # env.add_obstacle(3,4,3,4)
     env.state_cutting()
-    env.state_init()    
+    env.state_init()   
     # env.index_to_state([1,1,1,1], env.dim_x)
     # print(env.state_to_index(np.array([0.3, 0.8, 1, 0.1]), env.dim_x))
-
 
     # state = np.array([2, 3, 4, 5])
     # action = np.array([1, 1])
