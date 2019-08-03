@@ -38,10 +38,15 @@ class world_env(object):
         self.mass = 1
         self.length = 1
         self.inertia = 1
-        self.trans = 1
-        self.rot = 1
+        self.trans = 1  # Cdv
+        self.rot = 1 # Cd_phi
         self.delta = 1
 
+        self.threshold = 0.001
+
+        self.dim_x = [0, 2, 4, 5]
+        self.dim_y = [1, 3, 4, 5]
+        self.dim_a = [6, 7]
         ############# Discreteness Coefficient ##############
         # 6D state + 2D action
         # (x, y, vx, vy, theta, omega, t1, t2)
@@ -62,6 +67,7 @@ class world_env(object):
 
         self.n_state_type = 3
         self.state_type = None
+        self.state_reward = None
 
         # reward = [none, obstacle or out of range, goal]
         self.type_reward = np.array([-1, -500, 1000])
@@ -90,21 +96,29 @@ class world_env(object):
                 self.grid = None
                 break
 
-    def state_generator(self, dim = 8):
-        dim_x = [0, 2, 4, 5]  
-        dim_y = [1, 3, 4, 5]
-        dim_a = [6, 7]
+    def state_init(self):
+        self.value_x = np.zeros(self.step_number[self.dim_x])
+        self.value_y = np.zeros(self.step_number[self.dim_y])
 
-        # refer: https://stackoverflow.com/questions/1208118/using-numpy-to-build-an-array-of-all-combinations-of-two-arrays
-        self.state = np.array(np.meshgrid(self.grid[0],
-                                            self.grid[2],
-                                            self.grid[4],
-                                            self.grid[5])).T.reshape(-1, len(dim_x))
+        self.state_type_x = np.zeros(self.step_number[self.dim_x])
+        self.state_type_y = np.zeros(self.step_number[self.dim_y])
 
-        self.value = np.zeros(self.state.shape[0])
+        # self.state_type = self.state_evaluation(self.state, self.state_type, dim_x)
 
-        self.state_type = np.zeros([self.state.shape[0], self.n_state_type])
-        self.state_type = self.state_evaluation(self.state, self.state_type, dim_x)
+    def index_to_state(self, index, dim):
+        state = np.zeros(len(dim), dtype = float)
+        for i in range(len(dim)):
+            state[i] = self.grid[dim[i]][index[i]]
+
+        return state
+
+    def state_to_index(self, state, dim):
+        grid = self.grid[dim]
+
+        for i in range(len(dim)):
+            grid[i] = np.absolute(grid[i] - state[i])
+
+        return grid.argmin(axis=1)
 
     def state_evaluation(self, state, state_type, dim):
         for i, s in enumerate(state):
@@ -158,36 +172,42 @@ class world_env(object):
 
     def seek_nearest_position(self, state, dim):
         # This function can find the nearest position on discrete world for one state
-        # The type of state is a row of numpy array, e.g. state = np.array([2, 3, 4, 5])
+        # The type of state is a row of numpy array, e.g. state = np.array([2, 3, 4, 5]) a 4D state
         # The dim stores the corresponding dimension of state. 
         for i in range(len(dim)):
             state[i] = self.grid[dim[i]] [np.argmin(np.absolute(self.grid[dim[i]] - state[i]))]
 
+        print(state)
+
         return state
 
     def state_transition(self, state, action):
-        trans_mat = np.array([1, self.delta, 0, 0],
-                             [0, 1 - self.trans * self.delta / self.mass, 0, 0],
-                             [0, 0, 1, self.delta],
-                             [0, 0, 0, 1 - self.rot * self.delta / self.inertia])
+        # state = [x, vx, theta, omega]
 
-        print(trans_mat)
+        act = np.sum(action)
 
-        # _state = np.matmul(state, trans_mat)
-        
+        state_ = np.array([state[0] + state[1] * self.delta,
+                            state[1] * (1 - self.trans * self.delta / self.mass) - math.sin(state[2]) * self.delta / self.mass * act,
+                            state[2] + state[3] * self.delta,
+                            state[3] + self.delta / self.inertia * (-self.rot * state[3] - act)])
 
-    
+        return state_
 
 
 if __name__ == "__main__":
     env = world_env()
 
-    env.add_obstacle(1,3,2,4)
-    env.add_obstacle(3,4,3,4)
+    # env.add_obstacle(1,3,2,4)
+    # env.add_obstacle(3,4,3,4)
     env.state_cutting()
-    env.state_generator()    
-    
-    
+    env.state_init()    
+    # env.index_to_state([1,1,1,1], env.dim_x)
+    # print(env.state_to_index(np.array([0.3, 0.8, 1, 0.1]), env.dim_x))
+
+
+    # state = np.array([2, 3, 4, 5])
+    # action = np.array([1, 1])
+    # print(env.state_transition(state, action))
     
     
 
