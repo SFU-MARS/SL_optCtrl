@@ -41,18 +41,25 @@ class world_env(object):
         self.rot = 1 # Cd_phi
         self.delta = 1
 
-        self.threshold = 0.001
-
         self.dim_x = [0, 2, 4, 5]
         self.dim_y = [1, 3, 4, 5]
         self.dim_a = [6, 7]
+
+        self.discount = 0.95
+        self.threshold = 0.001
         ############# Discreteness Coefficient ##############
         # 6D state + 2D action
         # (x, y, vx, vy, theta, omega, t1, t2)
         self.ranges = np.array([self.x, self.y, self.vx, self.vy, self.theta, self.omega, self.t1, self.t2])
 
         # self.step_number = np.array([10, 10, 10, 10, 10, 10, 10, 10])
-        self.step_number = np.array([2, 2, 2, 2, 2, 2, 2, 2]) # used for debug
+        # self.step_number = np.array([2, 2, 2, 2, 2, 2, 2, 2]) # used for debug
+        self.step_number = np.array([4, 4, 4, 4, 4, 4, 4, 4]) # used for debug
+        # self.step_number = np.array([5, 5, 5, 5, 5, 5, 5, 5]) # used for debug
+        # self.step_number = np.array([6, 6, 6, 6, 6, 6, 6, 6]) # used for debug
+        # self.step_number = np.array([8, 8, 8, 8, 8, 8, 8, 8]) # used for debug
+        # self.step_number = np.array([12, 12, 12, 12, 12, 12, 12 ,12]) # used for debug
+
 
         # The list of goal dimension
         self.goals = np.array([self.goal_x, self.goal_y, self.goal_vx, self.goal_vy, self.goal_theta, self.goal_omega])
@@ -69,7 +76,7 @@ class world_env(object):
         self.state_reward = None
 
         # reward = [none, obstacle or out of range, goal]
-        self.type_reward = np.array([-1, -500, 1000])
+        self.reward = np.array([-1, -500, 1000])
 
     def add_obstacle(self, x1, x2, y1, y2):
         if ((x1 > x2) or (y1 > y2)):
@@ -95,15 +102,47 @@ class world_env(object):
                 self.grid = None
                 break
 
+        if (self.obstacles is not None):
+            for i in range(self.obstacles.shape[0]):
+                self.obstacles[i] = self.seek_nearest_position(self.obstacles[i], dim = [0, 0, 1, 1])
+
+        print(self.obstacles)
+        print(self.grid)
+
     def state_init(self):
         self.value_x = np.zeros(self.step_number[self.dim_x])
         self.value_y = np.zeros(self.step_number[self.dim_y])
 
-        self.state_type_x = np.zeros(self.step_number[self.dim_x])
-        self.state_type_y = np.zeros(self.step_number[self.dim_y])
+        self.state_type_x = np.zeros(self.step_number[self.dim_x], dtype = int)
+        self.state_type_y = np.zeros(self.step_number[self.dim_y], dtype = int)
 
         self.state_type_x = self.state_evaluation(self.state_type_x, self.dim_x)
         self.state_type_y = self.state_evaluation(self.state_type_y, self.dim_y)
+
+    def value_iteration(self):
+        # Generate the combination of 4-d data
+        # Select the rows which are not in obstacles
+
+        states = np.array(np.meshgrid(self.grid[0],
+                                        self.grid[2],
+                                        self.grid[4],
+                                        self.grid[5])).T.reshape(-1, len(self.dim_x))
+
+
+        index = []
+        for i, s in enumerate(states):
+            t = self.state_check(s, self.dim_x)
+            if (t != 1):
+                index.append(i)
+
+        states = states[index]
+
+        # Update the value array iteratively
+        actions = np.array(np.meshgrid(self.grid[6],
+                                        self.grid[7])).T.reshape(-1, len(self.dim_a))
+
+
+
 
     def index_to_state(self, index, dim):
         state = np.zeros(len(dim), dtype = float)
@@ -134,7 +173,7 @@ class world_env(object):
         # This function is used for returning the state_type of a state
         # Also including check whether the state is out of range
 
-        # temp = (0, 1, 2) -> (none, obstacle, goal)
+        # temp = (0, 1, 2) -> (none, obstacle / out of range, goal)
         temp = 2
 
         # Check in goal range
@@ -153,7 +192,7 @@ class world_env(object):
         if (self.obstacles is not None and len(self.obstacles)):
 
             temp_obs = None
-            if (dim[0] == 0):
+            if (dim[0] == 0): # if it is dim_x
                 temp_obs = self.obstacles[:, :2]
             else:
                 temp_obs = self.obstacles[:, 2:]
@@ -170,6 +209,9 @@ class world_env(object):
         temp = 0
         # Check out of range!
         for i, d in enumerate(dim):
+            if (d == 4):
+                continue
+
             if (s[i] < self.ranges[d][0] or s[i] > self.ranges[d][1]):
                 temp = 1
                 break
@@ -183,8 +225,6 @@ class world_env(object):
         for i in range(len(dim)):
             state[i] = self.grid[dim[i]] [np.argmin(np.absolute(self.grid[dim[i]] - state[i]))]
 
-        print(state)
-
         return state
 
     def state_transition(self, state, action):
@@ -197,16 +237,23 @@ class world_env(object):
                             state[2] + state[3] * self.delta,
                             state[3] + self.delta / self.inertia * (-self.rot * state[3] - act)])
 
+        if (state_[2] > self.theta[1]):
+            state_[2] = self.theta[0] + (state_[2] - self.theta[1])
+
+        if (state_[2] < self.theta[0]):
+            state_[2] = self.theta[1] + (state_[2] - self.theta[0])
+
         return state_
 
 
 if __name__ == "__main__":
     env = world_env()
 
-    # env.add_obstacle(1,3,2,4)
-    # env.add_obstacle(3,4,3,4)
+    env.add_obstacle(1,3,2,4)
+    env.add_obstacle(3,4,3,4)
     env.state_cutting()
-    env.state_init()   
+    env.state_init()
+    env.value_iteration()
     # env.index_to_state([1,1,1,1], env.dim_x)
     # print(env.state_to_index(np.array([0.3, 0.8, 1, 0.1]), env.dim_x))
 
