@@ -7,8 +7,8 @@ import os
 class world_env(object):
     def __init__(self):
         ###################### World Env ####################
-        self.x = (0, 5)
-        self.y = (0, 5)
+        self.x = (-5, 5)
+        self.y = (-5, 5)
 
         self.gravity = 9.8
 
@@ -47,7 +47,7 @@ class world_env(object):
         self.dim_a = [6, 7]
 
         self.discount = 0.95
-        self.threshold = 0.001
+        self.threshold = 10
         ############# Discreteness Coefficient ##############
         # 6D state + 2D action
         # (x, y, vx, vy, theta, omega, t1, t2)
@@ -55,11 +55,12 @@ class world_env(object):
 
         # self.step_number = np.array([10, 10, 10, 10, 10, 10, 10, 10])
         # self.step_number = np.array([2, 2, 2, 2, 2, 2, 2, 2]) # used for debug
-        self.step_number = np.array([4, 4, 4, 4, 4, 4, 4, 4]) # used for debug
+        self.step_number = np.array([11, 11, 11, 11, 9, 9, 15, 15]) # used for debug
         # self.step_number = np.array([5, 5, 5, 5, 5, 5, 5, 5]) # used for debug
         # self.step_number = np.array([6, 6, 6, 6, 6, 6, 6, 6]) # used for debug
         # self.step_number = np.array([8, 8, 8, 8, 8, 8, 8, 8]) # used for debug
         # self.step_number = np.array([12, 12, 12, 12, 12, 12, 12 ,12]) # used for debug
+        # self.step_number = np.array([2, 3, 4, 5, 6, 5, 4, 3]) # used for debug
 
 
         # The list of goal dimension
@@ -90,11 +91,18 @@ class world_env(object):
 
     def state_cutting(self, dim = 8):
         # Initialize and declare array space
-        self.grid = np.empty((dim, self.step_number.max()))
+        l = []
+        for size in self.step_number:
+            x = np.empty((size), dtype = float)
+            l.append(x)
+
+        self.grid = np.array(l, dtype = object)
+
 
         for i in range(dim):
             if (self.ranges[i][0] < self.ranges[i][1]):
                 self.grid[i] = np.linspace(self.ranges[i][0], self.ranges[i][1], self.step_number[i])
+
 
             # Range exception!
             else:
@@ -158,7 +166,7 @@ class world_env(object):
                     best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
 
                     transition_count += 1
-                    if (transition_count % 100 == 0):
+                    if (transition_count % 100000 == 0):
                         print(transition_count)
 
                 index = self.state_to_index(s, self.dim_x)
@@ -171,32 +179,35 @@ class world_env(object):
             print("iteraion %d:" %(iteration))
             print(delta)
 
+            self.value_output(iteration, "state")
+
             iteration += 1
 
-    def value_output(self, mode = 0):
+
+    def value_output(self, iteration, mode = "index"):
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        file_name = "/value.txt"
+        file_name = "/value_iteration_" + str(iteration) + ".txt"
+
 
         f = open(dir_path + file_name, "w")
-        for idx1 in range(self.step_number[self.dim_x[0]]):
-            for idx2 in range(self.step_number[self.dim_x[1]]):
-                for idx3 in range(self.step_number[self.dim_x[2]]):
-                    for idx4 in range(self.step_number[self.dim_x[3]]):
-                        if (mode == 0):
+        if (mode == "index"):
+            for idx1 in range(self.step_number[self.dim_x[0]]):
+                for idx2 in range(self.step_number[self.dim_x[1]]):
+                    for idx3 in range(self.step_number[self.dim_x[2]]):
+                        for idx4 in range(self.step_number[self.dim_x[3]]):
                             s = str(idx1)+ '  ' + str(idx2) + '  ' + str(idx3) + '  ' + str(idx4) + '  ' + str(self.value_x[idx1, idx2, idx3, idx4]) + '\n'
-                        else:
+                            f.write(s)
+        else:
+            for idx1 in range(self.step_number[self.dim_x[0]]):
+                for idx2 in range(self.step_number[self.dim_x[1]]):
+                    for idx3 in range(self.step_number[self.dim_x[2]]):
+                        for idx4 in range(self.step_number[self.dim_x[3]]):
                             state = self.index_to_state([idx1, idx2, idx3, idx4], self.dim_x)
-                            # TO DO .....
-
-
-                        f.write(s)
-
-
+                            s = np.array2string(state, precision = 4, separator = '  ')
+                            s += '  ' + format(self.value_x[idx1, idx2, idx3, idx4], '.4f') + '\n'
+                            f.write(s)
 
         f.close()
-
-
-
 
     def index_to_state(self, index, dim):
         state = np.zeros(len(dim), dtype = float)
@@ -211,7 +222,11 @@ class world_env(object):
         for i in range(len(dim)):
             grid[i] = np.absolute(grid[i] - state[i])
 
-        return grid.argmin(axis=1)
+        index = []
+        for i in range(len(dim)):
+            index.append(grid[i].argmin())
+
+        return index
 
     def state_check(self, s, dim):
         # This function is used for returning the state_type of a state
@@ -266,7 +281,6 @@ class world_env(object):
 
         return 0
 
- 
     def seek_nearest_position(self, state, dim):
         # This function can find the nearest position on discrete world for one state
         # The type of state is a row of numpy array, e.g. state = np.array([2, 3, 4, 5]) a 4D state
@@ -303,9 +317,10 @@ if __name__ == "__main__":
     env.state_cutting()
     env.state_init()
     env.value_iteration()
-    env.value_output(0)
+    # env.value_output("state")
 
-    # env.index_to_state([1,1,1,1], env.dim_x)
+    # env.state_to_index([1,1,1,1], env.dim_x)
+    # print(env.grid[env.dim_x])
     # print(env.state_to_index(np.array([0.3, 0.8, 1, 0.1]), env.dim_x))
 
     # state = np.array([2, 3, 4, 5])
