@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import pandas as pd
+import os
 
 
 class world_env(object):
@@ -105,8 +106,8 @@ class world_env(object):
             for i in range(self.obstacles.shape[0]):
                 self.obstacles[i] = self.seek_nearest_position(self.obstacles[i], dim = [0, 0, 1, 1])
 
-        print(self.obstacles)
-        print(self.grid)
+        # print(self.obstacles)
+        # print(self.grid)
 
     def state_init(self):
         self.value_x = np.zeros(self.step_number[self.dim_x])
@@ -172,6 +173,27 @@ class world_env(object):
 
             iteration += 1
 
+    def value_output(self, mode = 0):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        file_name = "/value.txt"
+
+        f = open(dir_path + file_name, "w")
+        for idx1 in range(self.step_number[self.dim_x[0]]):
+            for idx2 in range(self.step_number[self.dim_x[1]]):
+                for idx3 in range(self.step_number[self.dim_x[2]]):
+                    for idx4 in range(self.step_number[self.dim_x[3]]):
+                        if (mode == 0):
+                            s = str(idx1)+ '  ' + str(idx2) + '  ' + str(idx3) + '  ' + str(idx4) + '  ' + str(self.value_x[idx1, idx2, idx3, idx4]) + '\n'
+                        else:
+                            state = self.index_to_state([idx1, idx2, idx3, idx4], self.dim_x)
+                            # TO DO .....
+
+
+                        f.write(s)
+
+
+
+        f.close()
 
 
 
@@ -281,6 +303,8 @@ if __name__ == "__main__":
     env.state_cutting()
     env.state_init()
     env.value_iteration()
+    env.value_output(0)
+
     # env.index_to_state([1,1,1,1], env.dim_x)
     # print(env.state_to_index(np.array([0.3, 0.8, 1, 0.1]), env.dim_x))
 
