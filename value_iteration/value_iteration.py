@@ -39,7 +39,7 @@ class world_env(object):
         self.inertia = 1
         self.trans = 1  # Cdv
         self.rot = 1 # Cd_phi
-        self.delta = 1
+        self.delta = 0.1
 
         self.dim_x = [0, 2, 4, 5]
         self.dim_y = [1, 3, 4, 5]
@@ -71,7 +71,6 @@ class world_env(object):
         self.state = None
         self.value = None
 
-        self.n_state_type = 3
         self.state_type = None
         self.state_reward = None
 
@@ -116,9 +115,6 @@ class world_env(object):
         self.state_type_x = np.zeros(self.step_number[self.dim_x], dtype = int)
         self.state_type_y = np.zeros(self.step_number[self.dim_y], dtype = int)
 
-        self.state_type_x = self.state_evaluation(self.state_type_x, self.dim_x)
-        self.state_type_y = self.state_evaluation(self.state_type_y, self.dim_y)
-
     def value_iteration(self):
         # Generate the combination of 4-d data
         # Select the rows which are not in obstacles
@@ -141,6 +137,42 @@ class world_env(object):
         actions = np.array(np.meshgrid(self.grid[6],
                                         self.grid[7])).T.reshape(-1, len(self.dim_a))
 
+        iteration = 0
+        transition_count = 0 
+        while True:
+
+            delta = 0
+
+            for s in states:
+                best_value = 0
+                for a in actions:
+                    s_ = self.state_transition(s, a)
+                    if (self.check_range(s_, self.dim_x) == 1):
+                        reward = self.reward[1]
+                    else:
+                        s_ = self.seek_nearest_position(s, self.dim_x)
+                        reward = self.reward[self.state_check(s_, self.dim_x)]
+
+                    index_ = self.state_to_index(s_, self.dim_x)
+                    best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
+
+                    transition_count += 1
+                    if (transition_count % 100 == 0):
+                        print(transition_count)
+
+                index = self.state_to_index(s, self.dim_x)
+                delta = max(delta, abs(best_value - self.value_x[index[0], index[1], index[2], index[3]]))
+                self.value_x[index[0], index[1], index[2], index[3]] = best_value
+
+            if (delta < self.threshold):
+                break 
+
+            print("iteraion %d:" %(iteration))
+            print(delta)
+
+            iteration += 1
+
+
 
 
 
@@ -159,29 +191,14 @@ class world_env(object):
 
         return grid.argmin(axis=1)
 
-    def state_evaluation(self, state_type, dim):
-        for idx1 in range(self.step_number[dim[0]]):
-            for idx2 in range(self.step_number[dim[1]]):
-                for idx3 in range(self.step_number[dim[2]]):
-                    for idx4 in range(self.step_number[dim[3]]):
-                        s = self.index_to_state([idx1, idx2, idx3, idx4], dim)
-                        state_type[idx1, idx2, idx3, idx4] = self.state_check(s, dim)
-
-        return state_type
-
     def state_check(self, s, dim):
         # This function is used for returning the state_type of a state
         # Also including check whether the state is out of range
 
         # temp = (0, 1, 2) -> (none, obstacle / out of range, goal)
-        temp = 2
 
         # Check in goal range
-        for i, d in enumerate(dim):
-            if (s[i] < self.goals[d][0] or s[i] > self.goals[d][1]):
-                temp = 0
-                break
-
+        temp = self.check_goal(s, dim)
         if (temp):
             return temp
 
@@ -206,18 +223,28 @@ class world_env(object):
             if (temp):
                 return temp
 
-        temp = 0
         # Check out of range!
+        temp = self.check_range(s, dim)
+
+        return temp
+
+    def check_goal(self, s, dim):
+        for i, d in enumerate(dim):
+            if (s[i] < self.goals[d][0] or s[i] > self.goals[d][1]):
+                return 0
+        return 2
+
+    def check_range(self, s, dim):
         for i, d in enumerate(dim):
             if (d == 4):
                 continue
 
             if (s[i] < self.ranges[d][0] or s[i] > self.ranges[d][1]):
-                temp = 1
-                break
+                return 1
 
-        return temp
+        return 0
 
+ 
     def seek_nearest_position(self, state, dim):
         # This function can find the nearest position on discrete world for one state
         # The type of state is a row of numpy array, e.g. state = np.array([2, 3, 4, 5]) a 4D state
@@ -261,10 +288,4 @@ if __name__ == "__main__":
     # action = np.array([1, 1])
     # print(env.state_transition(state, action))
     
-    
-
-    # TODO List
-    # state_check() function test
-    # state transition function() implement and test
-    # value iteration function() implement and test
 
