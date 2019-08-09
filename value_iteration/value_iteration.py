@@ -25,22 +25,22 @@ class world_env(object):
         self.goal_omega = (-10, 10)
 
         ###################### Drone ########################
-        self.theta = (-math.pi, math.pi)
-        self.omega = (-math.pi * 2, math.pi * 2)
+        self.theta = (0, 2*math.pi)
+        self.omega = (-math.pi, math.pi)
 
-        self.vx = (-5, 5)
-        self.vy = (-5, 5)
+        self.vx = (-2, 2)
+        self.vy = (-2, 2)
 
         # thrust - action range
-        self.t1 = (0, 0.14)
-        self.t2 = (0, 0.14)
+        self.t1 = (0, 36.7875/2)
+        self.t2 = (0, 36.7875/2)
 
-        self.mass = 1
-        self.length = 1
-        self.inertia = 1
-        self.trans = 1  # Cdv
-        self.rot = 1 # Cd_phi
-        self.delta = 0.1
+        self.mass = 1.25
+        self.length = 0.5
+        self.inertia = 0.125
+        self.trans = 0.25  # Cdv
+        self.rot =  0.02255  # Cd_phi
+        self.delta = 0.3
 
         self.dim_x = [0, 2, 4, 5]
         self.dim_y = [1, 3, 4, 5]
@@ -156,13 +156,19 @@ class world_env(object):
                 best_value = 0
                 for a in actions:
                     s_ = self.state_transition(s, a)
+                    print(s, s_)
                     if (self.check_range(s_, self.dim_x) == 1):
                         reward = self.reward[1]
                     else:
                         s_ = self.seek_nearest_position(s, self.dim_x)
                         reward = self.reward[self.state_check(s_, self.dim_x)]
 
+
+                    index = self.state_to_index(s, self.dim_x)
                     index_ = self.state_to_index(s_, self.dim_x)
+                    print(index, index_)
+                    print("______________________________________________")
+
                     best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
 
                     transition_count += 1
