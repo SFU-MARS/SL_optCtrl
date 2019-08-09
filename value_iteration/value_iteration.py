@@ -148,6 +148,12 @@ class world_env(object):
 
         iteration = 0
         transition_count = 0 
+
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        file_name = "/log.txt"
+
+        f = open(dir_path + file_name, "w")
+
         while True:
 
             delta = 0
@@ -156,7 +162,15 @@ class world_env(object):
                 best_value = 0
                 for a in actions:
                     s_ = self.state_transition(s, a)
-                    print(s, s_)
+
+                    log = "s: " + np.array2string(s, precision = 4, separator = '  ') + "\n"
+                    f.write(log)
+                    log = "s_: " + np.array2string(s_, precision = 4, separator = '  ') + "\n"
+                    f.write(log)
+                    log = "a: " + np.array2string(a, precision = 4, separator = '  ') + "\n"
+                    f.write(log)
+
+
                     if (self.check_range(s_, self.dim_x) == 1):
                         reward = self.reward[1]
                     else:
@@ -166,8 +180,13 @@ class world_env(object):
 
                     index = self.state_to_index(s, self.dim_x)
                     index_ = self.state_to_index(s_, self.dim_x)
-                    print(index, index_)
-                    print("______________________________________________")
+                    # print(index, index_)
+
+                    log = ''.join(str(e) + ' ' for e in index) + '\n'
+                    f.write(log)
+                    log = ''.join(str(e) + ' ' for e in index_) + '\n'
+                    f.write(log)
+                    f.write("_________________________\n")
 
                     best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
 
@@ -188,6 +207,8 @@ class world_env(object):
             self.value_output(iteration, "state")
 
             iteration += 1
+
+        f.close()
 
 
     def value_output(self, iteration, mode = "index"):
