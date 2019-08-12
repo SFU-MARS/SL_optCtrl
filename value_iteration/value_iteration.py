@@ -321,11 +321,12 @@ class world_env(object):
         # state = [x, vx, theta, omega]
 
         act = np.sum(action)
+        act_diff = action[0] - action[1]
 
         state_ = np.array([state[0] + state[1] * self.delta,
                             state[1] * (1 - self.trans * self.delta / self.mass) - math.sin(state[2]) * self.delta / self.mass * act,
                             state[2] + state[3] * self.delta,
-                            state[3] + self.delta / self.inertia * (-self.rot * state[3] - act)])
+                            state[3] + self.delta / self.inertia * (-self.rot * state[3] - self.length * act_diff)])
 
         if (state_[2] > self.theta[1]):
             state_[2] = self.theta[0] + (state_[2] - self.theta[1])
