@@ -324,14 +324,14 @@ class world_env(object):
         act_diff = action[0] - action[1]
 
         state_ = np.array([state[0] + state[1] * self.delta,
-                            state[1] * (1 - self.trans * self.delta / self.mass) - math.sin(state[2]) * self.delta / self.mass * act,
+                            state[1] + self.delta / self.mass * (-self.trans * state[1] - math.sin(state[2]) * act),
                             state[2] + state[3] * self.delta,
                             state[3] + self.delta / self.inertia * (-self.rot * state[3] - self.length * act_diff)])
 
-        if (state_[2] > self.theta[1]):
+        while (state_[2] > self.theta[1]):
             state_[2] = self.theta[0] + (state_[2] - self.theta[1])
 
-        if (state_[2] < self.theta[0]):
+        while (state_[2] < self.theta[0]):
             state_[2] = self.theta[1] + (state_[2] - self.theta[0])
 
         return state_
@@ -344,8 +344,12 @@ if __name__ == "__main__":
     env.add_obstacle(3,4,3,4)
     env.state_cutting()
     env.state_init()
-    env.value_iteration()
+    # env.value_iteration()
     # env.value_output("state")
+
+    # state = np.array([5, 0.8, 0.7854, -3.1416], dtype = float)
+    # action = np.array([17.0799, 14.4522], dtype = float)
+    # print(env.state_transition(state, action))
 
     # env.state_to_index([1,1,1,1], env.dim_x)
     # print(env.grid[env.dim_x])
