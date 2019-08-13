@@ -40,7 +40,7 @@ class world_env(object):
         self.inertia = 0.125
         self.trans = 0.25  # Cdv
         self.rot =  0.02255  # Cd_phi
-        self.delta = 0.8
+        self.delta = 0.4
 
         self.dim_x = [0, 2, 4, 5]
         self.dim_y = [1, 3, 4, 5]
@@ -55,9 +55,10 @@ class world_env(object):
 
         # self.step_number = np.array([10, 10, 10, 10, 10, 10, 10, 10])
         # self.step_number = np.array([2, 2, 2, 2, 2, 2, 2, 2]) # used for debug
-        self.step_number = np.array([31, 11, 11, 11, 11, 11, 15, 15]) # used for debug
-        # self.step_number = np.array([11, 11, 11, 11, 9, 9, 15, 15]) # used for debug
-        # self.step_number = np.array([6, 6, 6, 6, 6, 6, 6, 6]) # used for debug
+        # self.step_number = np.array([31, 11, 11, 11, 11, 11, 15, 15]) # used for debug
+        self.step_number = np.array([11, 11, 11, 11, 9, 9, 15, 15]) # used for debug
+        # self.step_number = np.array([4, 4, 4, 4, 4, 4, 4, 4]) # used for debug
+        # self.step_number = np.array([6, 6, 6, 6, 6, 6, 6, 6]) # used for debug 
         # self.step_number = np.array([8, 8, 8, 8, 8, 8, 8, 8]) # used for debug
         # self.step_number = np.array([12, 12, 12, 12, 12, 12, 12 ,12]) # used for debug
         # self.step_number = np.array([2, 3, 4, 5, 6, 5, 4, 3]) # used for debug
@@ -121,6 +122,9 @@ class world_env(object):
         self.value_x = np.zeros(self.step_number[self.dim_x])
         self.value_y = np.zeros(self.step_number[self.dim_y])
 
+        self.value_x.fill(-2000)
+        self.value_y.fill(-2000)
+
         self.state_type_x = np.zeros(self.step_number[self.dim_x], dtype = int)
         self.state_type_y = np.zeros(self.step_number[self.dim_y], dtype = int)
 
@@ -163,7 +167,7 @@ class world_env(object):
             delta = 0
 
             for s in states:
-                best_value = 0
+                best_value = -1000000
                 for a in actions:
                     s_ = self.state_transition(s, a)
 
@@ -354,11 +358,11 @@ class world_env(object):
 if __name__ == "__main__":
     env = world_env()
 
-    env.add_obstacle(-4.5,4.5,-4.5,4.5)
+    # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
     env.state_cutting()
     env.state_init()
-    env.value_iteration(debug = True)
+    env.value_iteration(debug = False)
     # env.value_output("state")
 
     # state = np.array([5, 0.8, 0.7854, -3.1416], dtype = float)
@@ -372,5 +376,14 @@ if __name__ == "__main__":
     # state = np.array([2, 3, 4, 5])
     # action = np.array([1, 1])
     # print(env.state_transition(state, action))
+
+
+    # TO DO LIST:
+    # Fix the implementation while the system crashed with wall and obstacle, the state' should be state
+    # Split the crash reward to crash reward and overspeed reward
+    # Tune the parameters better
+    # Visualize the value matrix
+    # Optimize the performance of algorithm in implementation
+    
     
 
