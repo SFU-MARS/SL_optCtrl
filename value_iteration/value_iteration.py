@@ -26,7 +26,7 @@ class world_env(object):
 
         ###################### Drone ########################
         self.theta = (0, 2*math.pi)
-        self.omega = (-math.pi, math.pi)
+        self.omega = (-5*math.pi, 5*math.pi)
 
         self.vx = (-2, 2)
         self.vy = (-2, 2)
@@ -40,7 +40,7 @@ class world_env(object):
         self.inertia = 0.125
         self.trans = 0.25  # Cdv
         self.rot =  0.02255  # Cd_phi
-        self.delta = 0.3
+        self.delta = 0.8
 
         self.dim_x = [0, 2, 4, 5]
         self.dim_y = [1, 3, 4, 5]
@@ -55,8 +55,8 @@ class world_env(object):
 
         # self.step_number = np.array([10, 10, 10, 10, 10, 10, 10, 10])
         # self.step_number = np.array([2, 2, 2, 2, 2, 2, 2, 2]) # used for debug
-        self.step_number = np.array([11, 11, 11, 11, 9, 9, 15, 15]) # used for debug
-        # self.step_number = np.array([5, 5, 5, 5, 5, 5, 5, 5]) # used for debug
+        self.step_number = np.array([31, 11, 11, 11, 11, 11, 15, 15]) # used for debug
+        # self.step_number = np.array([11, 11, 11, 11, 9, 9, 15, 15]) # used for debug
         # self.step_number = np.array([6, 6, 6, 6, 6, 6, 6, 6]) # used for debug
         # self.step_number = np.array([8, 8, 8, 8, 8, 8, 8, 8]) # used for debug
         # self.step_number = np.array([12, 12, 12, 12, 12, 12, 12 ,12]) # used for debug
@@ -124,7 +124,7 @@ class world_env(object):
         self.state_type_x = np.zeros(self.step_number[self.dim_x], dtype = int)
         self.state_type_y = np.zeros(self.step_number[self.dim_y], dtype = int)
 
-    def value_iteration(self):
+    def value_iteration(self, debug = False):
         # Generate the combination of 4-d data
         # Select the rows which are not in obstacles
 
@@ -140,7 +140,9 @@ class world_env(object):
             if (t != 1):
                 index.append(i)
 
+        print(states.shape)
         states = states[index]
+        print(states.shape)
 
         # Update the value array iteratively
         actions = np.array(np.meshgrid(self.grid[6],
@@ -150,11 +152,13 @@ class world_env(object):
         transition_count = 0 
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        file_name = "/log.txt"
-
-        f = open(dir_path + file_name, "w")
-
+        
         while True:
+
+            file_name = "/log" + str(iteration) + ".txt"
+            f = open(dir_path + file_name, "w")
+
+            num_remain = 0
 
             delta = 0
 
@@ -163,12 +167,13 @@ class world_env(object):
                 for a in actions:
                     s_ = self.state_transition(s, a)
 
-                    log = "s: " + np.array2string(s, precision = 4, separator = '  ') + "\n"
-                    f.write(log)
-                    log = "s_: " + np.array2string(s_, precision = 4, separator = '  ') + "\n"
-                    f.write(log)
-                    log = "a: " + np.array2string(a, precision = 4, separator = '  ') + "\n"
-                    f.write(log)
+                    if (debug):
+                        log = "s: " + np.array2string(s, precision = 4, separator = '  ') + "\n"
+                        f.write(log)
+                        log = "s_: " + np.array2string(s_, precision = 4, separator = '  ') + "\n"
+                        f.write(log)
+                        log = "a: " + np.array2string(a, precision = 4, separator = '  ') + "\n"
+                        f.write(log)
 
 
                     if (self.check_range(s_, self.dim_x) == 1):
@@ -180,13 +185,18 @@ class world_env(object):
 
                     index = self.state_to_index(s, self.dim_x)
                     index_ = self.state_to_index(s_, self.dim_x)
+                    if (index == index_):
+                        num_remain += 1
                     # print(index, index_)
 
-                    log = ''.join(str(e) + ' ' for e in index) + '\n'
-                    f.write(log)
-                    log = ''.join(str(e) + ' ' for e in index_) + '\n'
-                    f.write(log)
-                    f.write("_________________________\n")
+                    if (debug):
+                        log = ''.join(str(e) + ' ' for e in index) + '\n'
+                        f.write(log)
+                        log = ''.join(str(e) + ' ' for e in index_) + '\n'
+                        f.write(log)
+                        f.write(str(self.value_x[index_[0], index_[1], index_[2], index_[3]]))
+                        f.write(str(reward))
+                        f.write("_________________________\n")
 
                     best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
 
@@ -198,17 +208,21 @@ class world_env(object):
                 delta = max(delta, abs(best_value - self.value_x[index[0], index[1], index[2], index[3]]))
                 self.value_x[index[0], index[1], index[2], index[3]] = best_value
 
+
+
             if (delta < self.threshold):
                 break 
 
             print("iteraion %d:" %(iteration))
-            print(delta)
+            print("delta: ", delta)
+            print("num_remain: ", num_remain)
+
 
             self.value_output(iteration, "state")
 
             iteration += 1
+            f.close()
 
-        f.close()
 
 
     def value_output(self, iteration, mode = "index"):
@@ -340,11 +354,11 @@ class world_env(object):
 if __name__ == "__main__":
     env = world_env()
 
-    env.add_obstacle(1,3,2,4)
-    env.add_obstacle(3,4,3,4)
+    env.add_obstacle(-4.5,4.5,-4.5,4.5)
+    # env.add_obstacle(3,4,3,4)
     env.state_cutting()
     env.state_init()
-    # env.value_iteration()
+    env.value_iteration(debug = True)
     # env.value_output("state")
 
     # state = np.array([5, 0.8, 0.7854, -3.1416], dtype = float)
