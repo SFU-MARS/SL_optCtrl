@@ -14,16 +14,6 @@ class world_env(object):
 
         self.obstacles = None
 
-        ##################### Goal Env ######################        
-        self.goal_x = (4, 5)
-        self.goal_y = (4, 5)
-
-        self.goal_vx = (-10, 10)
-        self.goal_vy = (-10, 10)
-
-        self.goal_theta = (-10, 10)
-        self.goal_omega = (-10, 10)
-
         ###################### Drone ########################
         self.theta = (0, 2*math.pi)
         self.omega = (-5*math.pi, 5*math.pi)
@@ -48,6 +38,17 @@ class world_env(object):
 
         self.discount = 0.95
         self.threshold = 10
+
+        ##################### Goal Env ######################        
+        self.goal_x = (4, 5)
+        self.goal_y = (4, 5)
+
+        self.goal_vx = self.vx
+        self.goal_vy = self.vy
+
+        self.goal_theta = self.theta
+        self.goal_omega = self.omega
+
         ############# Discreteness Coefficient ##############
         # 6D state + 2D action
         # (x, y, vx, vy, theta, omega, t1, t2)
@@ -77,8 +78,8 @@ class world_env(object):
         self.state_type = None
         self.state_reward = None
 
-        # reward = [none, obstacle or out of range, goal]
-        self.reward = np.array([-1, -500, 1000])
+        # reward = [regular state, in goal, crashed, overspeed]
+        self.reward = np.array([-1, 1000, -500, -200])
 
     def add_obstacle(self, x1, x2, y1, y2):
         if ((x1 > x2) or (y1 > y2)):
@@ -277,52 +278,64 @@ class world_env(object):
         # This function is used for returning the state_type of a state
         # Also including check whether the state is out of range
 
-        # temp = (0, 1, 2) -> (none, obstacle / out of range, goal)
-
+        # temp = (0, 1, 2, 3) -> (regular state, in goal, crashed, overspeed)
+        temp = 0
         # Check in goal range
         temp = self.check_goal(s, dim)
         if (temp):
             return temp
 
-        # Check in obstacle
+        temp = self.check_crash(s, dim)
+        if (temp):
+            return temp
 
-        # Get the corresponding dimension of obstacles
-        # Due to dimension decomposition
-        if (self.obstacles is not None and len(self.obstacles)):
-
-            temp_obs = None
-            if (dim[0] == 0): # if it is dim_x
-                temp_obs = self.obstacles[:, :2]
-            else:
-                temp_obs = self.obstacles[:, 2:]
-
-            # Check in obstacle!
-            for obs in temp_obs:
-                if (s[0] >= obs[0]  and  s[0] <= obs[1]):
-                    temp = 1
-                    break
-
-            if (temp):
-                return temp
-
-        # Check out of range!
-        temp = self.check_range(s, dim)
+        temp = self.check_overspeed(s, dim)
+        if (temp):
+            return temp
 
         return temp
 
     def check_goal(self, s, dim):
         for i, d in enumerate(dim):
-            if (s[i] < self.goals[d][0] or s[i] > self.goals[d][1]):
-                return 0
-        return 2
-
-    def check_range(self, s, dim):
-        for i, d in enumerate(dim):
             if (d == 4):
                 continue
 
+            if (s[i] < self.goals[d][0] or s[i] > self.goals[d][1]):
+                return 0
+
+        return 1
+
+    def check_crash(self, s, dim):
+        # return 1 = crashed
+        # return 0 = no crash
+
+        if (self.obstacles is not None and len(self.obstacles)):
+            temp_obs = None
+            if (dim[0] == 0):
+                temp_obs = self.obstacles[:, :2]
+            else:
+                temp_obs = self.obstacles[:, 2:]
+
+            for obs in temp_obs:
+                if (s[0] >= obs[0] and s[0] <= obs[1]):
+                    return 2
+
+        if (s[0] < self.ranges[dim[0]][0] or s[0] > self.ranges[dim[0]][1]):
+            return 2
+
+        return 0
+
+    def check_overspeed(self, s, dim):
+        # return 3 = overspeed
+        # return 0 = regular speed
+        # Only check the velocity and angular velocity
+
+        for i, d in enumerate(dim):
+            if (i == 0 or i == 2): # pass the x and theta variable
+                continue
+
             if (s[i] < self.ranges[d][0] or s[i] > self.ranges[d][1]):
-                return 1
+                return 3
 
         return 0
 
@@ -357,12 +370,35 @@ class world_env(object):
 
 if __name__ == "__main__":
     env = world_env()
+    env.state_cutting()
+    env.state_init()
 
     # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
-    env.state_cutting()
-    env.state_init()
-    env.value_iteration(debug = False)
+
+
+    # self.vx = (-2, 2)
+    # self.theta = (0, 2*math.pi)
+    # self.omega = (-5*math.pi, 5*math.pi)
+
+    # (regular, goal, crashed, overspeed)
+    # [x, vx, theta, omega]
+    # states = np.array([[2, 0, 1, 0],
+    #                     [-6, 0, 1, 0],
+    #                     [4.5, -3, 1, 0],
+    #                     [4.5, 0, 1, 0],
+    #                     [4.5, 0, 0, 0],
+    #                     [4.4, 1, 1.3, 2.14],
+    #                     [3.5, 1, 1.3, 2],
+    #                     [0, -3, 2, -30],
+    #                     [0, 0, 0, -30]
+    #                     ], dtype = float)
+
+    # for state in states:
+    #     print(env.state_check(state, env.dim_x))
+
+    # env.value_iteration(debug = False)
+
     # env.value_output("state")
 
     # state = np.array([5, 0.8, 0.7854, -3.1416], dtype = float)
