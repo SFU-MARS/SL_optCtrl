@@ -36,8 +36,8 @@ class world_env(object):
         self.dim_y = [1, 3, 4, 5]
         self.dim_a = [6, 7]
 
-        self.discount = 0.95
-        self.threshold = 10
+        self.discount = 0.90
+        self.threshold = 5
 
         ##################### Goal Env ######################        
         self.goal_x = (4, 5)
@@ -141,29 +141,30 @@ class world_env(object):
 
         index = []
         for i, s in enumerate(states):
-            t = self.state_check(s, self.dim_x)
-            if (t != 1):
+            t = self.check_crash(s, self.dim_x)
+            if (t != 2):
                 index.append(i)
 
-        print(states.shape)
+        print("The total 4D states: ", states.shape)
         states = states[index]
-        print(states.shape)
+        print("The safe 4D states: ", states.shape)
 
         # Update the value array iteratively
         actions = np.array(np.meshgrid(self.grid[6],
                                         self.grid[7])).T.reshape(-1, len(self.dim_a))
 
         iteration = 0
-        transition_count = 0 
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
         
         while True:
 
-            file_name = "/log" + str(iteration) + ".txt"
+            file_name = "/log/log" + str(iteration) + ".txt"
             f = open(dir_path + file_name, "w")
 
             num_remain = 0
+            num_crash = 0
+            num_transition = 0 
 
             delta = 0
 
@@ -181,17 +182,21 @@ class world_env(object):
                         f.write(log)
 
 
-                    if (self.check_range(s_, self.dim_x) == 1):
+                    if (self.check_crash(s_, self.dim_x) == 2):
                         reward = self.reward[1]
+                        s_ = s
+                        num_crash += 1
                     else:
-                        s_ = self.seek_nearest_position(s, self.dim_x)
+                        s_ = self.seek_nearest_position(s_, self.dim_x)
                         reward = self.reward[self.state_check(s_, self.dim_x)]
 
 
                     index = self.state_to_index(s, self.dim_x)
                     index_ = self.state_to_index(s_, self.dim_x)
+
                     if (index == index_):
                         num_remain += 1
+
                     # print(index, index_)
 
                     if (debug):
@@ -205,25 +210,27 @@ class world_env(object):
 
                     best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
 
-                    transition_count += 1
-                    if (transition_count % 100000 == 0):
-                        print(transition_count)
+                    num_transition += 1
+                    if (num_transition % 100000 == 0):
+                        print(num_transition)
 
                 index = self.state_to_index(s, self.dim_x)
                 delta = max(delta, abs(best_value - self.value_x[index[0], index[1], index[2], index[3]]))
                 self.value_x[index[0], index[1], index[2], index[3]] = best_value
-
-
 
             if (delta < self.threshold):
                 break 
 
             print("iteraion %d:" %(iteration))
             print("delta: ", delta)
-            print("num_remain: ", num_remain)
-
+            print("num_transition: ", num_transition)
+            print("num_remain: ", num_remain - num_crash)
+            print("num_crash: ", num_crash)
+            print("\n\n")
 
             self.value_output(iteration, "state")
+
+            np.save("./value_matrix/value_matrix" + str(iteration), self.value_x)
 
             iteration += 1
             f.close()
@@ -232,7 +239,7 @@ class world_env(object):
 
     def value_output(self, iteration, mode = "index"):
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        file_name = "/value_iteration_" + str(iteration) + ".txt"
+        file_name = "./value_iteration/value_iteration_" + str(iteration) + ".txt"
 
 
         f = open(dir_path + file_name, "w")
@@ -397,7 +404,7 @@ if __name__ == "__main__":
     # for state in states:
     #     print(env.state_check(state, env.dim_x))
 
-    # env.value_iteration(debug = False)
+    env.value_iteration(debug = False)
 
     # env.value_output("state")
 
@@ -416,7 +423,6 @@ if __name__ == "__main__":
 
     # TO DO LIST:
     # Fix the implementation while the system crashed with wall and obstacle, the state' should be state
-    # Split the crash reward to crash reward and overspeed reward
     # Tune the parameters better
     # Visualize the value matrix
     # Optimize the performance of algorithm in implementation
