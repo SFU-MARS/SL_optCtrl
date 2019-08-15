@@ -2,6 +2,10 @@ import math
 import numpy as np
 import pandas as pd
 import os
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from matplotlib import cm
+
 
 
 class world_env(object):
@@ -374,11 +378,53 @@ class world_env(object):
 
         return state_
 
+    def plot_result(self, dir_path, file_path):
+        file = dir_path + file_path
+        data = np.load(file)
+        omega_index = 0
+
+        while omega_index < data.shape[-1]:
+            x = np.zeros(data.shape[:-1])
+            vx = np.zeros(data.shape[:-1])
+            theta = np.zeros(data.shape[:-1])
+            value = np.zeros(data.shape[:-1])
+
+            for i, d in np.ndenumerate(data):
+                if (i[-1] == omega_index):
+                    x[i[:-1]] = i[0]
+                    vx[i[:-1]] = i[1]
+                    theta[i[:-1]] = i[2]
+                    value[i[:-1]] = d
+     
+            x = x.reshape(-1)
+            vx = vx.reshape(-1)
+            theta = theta.reshape(-1)
+            value = value.reshape(-1)
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+
+            img = ax.scatter(x, vx, theta, c=value, cmap=plt.hot())
+            fig.colorbar(img)
+
+            # ax.view_init(45,60)
+
+            ax.set_xlabel('x', fontsize = 10)
+            ax.set_ylabel('vx', fontsize = 10)
+            ax.set_zlabel('theta', fontsize = 10)
+
+            # plt.show()
+            fig.savefig("Omega_" + str(omega_index), dpi=fig.dpi)
+
+            omega_index += 1
+            
+
 
 if __name__ == "__main__":
     env = world_env()
-    env.state_cutting()
-    env.state_init()
+    env.plot_result("./value_matrix/", "value_matrix52.npy")
+    # env.state_cutting()
+    # env.state_init()
 
     # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
@@ -404,7 +450,7 @@ if __name__ == "__main__":
     # for state in states:
     #     print(env.state_check(state, env.dim_x))
 
-    env.value_iteration(debug = False)
+    # env.value_iteration(debug = False)
 
     # env.value_output("state")
 
