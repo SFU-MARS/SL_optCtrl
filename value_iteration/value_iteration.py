@@ -41,7 +41,7 @@ class world_env(object):
         self.dim_a = [6, 7]
 
         self.discount = 0.90
-        self.threshold = 5
+        self.threshold = 0.05
 
         ##################### Goal Env ######################        
         self.goal_x = (4, 5)
@@ -133,7 +133,7 @@ class world_env(object):
         self.state_type_x = np.zeros(self.step_number[self.dim_x], dtype = int)
         self.state_type_y = np.zeros(self.step_number[self.dim_y], dtype = int)
 
-    def value_iteration(self, debug = False):
+    def value_iteration(self, debug = False, pretrain_file = "", iteration_number = 0):
         # Generate the combination of 4-d data
         # Select the rows which are not in obstacles
 
@@ -160,11 +160,21 @@ class world_env(object):
         iteration = 0
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
+
+        if (pretrain_file != ""):
+            try:
+                self.value_x = np.load(pretrain_file + str(iteration_number) + ".npy")
+                iteration = iteration_number + 1
+                print("Load pre_trained value matrix successfully!")
+            except:
+                print("Load pre_trained value matrix failed")
+
         
         while True:
 
-            file_name = "/log/log" + str(iteration) + ".txt"
-            f = open(dir_path + file_name, "w")
+            if (debug):
+                file_name = "/log/log_x_" + str(iteration) + ".txt"
+                f = open(dir_path + file_name, "w")
 
             num_remain = 0
             num_crash = 0
@@ -175,7 +185,7 @@ class world_env(object):
             for s in states:
                 best_value = -1000000
                 for a in actions:
-                    s_ = self.state_transition(s, a)
+                    s_ = self.state_transition_x(s, a)
 
                     if (debug):
                         log = "s: " + np.array2string(s, precision = 4, separator = '  ') + "\n"
@@ -187,7 +197,7 @@ class world_env(object):
 
 
                     if (self.check_crash(s_, self.dim_x) == 2):
-                        reward = self.reward[1]
+                        reward = self.reward[2]
                         s_ = s
                         num_crash += 1
                     else:
@@ -237,8 +247,146 @@ class world_env(object):
             np.save("./value_matrix/value_matrix" + str(iteration), self.value_x)
 
             iteration += 1
-            f.close()
 
+            if (debug):
+                f.close()
+
+
+    def value_iteration_y(self, bebug = False, pretrain_file = "", iteration_number = 0):
+    # Generate the combination of 4-d data (y, vy, theta, omega)
+    # Select the rows which are not in obstacles
+
+    states = np.array(np.meshgrid(self.grid[1],
+                                    self.grid[3],
+                                    self.grid[4],
+                                    self.grid[5])).T.reshape(-1, len(self.dim_y))
+
+    index = []
+    for i, s in enumerate(states):
+        t = self.check_crash(s, self.dim_y)
+        if (t != 2):
+            index.append(i)
+
+    print("The total 4D states: ", states.shape)
+    states = states[index]
+    print("The safe 4D states: ", states.shape)
+
+    actions = np.array(np.meshgrid(self.grid[6],
+                                    self.grid[7])).T.reshape(-1, len(self.dim_a))
+
+    iteration = 0
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    if (pretrain_file != ""):
+        try:
+            self.value_y = np.load(pretrain_file + str(iteration_number) + ".npy")
+            iteration = iteration_number + 1
+            print("Load pre_trained value matrix successfully!")
+        except:
+            print("Load pre_trained value matrix failed")
+
+    while True:
+        if (debug):
+            file_name = "/log/log_y_" + str(iteration) + ".txt"
+            f = open(dir_path + file_name, "w")
+
+
+        num_remain = 0
+        num_crash = 0
+        num_transition = 0
+        delta = 0
+
+        for s in states:
+            best_value = -1000000
+            for a in actions:
+                s_ = self.state_transition_y(s, a)
+
+                if (debug):
+                    log = "s: " + np.array2string(s, precision = 4, separator = '  ') + "\n"
+                    f.write(log)
+                    log = "s_: " + np.array2string(s_, precision = 4, separator = '  ') + "\n"
+                    f.write(log)
+                    log = "a: " + np.array2string(a, precision = 4, separator = '  ') + "\n"
+                    f.write(log)
+
+                if (self.check_crash(s_, self.dim_y) == 2):
+                    reward = self.reward[2]
+                    s_ = s
+                    num_crash += 1
+                else:
+                    s_ = self.seek_nearest_position(s_, self.dim_y)
+                    reward = self.reward[self.state_check(s_, self.dim_y)]
+
+                index = self.state_to_index(s, self.dim_y)
+                index_ = self.state_to_index(s_, self.dim_y)
+
+                if (index == index_):
+                    num_remain += 1
+
+                if (debug):
+                    log = ''.join(str(e) + ' ' for e in index) + '\n'
+                    f.write(log)
+                    log = ''.join(str(e) + ' ' for e in index_) + '\n'
+                    f.write(log)
+                    f.write(str(self.value_y[index_[0], index_[1], index_[2], index_[3]]))
+                    f.write(str(reward))
+                    f.write("__________________________\n")
+
+                best_value = max(best_value, reward + self.discount * self.value_y[index_[0], index_[1], index_[2], index_[3]])
+
+                num_transition += 1
+                if (num_transition % 100000 == 0):
+                    print(num_transition) 
+
+            index = self.state_to_index(s, self.dim_y)
+            delta = max(delta, abs(best_value - self.value_y[index[0], index[1], index[2], index[3]]))
+            self.value_y[index[0], index[1], index[2], index[3]] = best_value
+
+        if (delta < self.threshold):
+            break
+
+        print("iteration %d:" %(iteration))
+        print("delta: ", delta)
+        print("num_transition: ", num_transistion)
+        print("num_remain: ", num_remain - num_crash)
+        print("num_crash: ", num_crash)
+        print("\n\n")
+
+        self.value_output_y(iteration, "state")
+
+        np.save("./value_matrix/value_matrix_y_" + str(iteration), self.value_x)
+
+        iteration += 1
+
+        if (debug):
+            f.close()
+            
+
+    def value_output_y(self, iteration, mode = "index"):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        file_name = "./value_iteration/value_iteration_y_" + str(iteration) + ".txt"
+
+        f = open(dir_path + file_name, "w")
+        if (mode == "index"):
+            for idx1 in range(self.step_number[self.dim_y[0]]):
+                for idx2 in range(self.step_number[self.dim_y[1]]):
+                    for idx3 in range(self.step_number[self.dim_y[2]]):
+                        for idx4 in range(self.step_number[self.dim_y[3]]):
+                            s = str(idx1) + '  ' + str(idx2) + '  ' + str(idx3) + '  ' + str(idx4) + '  ' + str(self.value_y[idx1, idx2, idx3, idx4]) + '\n'
+                            f.write(s)
+
+        else:
+            for idx1 in range(self.step_number[self.dim_y[0]]):
+                for idx2 in range(self.step_number[self.dim_y[1]]):
+                    for idx3 in range(self.step_number[self.dim_y[2]]):
+                        for idx4 in range(self.step_number[self.dim_y[3]]):
+                            state = self.index_to_state([idx1, idx2, idx3, idx4], self.dim_y)
+                            s = np.array2string(state, precisioin = 4, separator = '  ')
+                            s += '  ' + format(self.value_y[idx1, idx2, idx3, idx4], '.4f') + '\n'
+                            f.write(s)
+
+        f.close()
 
 
     def value_output(self, iteration, mode = "index"):
@@ -359,7 +507,7 @@ class world_env(object):
 
         return state
 
-    def state_transition(self, state, action):
+    def state_transition_x(self, state, action):
         # state = [x, vx, theta, omega]
 
         act = np.sum(action)
@@ -377,6 +525,27 @@ class world_env(object):
             state_[2] = self.theta[1] + (state_[2] - self.theta[0])
 
         return state_
+
+    def state_transition_y(self, state, action):
+        # state = [y, vy, theta, omega]
+
+        act = np.sum(action)
+        act_diff = action[0] - action[1]
+
+        state_ = np.array([state[0] + state[1] * self.delta,
+                            (-self.trans * state[1] + math.cos(state[2]) * act) / self.mass - self.gravity,
+                            state[2] + state[3] * self.delta,
+                            state[3] + self.delta / self.inertia * (-self.rot * state[3] - self.length * act_diff)
+                            ])
+
+        while (state_[2] > self.theta[1]):
+            state_[2] = self.theta[0] + (state_[2] - self.theta[1])
+
+        while (state_[2] < self.theta[0]):
+            state_[2] = self.theta[1] + (state_[2] - self.theta[0])
+
+        return state_
+                            
 
     def plot_result(self, dir_path, file_path):
         file = dir_path + file_path
@@ -417,14 +586,25 @@ class world_env(object):
             fig.savefig("Omega_" + str(omega_index), dpi=fig.dpi)
 
             omega_index += 1
-            
+
+    def debug(self):
+        # s = np.array([-5, -2, 2.3562, 7.854], dtype = float)
+        s = np.array([-5, -2, 0, -15.708], dtype = float)
+        actions = np.array(np.meshgrid(self.grid[6],
+                                        self.grid[7])).T.reshape(-1, len(self.dim_a))
+
+        print(s)
+        for a in actions:
+            s_ = self.state_transition_x(s, a)
+            t = self.check_crash(s_, self.dim_x)
+            print(s_, a, t)
 
 
 if __name__ == "__main__":
     env = world_env()
-    env.plot_result("./value_matrix/", "value_matrix52.npy")
-    # env.state_cutting()
-    # env.state_init()
+    # env.plot_result("./value_matrix/", "value_matrix52.npy")
+    env.state_cutting()
+    env.state_init()
 
     # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
@@ -450,7 +630,8 @@ if __name__ == "__main__":
     # for state in states:
     #     print(env.state_check(state, env.dim_x))
 
-    # env.value_iteration(debug = False)
+    # env.value_iteration(False, "./value_matrix/value_matrix", 73)
+    env.value_iteration(False)
 
     # env.value_output("state")
 
