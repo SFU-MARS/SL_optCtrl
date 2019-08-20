@@ -41,7 +41,7 @@ class world_env(object):
         self.dim_a = [6, 7]
 
         self.discount = 0.90
-        self.threshold = 0.05
+        self.threshold = 0.5
 
         ##################### Goal Env ######################        
         self.goal_x = (4, 5)
@@ -298,8 +298,12 @@ class world_env(object):
             num_transition = 0
             delta = 0
 
-            for s in states:
+            delete_list = []
+
+            for i, s in enumerate(states):
                 best_value = -1000000
+                
+
                 for a in actions:
                     s_ = self.state_transition_y(s, a)
 
@@ -341,7 +345,12 @@ class world_env(object):
                     #     print(num_transition) 
 
                 index = self.state_to_index(s, self.dim_y)
-                delta = max(delta, abs(best_value - self.value_y[index[0], index[1], index[2], index[3]]))
+                current_delta = abs(best_value - self.value_y[index[0], index[1], index[2], index[3]])
+                delta = max(delta, current_delta)
+                if (current_delta < self.threshold):
+                    # print(current_delta)
+                    delete_list.append(i)
+
                 self.value_y[index[0], index[1], index[2], index[3]] = best_value
 
 
@@ -354,18 +363,20 @@ class world_env(object):
 
             self.value_output_y(iteration, "state")
 
-            np.save("./value_matrix/value_matrix_y_" + str(iteration), self.value_x)
+            np.save("./value_matrix/value_matrix_y_" + str(iteration), self.value_y)
 
             iteration += 1
+
+            print(states.shape)
+            print(len(delete_list))
+            states = np.delete(states, delete_list, 0)
+            print(states.shape)
 
             if (debug):
                 f.close()
 
             if (delta < self.threshold):
                 break
-
-
-
 
     def value_output(self, iteration, mode = "index"):
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -392,7 +403,6 @@ class world_env(object):
 
         f.close()
 
-
     def value_output_y(self, iteration, mode = "index"):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         file_name = "./value_iteration/value_iteration_y_" + str(iteration) + ".txt"
@@ -417,7 +427,6 @@ class world_env(object):
                             f.write(s)
 
         f.close()
-
 
     def index_to_state(self, index, dim):
         state = np.zeros(len(dim), dtype = float)
@@ -609,15 +618,14 @@ class world_env(object):
 
 if __name__ == "__main__":
     env = world_env()
-    # env.plot_result("./value_matrix/", "value_matrix65.npy")
+    # env.plot_result("./value_matrix/", "value_matrix_y_117.npy")
     env.state_cutting()
     env.state_init()
 
-    env.value_iteration_y(False)
+    env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
 
     # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
-
 
     # self.vx = (-2, 2)
     # self.theta = (0, 2*math.pi)
