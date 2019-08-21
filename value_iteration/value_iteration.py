@@ -528,9 +528,9 @@ class world_env(object):
         act_diff = action[0] - action[1]
 
         state_ = np.array([state[0] + state[1] * self.delta,
-                            state[1] + self.delta / self.mass * (-self.trans * state[1] - math.sin(state[2]) * act),
+                            state[1] + self.delta / self.mass * (-self.trans * state[1] + math.sin(state[2]) * act),
                             state[2] + state[3] * self.delta,
-                            state[3] + self.delta / self.inertia * (-self.rot * state[3] - self.length * act_diff)])
+                            state[3] + self.delta / self.inertia * (-self.rot * state[3] + self.length * act_diff)])
 
         while (state_[2] > self.theta[1]):
             state_[2] = self.theta[0] + (state_[2] - self.theta[1])
@@ -549,7 +549,7 @@ class world_env(object):
         state_ = np.array([state[0] + state[1] * self.delta,
                             state[1] + self.delta * ((-self.trans * state[1] + math.cos(state[2]) * act) / self.mass - self.gravity),
                             state[2] + state[3] * self.delta,
-                            state[3] + self.delta / self.inertia * (-self.rot * state[3] - self.length * act_diff)
+                            state[3] + self.delta / self.inertia * (-self.rot * state[3] + self.length * act_diff)
                             ])
 
         while (state_[2] > self.theta[1]):
@@ -625,7 +625,7 @@ class world_env(object):
 
     def fill_table(self, csv_table):
         data = pd.read_csv(csv_table)
-        print(data.shape)
+        print(data.head())
 
 
 
@@ -636,7 +636,7 @@ if __name__ == "__main__":
     env.state_init()
 
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
-    env.fill_table("./data/valueFunc_train.csv")
+    env.fill_table("./../data/valueFunc_train.csv")
 
     # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
