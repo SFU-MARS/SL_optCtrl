@@ -559,6 +559,14 @@ class world_env(object):
             state_[2] = self.theta[1] + (state_[2] - self.theta[0])
 
         return state_
+
+    def reload_value(self, dir_path, file_path, x = True):
+        file = dir_path + file_path
+        if (x):
+            self.value_x = np.load(file)
+        else:
+            self.value_y = np.load(file)
+
                             
     def plot_result(self, dir_path, file_path):
         file = dir_path + file_path
@@ -613,7 +621,12 @@ class world_env(object):
             iteration_count += 1
             print(x)
 
-        print("count:  ", iteration_count)  
+        print("count:  ", iteration_count)
+
+    def fill_table(self, csv_table):
+        data = pd.read_csv(csv_table)
+        print(data.shape)
+
 
 
 if __name__ == "__main__":
@@ -622,7 +635,8 @@ if __name__ == "__main__":
     env.state_cutting()
     env.state_init()
 
-    env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
+    # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
+    env.fill_table("./data/valueFunc_train.csv")
 
     # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
