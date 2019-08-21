@@ -5,6 +5,7 @@ import os
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from scipy.interpolate import RegularGridInterpolator
 
 
 
@@ -182,7 +183,9 @@ class world_env(object):
 
             delta = 0
 
-            for s in states:
+            delete_list = []
+
+            for i, s in enumerate(states):
                 best_value = -1000000
                 for a in actions:
                     s_ = self.state_transition_x(s, a)
@@ -225,11 +228,14 @@ class world_env(object):
                     best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
 
                     num_transition += 1
-                    if (num_transition % 100000 == 0):
-                        print(num_transition)
 
                 index = self.state_to_index(s, self.dim_x)
-                delta = max(delta, abs(best_value - self.value_x[index[0], index[1], index[2], index[3]]))
+                current_delta = abs(best_value - self.value_x[index[0], index[1], index[2], index[3]])
+
+                delta = max(delta, current_delta)
+                if (delta < self.threshold):
+                    delete_list.append(i)
+
                 self.value_x[index[0], index[1], index[2], index[3]] = best_value
 
 
@@ -242,9 +248,14 @@ class world_env(object):
 
             self.value_output(iteration, "state")
 
-            np.save("./value_matrix/value_matrix" + str(iteration), self.value_x)
+            np.save("./value_matrix/value_matrix_x_" + str(iteration), self.value_x)
 
             iteration += 1
+
+            print(states.shape)
+            print(len(delete_list))
+            states = np.delete(states, delete_list, 0)
+            print(states.shape)
 
             if (debug):
                 f.close()
@@ -380,7 +391,7 @@ class world_env(object):
 
     def value_output(self, iteration, mode = "index"):
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        file_name = "./value_iteration/value_iteration_" + str(iteration) + ".txt"
+        file_name = "./value_iteration/value_iteration_x_" + str(iteration) + ".txt"
 
 
         f = open(dir_path + file_name, "w")
@@ -566,8 +577,7 @@ class world_env(object):
             self.value_x = np.load(file)
         else:
             self.value_y = np.load(file)
-
-                            
+                
     def plot_result(self, dir_path, file_path):
         file = dir_path + file_path
         data = np.load(file)
@@ -623,10 +633,46 @@ class world_env(object):
 
         print("count:  ", iteration_count)
 
-    def fill_table(self, csv_table):
+    def fill_table(self, csv_table, dir_path, num_x = 0, num_y = 0):
         data = pd.read_csv(csv_table)
-        print(data.head())
 
+        if (dir_path):
+            file_x = dir_path + "value_matrix_x_" + str(num_x) + ".npy"
+            file_y = dir_path + "value_matrix_y_" + str(num_y) + ".npy"
+
+            try:
+                self.value_x = np.load(file_x)
+                self.value_y = np.load(file_y)
+            except:
+                print("Failed to reload value matrix!")
+
+        min_value = min(np.min(self.value_x), np.min(self.value_y))
+
+
+        interpolating_function_x = RegularGridInterpolator((self.grid[0],
+                                                            self.grid[2],
+                                                            self.grid[4],
+                                                            self.grid[5]), 
+                                                            self.value_x, 
+                                                            bounds_error = False, 
+                                                            fill_value = min_value)
+
+        interpolating_function_y = RegularGridInterpolator((self.grid[1],
+                                                            self.grid[3],
+                                                            self.grid[4],
+                                                            self.grid[5]), 
+                                                            self.value_y, 
+                                                            bounds_error = False, 
+                                                            fill_value = min_value)
+
+
+        for index, row in data.iterrows():
+            state_x = np.array([row.x, row.vx, row.phi, row.w])
+            state_y = np.array([row.y, row.vy, row.phi, row.w])
+            value_x = interpolating_function_x(state_x)
+            value_y = interpolating_function_y(state_y)
+            value = min(value_x, value_y)
+            data.at[index, 'value'] = value
 
 
 if __name__ == "__main__":
@@ -635,8 +681,12 @@ if __name__ == "__main__":
     env.state_cutting()
     env.state_init()
 
+    env.value_iteration(False)
+    env.value_iteration_y(False)
+    env.fill_table("./../data/valueFunc_train.csv", "./value_matrix")
+
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
-    env.fill_table("./../data/valueFunc_train.csv")
+    # env.fill_table("./../data/valueFunc_train.csv")
 
     # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
