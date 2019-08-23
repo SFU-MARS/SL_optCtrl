@@ -134,7 +134,7 @@ class world_env(object):
         self.state_type_x = np.zeros(self.step_number[self.dim_x], dtype = int)
         self.state_type_y = np.zeros(self.step_number[self.dim_y], dtype = int)
 
-    def value_iteration(self, debug = False, pretrain_file = "", iteration_number = 0):
+    def value_iteration(self, debug = False, pretrain_file = "", iteration_number = 0, mode = "nearest"):
         # Generate the combination of 4-d data
         # Select the rows which are not in obstacles
 
@@ -186,46 +186,76 @@ class world_env(object):
             delete_list = []
 
             for i, s in enumerate(states):
+                if (i % 100 == 0):
+                    print(i)
                 best_value = -1000000
+
+                if (mode == "linear"):
+                    # min_value = np.min(self.value_x)
+                    # interpolating_function = RegularGridInterpolator((self.grid[0],
+                    #                                                     self.grid[2],
+                    #                                                     self.grid[4],
+                    #                                                     self.grid[5]), 
+                    #                                                     self.value_x, 
+                    #                                                     bounds_error = False, 
+                    #                                                     fill_value = min_value)
+
+                    sub_value_matrix, r = self.seek_neighbors_values(s, self.dim_x)
+                    min_value = np.min(sub_value_matrix)
+                    interpolating_function = RegularGridInterpolator((self.grid[0],
+                                                                        self.grid[2],
+                                                                        self.grid[4],
+                                                                        self.grid[5]),
+                                                                        sub_value_matrix,
+                                                                        bounds_error = False,
+                                                                        fill_value = min_value)
+
                 for a in actions:
                     s_ = self.state_transition_x(s, a)
 
-                    if (debug):
-                        log = "s: " + np.array2string(s, precision = 4, separator = '  ') + "\n"
-                        f.write(log)
-                        log = "s_: " + np.array2string(s_, precision = 4, separator = '  ') + "\n"
-                        f.write(log)
-                        log = "a: " + np.array2string(a, precision = 4, separator = '  ') + "\n"
-                        f.write(log)
+                    
+                    if (mode == "linear"):
+                        state_type = self.check_crash(s_, self.dim_x)
+                        num_crash += (state_type == 2)
+                        reward = self.reward[state_type]
+                        best_value = max(best_value, reward + self.discount * interpolating_function(s_))
 
 
-                    if (self.check_crash(s_, self.dim_x) == 2):
-                        reward = self.reward[2]
-                        s_ = s
-                        num_crash += 1
-                    else:
-                        s_ = self.seek_nearest_position(s_, self.dim_x)
-                        reward = self.reward[self.state_check(s_, self.dim_x)]
+                    if (mode == "nearest"):
+                        # if (debug):
+                        #     log = "s: " + np.array2string(s, precision = 4, separator = '  ') + "\n"
+                        #     f.write(log)
+                        #     log = "s_: " + np.array2string(s_, precision = 4, separator = '  ') + "\n"
+                        #     f.write(log)
+                        #     log = "a: " + np.array2string(a, precision = 4, separator = '  ') + "\n"
+                        #     f.write(log)
 
 
-                    index = self.state_to_index(s, self.dim_x)
-                    index_ = self.state_to_index(s_, self.dim_x)
+                        if (self.check_crash(s_, self.dim_x) == 2):
+                            reward = self.reward[2]
+                            s_ = s
+                            num_crash += 1
+                        else:
+                            s_ = self.seek_nearest_position(s_, self.dim_x)
+                            reward = self.reward[self.state_check(s_, self.dim_x)]
 
-                    if (index == index_):
-                        num_remain += 1
 
-                    # print(index, index_)
+                        index = self.state_to_index(s, self.dim_x)
+                        index_ = self.state_to_index(s_, self.dim_x)
 
-                    if (debug):
-                        log = ''.join(str(e) + ' ' for e in index) + '\n'
-                        f.write(log)
-                        log = ''.join(str(e) + ' ' for e in index_) + '\n'
-                        f.write(log)
-                        f.write(str(self.value_x[index_[0], index_[1], index_[2], index_[3]]))
-                        f.write(str(reward))
-                        f.write("_________________________\n")
+                        if (index == index_):
+                            num_remain += 1
 
-                    best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
+                        # if (debug):
+                        #     log = ''.join(str(e) + ' ' for e in index) + '\n'
+                        #     f.write(log)
+                        #     log = ''.join(str(e) + ' ' for e in index_) + '\n'
+                        #     f.write(log)
+                        #     f.write(str(self.value_x[index_[0], index_[1], index_[2], index_[3]]))
+                        #     f.write(str(reward))
+                        #     f.write("_________________________\n")
+
+                        best_value = max(best_value, reward + self.discount * self.value_x[index_[0], index_[1], index_[2], index_[3]])
 
                     num_transition += 1
 
@@ -233,7 +263,7 @@ class world_env(object):
                 current_delta = abs(best_value - self.value_x[index[0], index[1], index[2], index[3]])
 
                 delta = max(delta, current_delta)
-                if (delta < self.threshold):
+                if (current_delta < self.threshold):
                     delete_list.append(i)
 
                 self.value_x[index[0], index[1], index[2], index[3]] = best_value
@@ -359,8 +389,7 @@ class world_env(object):
                 current_delta = abs(best_value - self.value_y[index[0], index[1], index[2], index[3]])
                 delta = max(delta, current_delta)
                 if (current_delta < self.threshold):
-                    # print(current_delta)
-                    delete_list.append(i)
+                        delete_list.append(i)
 
                 self.value_y[index[0], index[1], index[2], index[3]] = best_value
 
@@ -523,6 +552,45 @@ class world_env(object):
 
         return 0
 
+    def seek_neighbors_values(self, state, dim):
+        # print(state)
+        # print(self.grid)
+
+        index = self.state_to_index(state, dim)
+        print("___________________________")
+        print(index)
+        r = []
+        for i in range(len(dim)):
+            left = index[i]
+            right = 0
+            if (left == 0  or  left == self.step_number[dim[i]] - 1):
+                right = 1 if left == 0 else left - 1
+            else:
+                if (self.grid[dim[i]][left + 1] - state[i]) < (state[i] - self.grid[dim[i]][left - 1]):
+                    right = left + 1
+                else:
+                    right = left - 1
+            left, right = left - (left > right), right + (left > right)
+            right += 1
+            r.append([left, right])
+
+        print(r)
+        print("_________________________")
+
+        
+
+        if (dim[0] == 0):
+            return self.value_x[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1], r[3][0]:r[3][1]], sub_states
+        else:
+            return self.value_y[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1], r[3][0]:r[3][1]], sub_states
+
+
+
+        # for i in range(len(dim)):
+        #     left = self.grid[dim[i]] [np.argmin(np.absolute(self.grid[dim[i]] - state[i]))]
+        #     print(left)
+
+
     def seek_nearest_position(self, state, dim):
         # This function can find the nearest position on discrete world for one state
         # The type of state is a row of numpy array, e.g. state = np.array([2, 3, 4, 5]) a 4D state
@@ -609,12 +677,12 @@ class world_env(object):
 
             # ax.view_init(45,60)
 
-            ax.set_xlabel('x', fontsize = 10)
-            ax.set_ylabel('vx', fontsize = 10)
-            ax.set_zlabel('theta', fontsize = 10)
+            ax.set_xlabel('x', fontsize = 15)
+            ax.set_ylabel('vx', fontsize = 15)
+            ax.set_zlabel('theta', fontsize = 15)
 
-            plt.show()
-            fig.savefig("Omega_" + str(omega_index), dpi=fig.dpi)
+            # plt.show()
+            fig.savefig("Iter_57_Plot_x_Omega_" + str(omega_index), dpi=fig.dpi)
 
             omega_index += 1
 
@@ -633,8 +701,8 @@ class world_env(object):
 
         print("count:  ", iteration_count)
 
-    def fill_table(self, csv_table, dir_path, num_x = 0, num_y = 0):
-        data = pd.read_csv(csv_table)
+    def fill_table(self, csv_path, dir_path, num_x = 0, num_y = 0):
+        data = pd.read_csv(csv_path)
 
         if (dir_path):
             file_x = dir_path + "value_matrix_x_" + str(num_x) + ".npy"
@@ -674,16 +742,19 @@ class world_env(object):
             value = min(value_x, value_y)
             data.at[index, 'value'] = value
 
+        data.to_csv("./new_data.csv")
+
 
 if __name__ == "__main__":
     env = world_env()
-    # env.plot_result("./value_matrix/", "value_matrix_y_117.npy")
+    # env.plot_result("./value_matrix/", "value_matrix_x_0.npy")
     env.state_cutting()
     env.state_init()
 
-    env.value_iteration(False)
-    env.value_iteration_y(False)
-    env.fill_table("./../data/valueFunc_train.csv", "./value_matrix")
+    env.value_iteration(False, mode = "linear")
+
+    # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 54)
+    # env.fill_table("./../data/valueFunc_train.csv", "./value_matrix/", 74, 61)
 
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
     # env.fill_table("./../data/valueFunc_train.csv")
@@ -727,10 +798,3 @@ if __name__ == "__main__":
     # state = np.array([2, 3, 4, 5])
     # action = np.array([1, 1])
     # print(env.state_transition(state, action))
-
-
-    # TO DO LIST:
-    # Optimize the performance of algorithm in implementation
-    
-    
-
