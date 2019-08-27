@@ -2,7 +2,60 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/data/example.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/quick_trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@DubinsCar/DubinsCar.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@DubinsCar/dynamics.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@DubinsCar/optCtrl.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@DubinsCar/optDstb.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_VxPhi/Quad6D_VxPhi.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_VxPhi/dynamics.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_VxPhi/optCtrl.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_VyPhi/Quad6D_VyPhi.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_VyPhi/dynamics.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_VyPhi/optCtrl.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_W/Quad6D_W.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_W/dynamics.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_W/optCtrl.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_XY/Quad6D_XY.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_XY/dynamics.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/@Quad6D_XY/optCtrl.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/DubinsCar_approx_RS.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/DubinsCar_approx_TTR.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/DubinsCar_brs_engine.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/DubinsCar_create_init_target.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/PlanarQuad_brs_engine.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/Quad6D_approx_RS.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/Quad6D_approx_TTR.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/Quad6D_create_init_target.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/shapeCylinderSquared.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/target/initTargetAreaVxPhi.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/target/initTargetAreaVyPhi.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/target/initTargetAreaW.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/target/initTargetAreaX.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/target/initTargetAreaY.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/test.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr/ttrVxPhi.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr/ttrVyPhi.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr/ttrW.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr/ttrX.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr/ttrY.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr_backup/ttrValue.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr_backup/ttrVxPhi.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr_backup/ttrVyPhi.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr_backup/ttrW.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr_backup/ttrX.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/ttr_backup/ttrY.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/value/valueVxPhi.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/value/valueVyPhi.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/value/valueW.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/value/valueX.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/brs_engine/value/valueY.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/valueFunc_train.csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,33 +64,32 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/SL_optCtrl$utils.coverage" NAME="utils Coverage Results" MODIFIED="1562721800915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer.coverage" NAME="quick_trainer Coverage Results" MODIFIED="1565312947184" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$utils.coverage" NAME="utils Coverage Results" MODIFIED="1566928942104" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optControl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562626926228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562628146915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/brs_engine/PlanarQuad_brs_engine.py">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="777">
-              <caret line="189" column="20" selection-start-line="189" selection-start-column="20" selection-end-line="189" selection-end-column="20" />
+            <state relative-caret-position="1306">
+              <caret line="128" column="17" selection-start-line="128" selection-start-column="17" selection-end-line="128" selection-end-column="17" />
               <folding>
-                <element signature="e#0#20#0" expanded="true" />
-                <element signature="e#8768#8797#0" />
+                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/utils.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/quick_trainer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="178">
-              <caret line="251" column="20" lean-forward="true" selection-start-line="251" selection-start-column="20" selection-end-line="251" selection-end-column="20" />
+            <state relative-caret-position="-1026">
+              <caret line="96" selection-start-line="96" selection-end-line="96" />
               <folding>
-                <element signature="e#0#18#0" expanded="true" />
-                <element signature="e#697#8287#0" />
+                <element signature="e#1250#1320#0" />
               </folding>
             </state>
           </provider>
@@ -56,22 +108,27 @@
     <findStrings>
       <find>srv_reset_proxy</find>
       <find>get_model_state</find>
+      <find>gMin</find>
+      <find>brs_engine</find>
     </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro" />
         <option value="$PROJECT_DIR$/brs_engine/PlanarQuad_brs_engine.py" />
+        <option value="$PROJECT_DIR$/quick_trainer.py" />
         <option value="$PROJECT_DIR$/utils.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-12" />
-    <option name="y" value="69" />
-    <option name="width" value="1914" />
-    <option name="height" value="1031" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="1919" />
+    <option name="width" value="1922" />
+    <option name="height" value="1201" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -100,7 +157,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../quad_stabilization" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -140,6 +197,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="quick_trainer" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="SL_optControl" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/quick_trainer.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="utils" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -165,10 +244,12 @@
     <list>
       <item itemvalue="Python.PlanarQuad_brs_engine" />
       <item itemvalue="Python.utils" />
+      <item itemvalue="Python.quick_trainer" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.utils" />
+        <item itemvalue="Python.quick_trainer" />
         <item itemvalue="Python.PlanarQuad_brs_engine" />
       </list>
     </recent_temporary>
@@ -185,12 +266,17 @@
       <updated>1562609408902</updated>
       <workItem from="1562609409960" duration="7627000" />
       <workItem from="1562627048718" duration="72000" />
-      <workItem from="1562627157649" duration="30569000" />
+      <workItem from="1562627157649" duration="35315000" />
+      <workItem from="1563209286250" duration="616000" />
+      <workItem from="1563831281908" duration="58000" />
+      <workItem from="1565302495898" duration="9092000" />
+      <workItem from="1565384457575" duration="5000" />
+      <workItem from="1566925430348" duration="7915000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="38268000" />
+    <option name="totallyTimeSpent" value="60700000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -202,29 +288,28 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="0" width="1922" height="1201" extended-state="7" />
-    <editor active="true" />
+    <frame x="1919" y="0" width="1922" height="1201" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18763326" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.19627659" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32893288" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.2094532" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32234433" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39933994" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info active="true" anchor="bottom" id="TODO" order="6" visible="true" weight="0.18999073" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.61260426" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32993513" />
       <window_info anchor="bottom" id="Python Console" order="12" weight="0.32893288" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" id="SciView" order="3" weight="0.67537314" />
       <window_info anchor="right" id="Database" order="4" />
     </layout>
   </component>
@@ -249,27 +334,40 @@
     <entry file="file://$PROJECT_DIR$/brs_engine/Quad6D_create_init_target.m">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/valueFunc_train.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/brs_engine/PlanarQuad_brs_engine.py">
+    <entry file="file://$PROJECT_DIR$/quick_trainer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="777">
-          <caret line="189" column="20" selection-start-line="189" selection-start-column="20" selection-end-line="189" selection-end-column="20" />
+        <state relative-caret-position="-1026">
+          <caret line="96" selection-start-line="96" selection-end-line="96" />
           <folding>
-            <element signature="e#0#20#0" expanded="true" />
-            <element signature="e#8768#8797#0" />
+            <element signature="e#1250#1320#0" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/brs_engine/PlanarQuad_brs_engine.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="369">
+          <caret line="67" column="42" lean-forward="true" selection-start-line="67" selection-start-column="42" selection-end-line="67" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+            <element signature="e#9720#9793#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/example.csv">
+      <provider selected="true" editor-type-id="csv-text-editor" />
+      <provider editor-type-id="text-editor" />
+      <provider editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="3" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="251" column="20" lean-forward="true" selection-start-line="251" selection-start-column="20" selection-end-line="251" selection-end-column="20" />
+        <state relative-caret-position="1306">
+          <caret line="128" column="17" selection-start-line="128" selection-start-column="17" selection-end-line="128" selection-end-column="17" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#697#8287#0" />
           </folding>
         </state>
       </provider>
