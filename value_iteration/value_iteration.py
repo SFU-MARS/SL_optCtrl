@@ -63,7 +63,7 @@ class world_env(object):
         # self.step_number = np.array([10, 10, 10, 10, 10, 10, 10, 10])
         # self.step_number = np.array([2, 2, 2, 2, 2, 2, 2, 2]) # used for debug
         # self.step_number = np.array([31, 11, 11, 11, 11, 11, 15, 15]) # used for debug
-        self.step_number = np.array([11, 11, 11, 11, 9, 9, 10, 10]) # used for debug
+        self.step_number = np.array([11, 11, 11, 11, 9, 9, 3, 3]) # used for debug
         # self.step_number = np.array([4, 4, 4, 4, 4, 4, 4, 4]) # used for debug
         # self.step_number = np.array([6, 6, 6, 6, 6, 6, 6, 6]) # used for debug 
         # self.step_number = np.array([8, 8, 8, 8, 8, 8, 8, 8]) # used for debug
@@ -190,7 +190,7 @@ class world_env(object):
                 
                 best_value = -1000000
 
-                sum_time = 0
+                # sum_time = 0
 
                 if (mode == "linear"):
 
@@ -205,15 +205,15 @@ class world_env(object):
                     #                                                     fill_value = min_value)
 
                     # This part is version 3 which uses 16 neighbors to interpolate one value
-                    start_time = time.clock()
+                    # start_time = time.clock()
                     sub_value_matrix, sub_states = self.seek_neighbors_values(s, self.dim_x)
-                    print("seek_neighbors_value() uses: ", time.clock() - start_time)
+                    # print("seek_neighbors_value() uses: ", time.clock() - start_time)
 
-                    start_time = time.clock()
+                    # start_time = time.clock()
                     min_value = np.min(sub_value_matrix)
-                    print("np.min() uses: ", time.clock() - start_time)
+                    # print("np.min() uses: ", time.clock() - start_time)
 
-                    start_time = time.clock()
+                    # start_time = time.clock()
                     interpolating_function = RegularGridInterpolator((sub_states[0],
                                                                         sub_states[1],
                                                                         sub_states[2],
@@ -221,7 +221,7 @@ class world_env(object):
                                                                         sub_value_matrix,
                                                                         bounds_error = False,
                                                                         fill_value = min_value)
-                    print("Declearation of Interpolator uses: ", time.clock() - start_time)
+                    # print("Declearation of Interpolator uses: ", time.clock() - start_time)
 
                 for a in actions:
                     s_ = self.state_transition_x(s, a)
@@ -231,10 +231,10 @@ class world_env(object):
                         num_crash += (state_type == 2)
                         reward = self.reward[state_type]
                         
-                        start_time = time.clock()
+                        # start_time = time.clock()
                         best_value = max(best_value, reward + self.discount * interpolating_function(s_))
-                        end_time = time.clock()
-                        sum_time += (end_time - start_time)
+                        # end_time = time.clock()
+                        # sum_time += (end_time - start_time)
 
 
                     if (mode == "nearest"):
@@ -274,8 +274,8 @@ class world_env(object):
 
                     num_transition += 1
 
-                print("Interpolate one value uses: ", sum_time / 100.0)
-                print("_________________")
+                # print("Interpolate one value uses: ", sum_time / 100.0)
+                # print("_________________")
 
 
                 index = self.state_to_index(s, self.dim_x)
@@ -758,33 +758,33 @@ class world_env(object):
                                                             bounds_error = False, 
                                                             fill_value = min_value)
 
+        data = data.astype({'value': 'float'})
 
         for index, row in data.iterrows():
             state_x = np.array([row.x, row.vx, row.phi, row.w])
-            state_y = np.array([row.y, row.vy, row.phi, row.w])
+            state_z = np.array([row.z, row.vz, row.phi, row.w])
             value_x = interpolating_function_x(state_x)
-            value_y = interpolating_function_y(state_y)
-            value = min(value_x, value_y)
+            value_z = interpolating_function_y(state_z)
+            value = min(value_x, value_z)
             data.at[index, 'value'] = value
 
-        data.to_csv("./new_data.csv")
+        data.to_csv("./valueFunc_train_filled.csv")
 
 
 if __name__ == "__main__":
     env = world_env()
-    # env.plot_result("./value_matrix/", "value_matrix_x_0.npy")
+    # env.plot_result("./value_matrix/", "value_matrix_x_74.npy")
     env.state_cutting()
     env.state_init()
-    env.value_iteration(False)
-    env.value_iteration_y(False)
+    # env.value_iteration(False)
+    # env.value_iteration_y(False)
 
-    # env.value_iteration(False, mode = "linear")
+    env.value_iteration(False, mode = "linear")
 
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 54)
-    # env.fill_table("./../data/valueFunc_train.csv", "./value_matrix/", 74, 61)
+    # env.fill_table("./valueFunc_train.csv", "./value_matrix/", 74, 57)
 
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
-    # env.fill_table("./../data/valueFunc_train.csv")
 
     # env.add_obstacle(-4.5,4.5,-4.5,4.5)
     # env.add_obstacle(3,4,3,4)
