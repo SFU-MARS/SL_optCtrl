@@ -116,22 +116,22 @@ def plot_history(history):
 
     plt.figure()
     plt.xlabel('Epoch')
-    plt.ylabel('Mean Abs Error [MPG]')
+    plt.ylabel('Mean Abs Error')
     plt.plot(hist['epoch'], hist['mean_absolute_error'],
            label='Train Error')
     plt.plot(hist['epoch'], hist['val_mean_absolute_error'],
            label = 'Val Error')
-    plt.ylim([0,5])
+    # plt.ylim([0,5])
     plt.legend()
 
     plt.figure()
     plt.xlabel('Epoch')
-    plt.ylabel('Mean Square Error [$MPG^2$]')
+    plt.ylabel('Mean Square Error')
     plt.plot(hist['epoch'], hist['mean_squared_error'],
            label='Train Error')
     plt.plot(hist['epoch'], hist['val_mean_squared_error'],
            label = 'Val Error')
-    plt.ylim([0,20])
+    # plt.ylim([0,20])
     plt.legend()
     plt.show()
 
@@ -141,18 +141,16 @@ class PrintDot(keras.callbacks.Callback):
         if epoch % 100 == 0: print('')
         print('.', end='')
 
-
 if __name__ == "__main__":
-
     dirpath = os.path.dirname(__file__)
     dataset_path = None
-    if not os.path.exists(dirpath + "/auto-mpg.data"):
-        dataset_path = keras.utils.get_file(dirpath + "/auto-mpg.data", "http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data")
-        print("dataset_path:", dataset_path)
+    if not os.path.exists(dirpath + "/data/valueFunc_train_filled.csv"):
+        raise ValueError("can not find the training file!!")
     else:
-        dataset_path = dirpath + "/auto-mpg.data"
-    column_names = ['MPG','Cylinders','Displacement','Horsepower','Weight', 'Acceleration', 'Model Year', 'Origin']
-    raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values = "?", comment='\t', sep=" ", skipinitialspace=True)
+        dataset_path = dirpath + "/data/valueFunc_train_filled.csv"
+    column_names = ['x', 'vx', 'z', 'vz','phi','w','value','d1','d2','d3','d4','d5','d6','d7', 'd8']
+    raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
+                              skipinitialspace=True, skiprows=1)
 
     dataset = raw_dataset.copy()
     print(dataset.tail())
@@ -160,50 +158,98 @@ if __name__ == "__main__":
     print(dataset.isna().sum())
 
     dataset = dataset.dropna()
-    origin  = dataset.pop('Origin')
 
-    dataset['USA'] = (origin == 1)*1.0
-    dataset['Europe'] = (origin == 2)*1.0
-    dataset['Japan'] = (origin == 3)*1.0
-    print(dataset.tail())
+    train_dataset = dataset.sample(frac=1.0, random_state=0)
 
-    train_dataset = dataset.sample(frac=0.8, random_state=0)
-    test_dataset  = dataset.drop(train_dataset.index)
 
     train_stats = train_dataset.describe()
-    train_stats.pop("MPG")
+    train_stats.pop("value")
     train_stats = train_stats.transpose()
 
-
-    train_labels = train_dataset.pop('MPG')
-    test_labels = test_dataset.pop('MPG')
-
-
-
-
+    train_labels = train_dataset.pop('value')
 
     model = build_model(train_dataset)
     model.summary()
     normed_train_data = norm(train_dataset, train_stats)
-    normed_test_data  = norm(test_dataset, train_stats)
 
 
-    # sns.pairplot(train_dataset[["MPG", "Cylinders", "Displacement", "Weight"]], diag_kind="kde")
-    #
-    # plt.show()
-
-
-
-    EPOCHS = 1000
+    EPOCHS = 2500
 
     history = model.fit(
         normed_train_data, train_labels,
-        epochs=EPOCHS, validation_split=0.2, verbose=0,
+        epochs=EPOCHS, validation_split=0.2, verbose=1,
         callbacks=[PrintDot()])
 
+    keras.models.save_model(model, './model/vf.h5')
     hist = pd.DataFrame(history.history)
     hist['epoch'] = history.epoch
     hist.tail()
 
     plot_history(history)
+
+# if __name__ == "__main__":
+#
+#     dirpath = os.path.dirname(__file__)
+#     dataset_path = None
+#     if not os.path.exists(dirpath + "/auto-mpg.data"):
+#         dataset_path = keras.utils.get_file(dirpath + "/auto-mpg.data", "http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data")
+#         print("dataset_path:", dataset_path)
+#     else:
+#         dataset_path = dirpath + "/auto-mpg.data"
+#     column_names = ['MPG','Cylinders','Displacement','Horsepower','Weight', 'Acceleration', 'Model Year', 'Origin']
+#     raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values = "?", comment='\t', sep=" ", skipinitialspace=True)
+#
+#     dataset = raw_dataset.copy()
+#     print(dataset.tail())
+#
+#     print(dataset.isna().sum())
+#
+#     dataset = dataset.dropna()
+#     origin  = dataset.pop('Origin')
+#
+#     dataset['USA'] = (origin == 1)*1.0
+#     dataset['Europe'] = (origin == 2)*1.0
+#     dataset['Japan'] = (origin == 3)*1.0
+#     print(dataset.tail())
+#
+#     train_dataset = dataset.sample(frac=0.8, random_state=0)
+#     test_dataset  = dataset.drop(train_dataset.index)
+#
+#     train_stats = train_dataset.describe()
+#     train_stats.pop("MPG")
+#     train_stats = train_stats.transpose()
+#
+#     print("train_stats:", train_stats)
+#
+#     train_labels = train_dataset.pop('MPG')
+#     test_labels = test_dataset.pop('MPG')
+#
+#
+#
+#
+#
+#     model = build_model(train_dataset)
+#     model.summary()
+#     normed_train_data = norm(train_dataset, train_stats)
+#     normed_test_data  = norm(test_dataset, train_stats)
+#
+#
+#     # sns.pairplot(train_dataset[["MPG", "Cylinders", "Displacement", "Weight"]], diag_kind="kde")
+#     #
+#     # plt.show()
+#
+#
+#
+#     EPOCHS = 1000
+#
+#     history = model.fit(
+#         normed_train_data, train_labels,
+#         epochs=EPOCHS, validation_split=0.2, verbose=0,
+#         callbacks=[PrintDot()])
+#
+#     hist = pd.DataFrame(history.history)
+#     hist['epoch'] = history.epoch
+#     hist.tail()
+#
+#     plot_history(history)
 
