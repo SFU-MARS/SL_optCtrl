@@ -152,7 +152,6 @@ class world_env(object):
 
         reward = np.zeros(states.shape[0])
 
-
         # find out the goal states and initialize the values, and remove them from states list
         delete_list = []
 
@@ -168,7 +167,6 @@ class world_env(object):
         states = np.delete(states, delete_list, 0)
         reward = np.delete(reward, delete_list, 0)
 
-
         index = []
         for i, s in enumerate(states):
             t = self.check_crash(s, self.dim_x)
@@ -182,10 +180,7 @@ class world_env(object):
         # Update the value array iteratively
         actions = np.array(np.meshgrid(self.grid[6],
                                         self.grid[7])).T.reshape(-1, len(self.dim_a))
-
         iteration = 0
-
-        dir_path = os.path.dirname(os.path.realpath(__file__))
 
         if (pretrain_file != ""):
             try:
@@ -197,13 +192,8 @@ class world_env(object):
 
 
         while True:
-            num_remain = 0
-            num_crash = 0
             num_transition = 0 
-
             delta = 0
-
-            delete_list = []
 
             for i, s in enumerate(states):
                 
@@ -211,13 +201,8 @@ class world_env(object):
 
                 state_type = self.state_check(s, self.dim_x)
                 current_reward = reward[i]
-
-                # sum_time = 0
-                # print("="*20)
-
                 for a in actions:
                     s_ = self.state_transition_x(s, a)
-
                     if (mode == "linear"):
                         next_step_type = self.state_check(s_, self.dim_x)
 
@@ -234,10 +219,8 @@ class world_env(object):
                                                                                 fill_value = self.reward[2])
                             next_step_value = interpolating_function(s_)
 
-                        # print(s, state_type, current_reward, s_, next_step_type, next_step_value)
                         best_value = max(best_value, current_reward + self.discount * next_step_value)
                         
-
                     if (mode == "nearest"):
                         if (self.check_crash(s_, self.dim_x) == 2):
                             reward = self.reward[2]
@@ -260,29 +243,19 @@ class world_env(object):
                 current_delta = abs(best_value - self.value_x[index])
 
                 delta = max(delta, current_delta)
-                if (current_delta < self.threshold):
-                    delete_list.append(i)
-
+      
                 self.value_x[index] = best_value
-
-                # print("=" * 20)
 
             print("iteraion %d:" %(iteration))
             print("delta: ", delta)
             print("num_transition: ", num_transition)
 
             self.value_output(iteration, "state")
-
             np.save("./value_matrix/value_matrix_x_" + str(iteration), self.value_x)
 
             iteration += 1
 
-            print(states.shape)
-            print(len(delete_list))
-            # states = np.delete(states, delete_list, 0)
-            print(states.shape)
             print("\n\n")
-
 
             if (delta < self.threshold):
                 break 
@@ -295,6 +268,8 @@ class world_env(object):
                                         self.grid[3],
                                         self.grid[4],
                                         self.grid[5])).T.reshape(-1, len(self.dim_y))
+
+
 
         index = []
         for i, s in enumerate(states):
