@@ -8,45 +8,46 @@ import tensorflow as tf
 from tensorflow import keras
 
 
-class SL_valueLearner(object):
-    def __init__(self):
-        self.batch_size  = 50
-        self.input_size  = 6 + 8
-        # self.keep_prob   = 1
-        # self.epoch = 50
-        # self.train_data_size = 35000
-        # self.test_data_size  = 15000
-        self.train_data_size = 7000
-        self.test_data_size  = 3000
-    def read_data(self, use='train'):
-        if use == 'train':
-            data = pd.read_csv('./data/valueFunc_train.csv')
-        elif use == 'test':
-            data = pd.read_csv('./data/valueFunc_test.csv')
-        length = len(data)
-
-        X = []
-        y = []
-
-        for dx, values in data.iterrows():
-            vect = []
-            vect.extend(values[0:6])
-            vect.extend(values[7:])
-            # print("vect", vect)
-            vect = np.array(vect)
-            X.append(vect)
-
-            v_gt = values[6]
-            y.append([v_gt])
-
-        X = np.array(X)
-        y = np.array(y)
-
-        print("read data for " + use + ' ...', np.shape(X))
-        print("read label for " + use + ' ...', np.shape(y))
-
-        return X,y
-
+# class SL_valueLearner(object):
+#     def __init__(self):
+#         self.batch_size  = 50
+#         self.input_size  = 6 + 8
+#         # self.keep_prob   = 1
+#         # self.epoch = 50
+#         # self.train_data_size = 35000
+#         # self.test_data_size  = 15000
+#         self.train_data_size = 7000
+#         self.test_data_size  = 3000
+#
+#     def read_data(self, use='train'):
+#         if use == 'train':
+#             data = pd.read_csv('./data/valueFunc_train.csv')
+#         elif use == 'test':
+#             data = pd.read_csv('./data/valueFunc_test.csv')
+#         length = len(data)
+#
+#         X = []
+#         y = []
+#
+#         for dx, values in data.iterrows():
+#             vect = []
+#             vect.extend(values[0:6])
+#             vect.extend(values[7:])
+#             # print("vect", vect)
+#             vect = np.array(vect)
+#             X.append(vect)
+#
+#             v_gt = values[6]
+#             y.append([v_gt])
+#
+#         X = np.array(X)
+#         y = np.array(y)
+#
+#         print("read data for " + use + ' ...', np.shape(X))
+#         print("read label for " + use + ' ...', np.shape(y))
+#
+#         return X,y
+#
 
     # def dense_layer(input, in_size, out_size, activation_function=None):
     #     Weights = tf.Variable(tf.random_normal([in_size, out_size]))

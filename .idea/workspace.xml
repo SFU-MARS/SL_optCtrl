@@ -2,9 +2,288 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/data/valueFunc_train_filled.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/a2c/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/a2c/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/a2c/a2c.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/a2c/runner.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/a2c/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acer/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acer/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acer/acer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acer/buffer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acer/defaults.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acer/policies.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acer/runner.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/acktr.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/acktr_cont.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/acktr_disc.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/kfac.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/kfac_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/policies.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/run_mujoco.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/acktr/value_functions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/bench/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/bench/benchmarks.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/bench/monitor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/atari_wrappers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/cg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/cmd_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/console_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/dataset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/distributions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/filters.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/identity_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/input.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/math_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/misc_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/mpi_adam.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/mpi_adam_optimizer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/mpi_fork.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/mpi_moments.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/mpi_running_mean_std.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/mpi_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/policies.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/retro_wrappers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/runners.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/running_mean_std.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/running_stat.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/schedules.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/segment_tree.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/envs/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/envs/fixed_sequence_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/envs/identity_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/envs/mnist_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_cartpole.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_doc_examples.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_fixed_sequence.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_identity.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_mnist.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_schedules.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_segment_tree.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_serialization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/test_tf_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tests/util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tf_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/tile_images.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/dummy_vec_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/shmem_vec_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/subproc_vec_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/test_vec_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/vec_frame_stack.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/vec_monitor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/common/vec_env/vec_normalize.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ddpg/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ddpg/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ddpg/ddpg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ddpg/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ddpg/memory.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ddpg/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ddpg/noise.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ddpg/training.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/build_graph.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/deepq.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/defaults.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/custom_cartpole.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/enjoy_cartpole.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/enjoy_mountaincar.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/enjoy_pong.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/enjoy_retro.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/run_atari.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/run_retro.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/train_cartpole.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/experiments/train_mountaincar.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/replay_buffer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/deepq/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/adversary.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/behavior_clone.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/dataset/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/dataset/mujoco_dset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/gail-eval.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/mlp_policy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/HalfCheetah-normalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/HalfCheetah-normalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/HalfCheetah-unnormalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/HalfCheetah-unnormalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Hopper-normalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Hopper-normalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Hopper-unnormalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Hopper-unnormalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Humanoid-normalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Humanoid-normalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Humanoid-unnormalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Humanoid-unnormalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/HumanoidStandup-normalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/HumanoidStandup-normalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/HumanoidStandup-unnormalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/HumanoidStandup-unnormalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Walker2d-normalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Walker2d-normalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Walker2d-unnormalized-deterministic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/Walker2d-unnormalized-stochastic-scores.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/gail-result.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/halfcheetah-training.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/hopper-training.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/humanoid-training.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/humanoidstandup-training.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/result/walker2d-training.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/run_mujoco.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/statistics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/gail/trpo_mpi.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/actor_critic.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/ddpg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/experiment/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/experiment/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/experiment/play.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/experiment/plot.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/experiment/train.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/her.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/normalizer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/replay_buffer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/rollout.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/her/util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/logger.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/cnn_policy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/mlp_policy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/pposgd_simple.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/run_atari.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/run_humanoid.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/run_mujoco.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1-standard/run_robotics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1/cnn_policy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1/mlp_policy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1/pposgd_simple.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1/run_atari.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo1/run_mujoco.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo2/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo2/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo2/defaults.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/ppo2/ppo2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/results_plotter.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/run.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/trpo_mpi/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/trpo_mpi/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/trpo_mpi/defaults.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baselines/trpo_mpi/trpo_mpi.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/atari_wrappers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/cg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/cmd_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/console_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/dataset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/distributions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/filters.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/identity_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/input.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/math_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/misc_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/mpi_adam.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/mpi_adam_optimizer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/mpi_fork.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/mpi_moments.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/mpi_running_mean_std.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/mpi_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/policies.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/retro_wrappers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/runners.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/running_mean_std.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/running_stat.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/schedules.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/segment_tree.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/envs/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/envs/fixed_sequence_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/envs/identity_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/envs/mnist_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_cartpole.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_doc_examples.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_fixed_sequence.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_identity.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_mnist.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_schedules.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_segment_tree.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_serialization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/test_tf_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tests/util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tf_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/tile_images.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/dummy_vec_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/shmem_vec_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/subproc_vec_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/test_vec_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/vec_frame_stack.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/vec_monitor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/vec_env/vec_normalize.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gazebo_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/globals.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo.egg-info/PKG-INFO" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo.egg-info/SOURCES.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo.egg-info/dependency_links.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo.egg-info/requires.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo.egg-info/top_level.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/tmp/DubinsCarEnv_v0_dqn.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/tmp/PlanarQuadEnv_v0_dqn.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/tmp/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gym_foo/setup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/air_space/model.config" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/air_space/model.sdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/air_space/model.sdf.backup" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/circuit_ground/model.config" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/circuit_ground/model.sdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo1_utils/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo1_utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo1_utils/cnn_policy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo1_utils/mlp_policy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo1_utils/pposgd_simple.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo1_utils/run_atari.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo1_utils/run_mujoco.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ppo_params.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_ppo.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/liveplot.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/memory.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/pickle_analysis.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/pickle_show.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/plotting_performance.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/random_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/reward_norm_visualize.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/rl_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/vf.h5" beforeDir="false" afterPath="$PROJECT_DIR$/tf_model/vf.h5" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/quick_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/quick_trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quick_trainer_mod.py" beforeDir="false" afterPath="$PROJECT_DIR$/quick_trainer_mod.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,30 +295,101 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/SL_optCtrl$utils.coverage" NAME="utils Coverage Results" MODIFIED="1566928942104" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer.coverage" NAME="quick_trainer Coverage Results" MODIFIED="1567037161492" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer_mod.coverage" NAME="quick_trainer_mod Coverage Results" MODIFIED="1567121173358" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optControl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562626926228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562628146915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/utils.py">
+        <entry file="file://$PROJECT_DIR$/quick_trainer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-592">
-              <caret line="108" column="38" selection-start-line="108" selection-start-column="38" selection-end-line="108" selection-end-column="38" />
+            <state relative-caret-position="-1062">
+              <caret line="10" column="32" selection-start-line="10" selection-start-column="32" selection-end-line="10" selection-end-column="32" />
               <folding>
-                <element signature="e#0#18#0" expanded="true" />
+                <element signature="e#198#3385#0" />
+                <element signature="e#1250#1320#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/quick_trainer.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/quick_trainer_mod.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1290">
-              <caret line="182" column="43" lean-forward="true" selection-start-line="182" selection-start-column="43" selection-end-line="182" selection-end-column="43" />
+            <state relative-caret-position="234">
+              <caret line="234" column="50" selection-start-line="234" selection-start-column="45" selection-end-line="234" selection-end-column="50" />
               <folding>
-                <element signature="e#1250#1320#0" />
+                <element signature="e#0#19#0" expanded="true" />
+                <element signature="e#163#195#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/train_ppo.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1010">
+              <caret line="73" column="77" selection-start-line="73" selection-start-column="77" selection-end-line="73" selection-end-column="77" />
+              <folding>
+                <element signature="e#1#11#0" expanded="true" />
+                <element signature="e#7390#7478#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/baselines/common/tf_util.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="186">
+              <caret line="237" column="25" selection-start-line="237" selection-start-column="25" selection-end-line="237" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="72">
+              <caret line="290" column="20" selection-start-line="290" selection-start-column="20" selection-end-line="290" selection-end-column="20" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/run.sh">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="180">
+              <caret line="10" selection-start-line="10" selection-end-line="10" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ppo1_utils/mlp_policy.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="72">
+              <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
+              <folding>
+                <element signature="e#0#64#0" expanded="true" />
+                <element signature="e#233#4837#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ppo.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="233">
+              <caret line="138" column="43" selection-start-line="138" selection-start-column="43" selection-end-line="138" selection-end-column="43" />
+              <folding>
+                <element signature="e#0#43#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -73,7 +423,14 @@
         <option value="$PROJECT_DIR$/brs_engine/PlanarQuad_brs_engine.py" />
         <option value="$PROJECT_DIR$/utils.py" />
         <option value="$PROJECT_DIR$/data/valueFunc_train_filled.csv" />
+        <option value="$PROJECT_DIR$/run.sh" />
+        <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" />
         <option value="$PROJECT_DIR$/quick_trainer.py" />
+        <option value="$PROJECT_DIR$/ppo.py" />
+        <option value="$PROJECT_DIR$/baselines/common/tf_util.py" />
+        <option value="$PROJECT_DIR$/train_ppo.py" />
+        <option value="$PROJECT_DIR$/quick_trainer_mod.py" />
+        <option value="$PROJECT_DIR$/ppo1_utils/mlp_policy.py" />
       </list>
     </option>
   </component>
@@ -99,7 +456,12 @@
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_icra" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="tf_model" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -116,6 +478,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/data" />
     </key>
   </component>
@@ -131,7 +494,18 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.quick_trainer">
+  <component name="RunManager" selected="Python.quick_trainer_mod">
+    <configuration name="run.sh" type="BashConfigurationType" factoryName="Bash" temporary="true">
+      <module name="SL_optControl" />
+      <option name="INTERPRETER_OPTIONS" value="bash" />
+      <option name="INTERPRETER_PATH" value="/usr/bin/env" />
+      <option name="PROJECT_INTERPRETER" value="false" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run.sh" />
+      <option name="PARAMETERS" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="PlanarQuad_brs_engine" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -176,6 +550,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="quick_trainer_mod" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="SL_optControl" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/quick_trainer_mod.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="utils" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -202,9 +598,13 @@
       <item itemvalue="Python.PlanarQuad_brs_engine" />
       <item itemvalue="Python.utils" />
       <item itemvalue="Python.quick_trainer" />
+      <item itemvalue="Bash.run.sh" />
+      <item itemvalue="Python.quick_trainer_mod" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.quick_trainer_mod" />
+        <item itemvalue="Bash.run.sh" />
         <item itemvalue="Python.quick_trainer" />
         <item itemvalue="Python.utils" />
         <item itemvalue="Python.PlanarQuad_brs_engine" />
@@ -229,12 +629,12 @@
       <workItem from="1565302495898" duration="9092000" />
       <workItem from="1565384457575" duration="5000" />
       <workItem from="1566925430348" duration="7915000" />
-      <workItem from="1566949665098" duration="13168000" />
+      <workItem from="1566949665098" duration="24123000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="73868000" />
+    <option name="totallyTimeSpent" value="84823000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -246,15 +646,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="1919" y="0" width="1922" height="1201" extended-state="7" />
-    <editor active="true" />
+    <frame x="1919" y="0" width="1922" height="1201" extended-state="6" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.19787234" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32893288" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32967034" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.48351648" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.19688645" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -280,12 +679,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/quick_trainer.py</url>
-          <line>223</line>
+          <line>224</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/quick_trainer.py</url>
-          <line>245</line>
+          <line>246</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
@@ -357,12 +756,108 @@
     <entry file="file://$PROJECT_DIR$/data/training_result_2500epochs.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1_utils/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/air_space/model.sdf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-270" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/valueFunc_train.csv">
+      <provider editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="3" />
+      </provider>
+      <provider selected="true" editor-type-id="csv-text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1_utils/pposgd_simple.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#74#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/quick_trainer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1290">
-          <caret line="182" column="43" lean-forward="true" selection-start-line="182" selection-start-column="43" selection-end-line="182" selection-end-column="43" />
+        <state relative-caret-position="-1062">
+          <caret line="10" column="32" selection-start-line="10" selection-start-column="32" selection-end-line="10" selection-end-column="32" />
           <folding>
+            <element signature="e#198#3385#0" />
             <element signature="e#1250#1320#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/baselines/common/tf_util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="237" column="25" selection-start-line="237" selection-start-column="25" selection-end-line="237" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/quick_trainer_mod.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="234" column="50" selection-start-line="234" selection-start-column="45" selection-end-line="234" selection-end-column="50" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+            <element signature="e#163#195#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train_ppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1010">
+          <caret line="73" column="77" selection-start-line="73" selection-start-column="77" selection-end-line="73" selection-end-column="77" />
+          <folding>
+            <element signature="e#1#11#0" expanded="true" />
+            <element signature="e#7390#7478#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="290" column="20" selection-start-line="290" selection-start-column="20" selection-end-line="290" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="10" selection-start-line="10" selection-end-line="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="233">
+          <caret line="138" column="43" selection-start-line="138" selection-start-column="43" selection-end-line="138" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1_utils/mlp_policy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
+          <folding>
+            <element signature="e#0#64#0" expanded="true" />
+            <element signature="e#233#4837#0" />
           </folding>
         </state>
       </provider>
