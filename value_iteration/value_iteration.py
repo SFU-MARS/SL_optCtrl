@@ -167,16 +167,8 @@ class world_env(object):
         states = np.delete(states, delete_list, 0)
         reward = np.delete(reward, delete_list, 0)
 
-        index = []
-        for i, s in enumerate(states):
-            t = self.check_crash(s, self.dim_x)
-            if (t != 2):
-                index.append(i)
-
         print("The total 4D states: ", states.shape)
-        states = states[index]
-        print("The safe 4D states: ", states.shape)
-
+       
         # Update the value array iteratively
         actions = np.array(np.meshgrid(self.grid[6],
                                         self.grid[7])).T.reshape(-1, len(self.dim_a))
@@ -260,33 +252,33 @@ class world_env(object):
             if (delta < self.threshold):
                 break 
 
-    def value_iteration_y(self, debug = False, pretrain_file = "", iteration_number = 0):
+    def value_iteration_y(self, debug = False, pretrain_file = "", iteration_number = 0, mode = "nearest"):
         # Generate the combination of 4-d data (y, vy, theta, omega)
         # Select the rows which are not in obstacles
-
         states = np.array(np.meshgrid(self.grid[1],
                                         self.grid[3],
                                         self.grid[4],
                                         self.grid[5])).T.reshape(-1, len(self.dim_y))
 
+        reward = np.zeros(states.shape[0])
 
+        delete_list = []
+        if (iteration_number == 0):
+            for i, s in enumerate(states):
+                state_type = self.state_check(s, self.dim_y)
 
-        index = []
-        for i, s in enumerate(states):
-            t = self.check_crash(s, self.dim_y)
-            if (t != 2):
-                index.append(i)
+                if (state_type == 1):
+                    index = tuple(self.state_to_index(s, self.dim_y))
+                    self.value_y[index] = self.reward[state_type]
+                    delete_list.append(i)
+
+        states = np.delete(states, delete_list, 0)
+        reward = np.delete(reward, delete_list, 0)
 
         print("The total 4D states: ", states.shape)
-        states = states[index]
-        print("The safe 4D states: ", states.shape)
-
+       
         actions = np.array(np.meshgrid(self.grid[6],
                                         self.grid[7])).T.reshape(-1, len(self.dim_a))
-
-        iteration = 0
-
-        dir_path = os.path.dirname(os.path.realpath(__file__))
 
         if (pretrain_file != ""):
             try:
@@ -297,78 +289,77 @@ class world_env(object):
                 print("Load pre_trained value matrix failed")
 
 
+        iteration = 0
         while True:
-            if (debug):
-                file_name = "/log/log_y_" + str(iteration) + ".txt"
-                f = open(dir_path + file_name, "w")
-
-
             num_remain = 0
             num_crash = 0
             num_transition = 0
+            dead_count = 0
             delta = 0
-
-            delete_list = []
 
             for i, s in enumerate(states):
                 best_value = -1000000
-                
+
+                state_type = self.state_check(s, self.dim_y)
+                current_reward = reward[i]
 
                 for a in actions:
                     s_ = self.state_transition_y(s, a)
 
-                    if (debug):
-                        log = "s: " + np.array2string(s, precision = 4, separator = '  ') + "\n"
-                        f.write(log)
-                        log = "s_: " + np.array2string(s_, precision = 4, separator = '  ') + "\n"
-                        f.write(log)
-                        log = "a: " + np.array2string(a, precision = 4, separator = '  ') + "\n"
-                        f.write(log)
+                    if (mode == "linear"):
+                        next_step_type = self.state_check(s_, self.dim_y)
 
-                    if (self.check_crash(s_, self.dim_y) == 2):
-                        reward = self.reward[2]
-                        s_ = s
-                        num_crash += 1
-                    else:
-                        s_ = self.seek_nearest_position(s_, self.dim_y)
-                        reward = self.reward[self.state_check(s_, self.dim_y)]
+                        if (next_step_type >= 2):
+                            next_step_value = (next_step_type == 2) * self.reward[2] + (next_step_type == 3) * self.reward[3]
+                        else:
+                            sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim_y)
+                            # print(sub_states)
+                            # print(s_)
+                            interpolating_function = RegularGridInterpolator((sub_states[0],
+                                                                                sub_states[1],
+                                                                                sub_states[2],
+                                                                                sub_states[3]),
+                                                                                sub_value_matrix,
+                                                                                bounds_error = False,
+                                                                                fill_value = self.reward[2])
+                            next_step_value = interpolating_function(s_)
 
-                    index = self.state_to_index(s, self.dim_y)
-                    index_ = self.state_to_index(s_, self.dim_y)
+                        # if (next_step_type < 3):
+                        #     print(s, state_type, current_reward, s_, next_step_type, next_step_value)
 
-                    if (index == index_):
-                        num_remain += 1
+                    if (mode == "nearest"):
+                        if (self.check_crash(s_, self.dim_y) == 2):
+                            reward = self.reward[2]
+                            s_ = s
+                            num_crash += 1
+                        else:
+                            s_ = self.seek_nearest_position(s_, self.dim_y)
+                            reward = self.reward[self.state_check(s_, self.dim_y)]
 
-                    if (debug):
-                        log = ''.join(str(e) + ' ' for e in index) + '\n'
-                        f.write(log)
-                        log = ''.join(str(e) + ' ' for e in index_) + '\n'
-                        f.write(log)
-                        f.write(str(self.value_y[index_[0], index_[1], index_[2], index_[3]]))
-                        f.write(str(reward))
-                        f.write("__________________________\n")
+                        index = self.state_to_index(s, self.dim_y)
+                        index_ = self.state_to_index(s_, self.dim_y)
 
-                    best_value = max(best_value, reward + self.discount * self.value_y[index_[0], index_[1], index_[2], index_[3]])
+                        if (index == index_):
+                            num_remain += 1
+
+                    best_value = max(best_value, current_reward + self.discount * next_step_value)
 
                     num_transition += 1
-                    # if (num_transition % 100000 == 0):
-                    #     print(num_transition) 
 
-                index = self.state_to_index(s, self.dim_y)
-                current_delta = abs(best_value - self.value_y[index[0], index[1], index[2], index[3]])
+                # print(index, s)
+                index = tuple(self.state_to_index(s, self.dim_y))
+                current_delta = abs(best_value - self.value_y[index])
                 delta = max(delta, current_delta)
                 if (current_delta < self.threshold):
-                        delete_list.append(i)
+                    dead_count += 1
 
-                self.value_y[index[0], index[1], index[2], index[3]] = best_value
-
+                print(s, state_type, best_value)
+                self.value_y[index] = best_value
 
             print("iteration %d:" %(iteration))
             print("delta: ", delta)
             print("num_transition: ", num_transition)
-            print("num_remain: ", num_remain - num_crash)
-            print("num_crash: ", num_crash)
-            print("\n\n")
+            print("dead count: ", dead_count)
 
             self.value_output_y(iteration, "state")
 
@@ -376,13 +367,7 @@ class world_env(object):
 
             iteration += 1
 
-            print(states.shape)
-            print(len(delete_list))
-            states = np.delete(states, delete_list, 0)
-            print(states.shape)
-
-            if (debug):
-                f.close()
+            print("\n\n")
 
             if (delta < self.threshold):
                 break
@@ -561,7 +546,6 @@ class world_env(object):
         #     left = self.grid[dim[i]] [np.argmin(np.absolute(self.grid[dim[i]] - state[i]))]
         #     print(left)
 
-
     def seek_nearest_position(self, state, dim):
         # This function can find the nearest position on discrete world for one state
         # The type of state is a row of numpy array, e.g. state = np.array([2, 3, 4, 5]) a 4D state
@@ -654,7 +638,7 @@ class world_env(object):
             ax.set_zlabel('theta', fontsize = 15)
 
             plt.show()
-            fig.savefig("Iter_26_Plot_x_Omega_" + str(omega_index), dpi=fig.dpi)
+            fig.savefig("Iter_32_Plot_y_Omega_" + str(omega_index), dpi=fig.dpi)
 
             omega_index += 1
 
@@ -720,11 +704,11 @@ class world_env(object):
 
 if __name__ == "__main__":
     env = world_env()
-    env.plot_result("./value_matrix/", "value_matrix_x_26.npy")
+    # env.plot_result("./value_matrix/", "value_matrix_y_32.npy")
     env.state_cutting()
     env.state_init()
     # env.value_iteration(False)
-    # env.value_iteration_y(False)
+    env.value_iteration_y(False, mode = "linear")
 
     # env.value_iteration(False, mode = "linear")
 
