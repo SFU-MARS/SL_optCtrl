@@ -280,34 +280,49 @@ class world_env(object):
         actions = np.array(np.meshgrid(self.grid[6],
                                         self.grid[7])).T.reshape(-1, len(self.dim_a))
 
-        if (pretrain_file != ""):
-            try:
-                self.value_y = np.load(pretrain_file + str(iteration_number) + ".npy")
-                iteration = iteration_number + 1
-                print("Load pre_trained value matrix successfully!")
-            except:
-                print("Load pre_trained value matrix failed")
+        # if (pretrain_file != ""):
+        #     try:
+        #         self.value_y = np.load(pretrain_file + str(iteration_number) + ".npy")
+        #         iteration = iteration_number + 1
+        #         print("Load pre_trained value matrix successfully!")
+        #     except:
+        #         print("Load pre_trained value matrix failed")
 
 
         iteration = 0
         while True:
-            num_remain = 0
             num_crash = 0
+            num_overspeed = 0
+            num_goal = 0
+            num_regular = 0
+
             num_transition = 0
             dead_count = 0
             delta = 0
+
 
             for i, s in enumerate(states):
                 best_value = -1000000
 
                 state_type = self.state_check(s, self.dim_y)
+
                 current_reward = reward[i]
+
+                crashed = 0
+                overspeed = 0
+                regular = 0
+                goal = 0
 
                 for a in actions:
                     s_ = self.state_transition_y(s, a)
 
                     if (mode == "linear"):
                         next_step_type = self.state_check(s_, self.dim_y)
+
+                        regular += (next_step_type == 0)
+                        goal += (next_step_type == 1)
+                        crashed += (next_step_type == 2)
+                        overspeed += (next_step_type == 3)
 
                         if (next_step_type >= 2):
                             next_step_value = (next_step_type == 2) * self.reward[2] + (next_step_type == 3) * self.reward[3]
@@ -324,6 +339,7 @@ class world_env(object):
                                                                                 fill_value = self.reward[2])
                             next_step_value = interpolating_function(s_)
 
+
                         # if (next_step_type < 3):
                         #     print(s, state_type, current_reward, s_, next_step_type, next_step_value)
 
@@ -339,23 +355,28 @@ class world_env(object):
                         index = self.state_to_index(s, self.dim_y)
                         index_ = self.state_to_index(s_, self.dim_y)
 
-                        if (index == index_):
-                            num_remain += 1
-
                     best_value = max(best_value, current_reward + self.discount * next_step_value)
 
                     num_transition += 1
 
-                # print(index, s)
+                # print(s, "  regular: ", regular, "  goal: ", goal, "  crashed: ", crashed, "  overspeed: ", overspeed)
+                num_goal += (goal)
+                num_crash += (crashed == 25)
+                num_regular += ((goal == 0)  &  (regular > 0))
+                num_overspeed += (overspeed == 25)
+
                 index = tuple(self.state_to_index(s, self.dim_y))
                 current_delta = abs(best_value - self.value_y[index])
                 delta = max(delta, current_delta)
                 if (current_delta < self.threshold):
                     dead_count += 1
 
-                print(s, state_type, best_value)
+                # print(s, state_type, best_value)
                 self.value_y[index] = best_value
 
+            # goal:  79  regualar: 9338  crashed:  810  overspeed:  5994  bad states:  -6519
+
+            print("goal: ", num_goal, " regualar:", num_regular, " crashed: ", num_crash, " overspeed: ", num_overspeed, " bad states: ", states.shape[0] - num_regular - num_crash - num_overspeed - num_goal)
             print("iteration %d:" %(iteration))
             print("delta: ", delta)
             print("num_transition: ", num_transition)
@@ -637,7 +658,7 @@ class world_env(object):
             ax.set_ylabel('vx', fontsize = 15)
             ax.set_zlabel('theta', fontsize = 15)
 
-            plt.show()
+            # plt.show()
             fig.savefig("Iter_32_Plot_y_Omega_" + str(omega_index), dpi=fig.dpi)
 
             omega_index += 1
@@ -691,15 +712,22 @@ class world_env(object):
 
         data = data.astype({'value': 'float'})
 
+
+        overspeed = 0
+        crashed = 0
         for index, row in data.iterrows():
             state_x = np.array([row.x, row.vx, row.phi, row.w])
             state_z = np.array([row.z, row.vz, row.phi, row.w])
             value_x = interpolating_function_x(state_x)
             value_z = interpolating_function_y(state_z)
             value = min(value_x, value_z)
+            overspeed += (value == -180)
+            crashed += (value == -360)
+
             data.at[index, 'value'] = value
 
-        data.to_csv("./valueFunc_train_filled.csv")
+        print(overspeed, crashed)
+        data.to_csv("./valueFunc_train_linear_filled.csv")
 
 
 if __name__ == "__main__":
@@ -708,12 +736,12 @@ if __name__ == "__main__":
     env.state_cutting()
     env.state_init()
     # env.value_iteration(False)
-    env.value_iteration_y(False, mode = "linear")
+    # env.value_iteration_y(False, mode = "linear")
 
     # env.value_iteration(False, mode = "linear")
 
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 54)
-    # env.fill_table("./valueFunc_train.csv", "./value_matrix/", 74, 57)
+    env.fill_table("./valueFunc_train.csv", "./value_matrix/", 26, 32)
 
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
 
