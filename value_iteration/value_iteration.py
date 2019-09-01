@@ -642,18 +642,16 @@ class world_env(object):
         data = np.load(file)
 
         # print(data.reshape(-1).shape)
-        values = np.sort(data.reshape(-1))
         # print(values)
 
         # 2d value distribution plots
-        # 9350
-        # plt.plot(values[9350:])
+        # y positive index 9350
+        # values = np.sort(data.reshape(-1))
+        # plt.plot(values)
         # plt.show()
         # return
-
-
         #=======================================================
-        
+
         # 3D value plots
         theta_index = 0
         while theta_index < data.shape[-1]:
@@ -812,7 +810,7 @@ if __name__ == "__main__":
     env = world_env()
     env.state_cutting()
     env.state_init()
-    env.plot_result("./value_matrix/", "value_matrix_y_32.npy")
+    env.plot_result("./value_matrix/", "value_matrix_x_26.npy")
 
     # env.value_iteration(False)
     # env.value_iteration_y(False, mode = "linear")
