@@ -8,6 +8,8 @@ from matplotlib import cm
 from scipy.interpolate import RegularGridInterpolator
 import time
 
+omega_over = 0
+velocity_over = 0
 
 
 class world_env(object):
@@ -290,6 +292,10 @@ class world_env(object):
 
 
         iteration = 0
+
+        global velocity_over
+        global omega_over
+
         while True:
             num_crash = 0
             num_overspeed = 0
@@ -299,6 +305,9 @@ class world_env(object):
             num_transition = 0
             dead_count = 0
             delta = 0
+
+            omega_over = 0
+            velocity_over = 0
 
 
             for i, s in enumerate(states):
@@ -360,7 +369,7 @@ class world_env(object):
                     num_transition += 1
 
                 # print(s, "  regular: ", regular, "  goal: ", goal, "  crashed: ", crashed, "  overspeed: ", overspeed)
-                num_goal += (goal)
+                num_goal += (goal > 0)
                 num_crash += (crashed == 25)
                 num_regular += ((goal == 0)  &  (regular > 0))
                 num_overspeed += (overspeed == 25)
@@ -374,9 +383,10 @@ class world_env(object):
                 # print(s, state_type, best_value)
                 self.value_y[index] = best_value
 
-            # goal:  79  regualar: 9338  crashed:  810  overspeed:  5994  bad states:  -6519
+            # goal:  26  regualar: 2872  crashed:  810  overspeed:  5994
 
-            print("goal: ", num_goal, " regualar:", num_regular, " crashed: ", num_crash, " overspeed: ", num_overspeed, " bad states: ", states.shape[0] - num_regular - num_crash - num_overspeed - num_goal)
+            print("goal: ", num_goal, " regualar:", num_regular, " crashed: ", num_crash, " overspeed: ", num_overspeed)
+            print("velocity overspeed: ", velocity_over, "  omega overspeed: ", omega_over)
             print("iteration %d:" %(iteration))
             print("delta: ", delta)
             print("num_transition: ", num_transition)
@@ -514,12 +524,16 @@ class world_env(object):
         # return 3 = overspeed
         # return 0 = regular speed
         # Only check the velocity and angular velocity
+        global velocity_over
+        global omega_over
 
         for i, d in enumerate(dim):
             if (i == 0 or i == 2): # pass the x and theta variable
                 continue
 
             if (s[i] < self.ranges[d][0] or s[i] > self.ranges[d][1]):
+                velocity_over += (i == 1)
+                omega_over += (i == 3)
                 return 3
 
         return 0
@@ -626,42 +640,102 @@ class world_env(object):
         file = dir_path + file_path
         print(file)
         data = np.load(file)
-        omega_index = 0
 
-        while omega_index < data.shape[-1]:
-            x = np.zeros(data.shape[:-1])
-            vx = np.zeros(data.shape[:-1])
-            theta = np.zeros(data.shape[:-1])
-            value = np.zeros(data.shape[:-1])
+        # print(data.reshape(-1).shape)
+        values = np.sort(data.reshape(-1))
+        # print(values)
 
-            for i, d in np.ndenumerate(data):
-                if (i[-1] == omega_index):
-                    x[i[:-1]] = i[0]
-                    vx[i[:-1]] = i[1]
-                    theta[i[:-1]] = i[2]
-                    value[i[:-1]] = d
+        # 2d value distribution plots
+        # 9350
+        # plt.plot(values[9350:])
+        # plt.show()
+        # return
+
+
+        #=======================================================
+        
+        # 3D value plots
+        theta_index = 0
+        while theta_index < data.shape[-1]:
+            omega_index = 0
+
+            path = "./plots/theta_" + str(theta_index)
+            try:
+                os.mkdir(path)
+            except:
+                print(path + " exist!")
+
+            while omega_index < data.shape[-2]:
+                print(theta_index, omega_index)
+                x = np.zeros(data.shape[:-2])
+                vx = np.zeros(data.shape[:-2])
+                value = np.zeros(data.shape[:-2])
+
+                for i, d in np.ndenumerate(data):
+                    if (i[-1] == omega_index  and  i[-2] == theta_index):
+                        x[i[:-2]] = self.grid[1][i[0]]
+                        vx[i[:-2]] = self.grid[3][i[1]]
+                        value[i[:-2]] = d
+
+
+                fig = plt.figure()
+                ax = fig.gca(projection='3d')
+
+                surf = ax.plot_surface(x, vx, value, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+                fig.colorbar(surf, shrink=0.5, aspect=5)
+
+                ax.set_xlabel('x', fontsize = 15)
+                ax.set_ylabel('vx', fontsize = 15)
+                ax.set_zlabel('value', fontsize = 15)
+                title = "theta: " + str(round(self.grid[4][theta_index], 2)) + "   omega: " + str(round(self.grid[5][omega_index], 2))
+                ax.set_title(title, fontsize = 15)
+
+                # plt.show()
+                fig.savefig(path + "/omega_" + str(omega_index), dpi=fig.dpi)
+
+                omega_index += 1
+            theta_index += 1
+
+        # ======================================================================
+
+
+        # omega_index = 0
+        # # 4d plots
+        # while omega_index < data.shape[-1]:
+        #     x = np.zeros(data.shape[:-1])
+        #     vx = np.zeros(data.shape[:-1])
+        #     theta = np.zeros(data.shape[:-1])
+        #     value = np.zeros(data.shape[:-1])
+
+        #     for i, d in np.ndenumerate(data):
+        #         if (i[-1] == omega_index):
+        #             x[i[:-1]] = i[0]
+        #             vx[i[:-1]] = i[1]
+        #             theta[i[:-1]] = i[2]
+        #             value[i[:-1]] = d
      
-            x = x.reshape(-1)
-            vx = vx.reshape(-1)
-            theta = theta.reshape(-1)
-            value = value.reshape(-1)
+        #     x = x.reshape(-1)
+        #     vx = vx.reshape(-1)
+        #     theta = theta.reshape(-1)
+        #     value = value.reshape(-1)
 
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
+        #     fig = plt.figure()
+        #     ax = fig.add_subplot(111, projection='3d')
 
-            img = ax.scatter(x, vx, theta, c=value, cmap=plt.hot())
-            fig.colorbar(img)
+        #     img = ax.scatter(x, vx, theta, c=value, cmap=plt.hot())
+        #     fig.colorbar(img)
 
-            # ax.view_init(45,60)
+        #     # ax.view_init(45,60)
 
-            ax.set_xlabel('x', fontsize = 15)
-            ax.set_ylabel('vx', fontsize = 15)
-            ax.set_zlabel('theta', fontsize = 15)
+        #     ax.set_xlabel('x', fontsize = 15)
+        #     ax.set_ylabel('vx', fontsize = 15)
+        #     ax.set_zlabel('theta', fontsize = 15)
 
-            # plt.show()
-            fig.savefig("Iter_32_Plot_y_Omega_" + str(omega_index), dpi=fig.dpi)
+        #     # plt.show()
+        #     fig.savefig("Iter_32_Plot_y_Omega_" + str(omega_index), dpi=fig.dpi)
 
-            omega_index += 1
+        #     omega_index += 1
 
     def debug(self):
         x = -2000.0
@@ -731,17 +805,22 @@ class world_env(object):
 
 
 if __name__ == "__main__":
+
+    # goal:  26  regualar: 2872  crashed:  810  overspeed:  5994
+    # velocity overspeed:  185157   omega overspeed:  27726
+
     env = world_env()
-    # env.plot_result("./value_matrix/", "value_matrix_y_32.npy")
     env.state_cutting()
     env.state_init()
+    env.plot_result("./value_matrix/", "value_matrix_y_32.npy")
+
     # env.value_iteration(False)
     # env.value_iteration_y(False, mode = "linear")
 
     # env.value_iteration(False, mode = "linear")
 
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 54)
-    env.fill_table("./valueFunc_train.csv", "./value_matrix/", 26, 32)
+    # env.fill_table("./valueFunc_train.csv", "./value_matrix/", 26, 32)
 
     # env.value_iteration_y(False, "./value_matrix/value_matrix_y_", 10)
 
