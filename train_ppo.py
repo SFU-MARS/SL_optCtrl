@@ -1,4 +1,6 @@
-
+import sys
+sys.path.remove('/opt/ros/melodic/lib/python2.7/dist-packages')
+sys.path.append('/opt/ros/melodic/lib/python2.7/dist-packages')
 import gym
 from gym_foo import gym_foo
 from gym import wrappers
@@ -26,7 +28,7 @@ def train(env, algorithm, args, params=None, load=False, loadpath=None, loaditer
 
         # Initialize policy
         ppo.create_session()
-        init_policy = ppo.create_policy('pi', env, vf_load=True)
+        init_policy = ppo.create_policy('pi', env, vf_load=args['vf_load'], pol_load=args['pol_load'])
         ppo.initialize()
 
         if load and loadpath is not None and loaditer is not None:
@@ -312,14 +314,21 @@ if __name__ == "__main__":
         parser.add_argument("--reward_type", help="which type of reward to use.", type=str, default='hand_craft')
         parser.add_argument("--algo", help="which type of algorithm to use.", type=str, default='ppo')
         parser.add_argument("--set_additional_goal", type=str, default="angle")
+        parser.add_argument("--vf_load", type=bool, default=False)
+        parser.add_argument("--pol_load", type=bool, default=False)
         args = parser.parse_args()
         args = vars(args)
 
         RUN_DIR = MODEL_DIR = FIGURE_DIR = RESULT_DIR = None
         if args['algo'] == "ppo":
             RUN_DIR = os.path.join(os.getcwd(), 'runs_icra',
-                                   args['gym_env'] + '_' + args['reward_type'] + '_' + args['algo'] + '_' + strftime(
-                                       '%d-%b-%Y_%H-%M-%S'))
+                                   strftime(
+                                       '%d-%b-%Y_%H-%M-%S') + args['gym_env'] + '_' + args['reward_type'] + '_' + args['algo'])
+            if args['vf_load']:
+                RUN_DIR = RUN_DIR + '_' + 'vf'
+            if args['pol_load']:
+                RUN_DIR = RUN_DIR + '_' + 'pol'
+
             MODEL_DIR = os.path.join(RUN_DIR, 'model')
             FIGURE_DIR = os.path.join(RUN_DIR, 'figure')
             RESULT_DIR = os.path.join(RUN_DIR, 'result')
@@ -377,7 +386,7 @@ if __name__ == "__main__":
             maybe_mkdir(args['MODEL_DIR'])
             maybe_mkdir(args['FIGURE_DIR'])
             maybe_mkdir(args['RESULT_DIR'])
-            ppo_params_json = os.environ['PROJ_HOME']+'/ppo_params.json'
+            ppo_params_json = os.environ['PROJ_HOME_3']+'/ppo_params.json'
 
             # Start to train the policy
             trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, args=args)

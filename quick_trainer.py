@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
 
+import numpy as np
+import pickle
 
 # class SL_valueLearner(object):
 #     def __init__(self):
@@ -48,145 +50,300 @@ from tensorflow import keras
 #
 #         return X,y
 #
+#
+#     def dense_layer(input, in_size, out_size, activation_function=None):
+#         Weights = tf.Variable(tf.random_normal([in_size, out_size]))
+#         biases = tf.Variable(tf.zeros([out_size]) + 0.1)
+#         Wx_plus_b = tf.matmul(input, Weights) + biases  # not actived yet
+#         Wx_plus_b = tf.nn.dropout(Wx_plus_b, keep_prob=keep_prob_s)
+#         if activation_function is None:
+#             output = Wx_plus_b
+#         else:
+#             output = activation_function(Wx_plus_b)
+#         return output
+#
+#
+#     def build_graph(self):
+#         self.xs = tf.placeholder(tf.float32, [None, self.input_size])
+#         self.ys = tf.placeholder(tf.float32, [None, 1])
+#
+#         # TODO: maybe need to normalize input xs
+#         # xs = xs.normalize()
+#         self.hidden_out1 = dense_layer(xs, self.input_size, 64, activation_function=tf.nn.tanh)
+#         self.hidden_out2 = dense_layer(hidden_out1, 64, 64, activation_function=tf.nn.tanh)
+#         self.vpred = dense_layer(hidden_out2, 64, 1, activation_function=None)
+#
+#         self.loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - vpred), reduction_indices=[1]))
+#         self.train_step = tf.train.AdamOptimizer(0.01).minimize(loss)
+#
+#     def train(self):
+#         X_train, y_train = read_data(use='train')
+#
+#         with tf.Session() as sess:
+#             init = tf.initialize_all_variables()
+#             sess.run(init)
+#
+#             # total iter_num = data_size / batch_size * epoch_num
+#             for iter in range(self.epoch * self.train_data_size / self.batch_size):
+#                 start = (iter * batch_size) % self.train_data_size
+#                 end   = min(start + batch_size, self.train_data_size)
+#
+#                 _, pred, loss = sess.run([train_step, vpred, loss], feed_dict={xs: X_train[start:end], ys: y_train[start:end], keep_prob_s: keep_prob})
+#
+#                 if iter % 50 == 0:
+#                     print("iter: ", '%04d' % (iter + 1), "loss: ", los)
+#
+#     def test(self):
+#         X_test, y_test = read_data(use='test')
+#
+#         # TODO: load trained model for test
 
-    # def dense_layer(input, in_size, out_size, activation_function=None):
-    #     Weights = tf.Variable(tf.random_normal([in_size, out_size]))
-    #     biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-    #     Wx_plus_b = tf.matmul(input, Weights) + biases  # not actived yet
-    #     Wx_plus_b = tf.nn.dropout(Wx_plus_b, keep_prob=keep_prob_s)
-    #     if activation_function is None:
-    #         output = Wx_plus_b
-    #     else:
-    #         output = activation_function(Wx_plus_b)
-    #     return output
-    #
-    #
-    # def build_graph(self):
-    #     self.xs = tf.placeholder(tf.float32, [None, self.input_size])
-    #     self.ys = tf.placeholder(tf.float32, [None, 1])
-    #
-    #     # TODO: maybe need to normalize input xs
-    #     # xs = xs.normalize()
-    #     self.hidden_out1 = dense_layer(xs, self.input_size, 64, activation_function=tf.nn.tanh)
-    #     self.hidden_out2 = dense_layer(hidden_out1, 64, 64, activation_function=tf.nn.tanh)
-    #     self.vpred = dense_layer(hidden_out2, 64, 1, activation_function=None)
-    #
-    #     self.loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - vpred), reduction_indices=[1]))
-    #     self.train_step = tf.train.AdamOptimizer(0.01).minimize(loss)
-    #
-    # def train(self):
-    #     X_train, y_train = read_data(use='train')
-    #
-    #     with tf.Session() as sess:
-    #         init = tf.initialize_all_variables()
-    #         sess.run(init)
-    #
-    #         # total iter_num = data_size / batch_size * epoch_num
-    #         for iter in range(self.epoch * self.train_data_size / self.batch_size):
-    #             start = (iter * batch_size) % self.train_data_size
-    #             end   = min(start + batch_size, self.train_data_size)
-    #
-    #             _, pred, loss = sess.run([train_step, vpred, loss], feed_dict={xs: X_train[start:end], ys: y_train[start:end], keep_prob_s: keep_prob})
-    #
-    #             if iter % 50 == 0:
-    #                 print("iter: ", '%04d' % (iter + 1), "loss: ", los)
-    #
-    # def test(self):
-    #     X_test, y_test = read_data(use='test')
-    #
-    #     # TODO: load trained model for test
+class Trainer(object):
+    def __init__(self, target='valueFunc'):
+        if target == 'valueFunc':
+            self.input_shape = 14
+            self.model = self.build_value_model(self.input_shape)
+        elif target == 'polFunc':
+            self.input_shape = 14
+            self.model = self.build_policy_model(self.input_shape)
 
-def build_model(train_dataset):
-    model = keras.Sequential([
-        keras.layers.Dense(64, activation=tf.nn.tanh, input_shape=[len(train_dataset.keys())]),
-        keras.layers.Dense(64, activation=tf.nn.tanh),
-        keras.layers.Dense(1)
-    ])
-    optimizer = tf.keras.optimizers.RMSprop(0.001)
-    model.compile(loss='mean_squared_error',
-                  optimizer = optimizer,
-                  metrics=['mean_absolute_error', 'mean_squared_error'])
-    return model
+    def build_value_model(self, input_shape):
+        model = keras.Sequential([
+            keras.layers.Dense(64, activation=tf.nn.tanh, input_shape=[input_shape]),
+            keras.layers.Dense(64, activation=tf.nn.tanh),
+            keras.layers.Dense(1)
+        ])
+        optimizer = tf.keras.optimizers.RMSprop(0.001)
+        model.compile(loss='mean_squared_error',
+                      optimizer = optimizer,
+                      metrics=['mean_absolute_error', 'mean_squared_error'])
+        return model
 
-def norm(x, train_stats):
-    return (x - train_stats['mean']) / train_stats['std']
+    def train_valueFunc(self):
 
-def plot_history(history):
-    hist = pd.DataFrame(history.history)
-    hist['epoch'] = history.epoch
+        dirpath = os.path.dirname(__file__)
+        dataset_path = None
+        if not os.path.exists(dirpath + "/data/valueFunc_train_linear_filled.csv"):
+            raise ValueError("can not find the training file!!")
+        else:
+            dataset_path = dirpath + "/data/valueFunc_train_filled.csv"
+        column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+        raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
+                                  skipinitialspace=True, skiprows=1)
 
-    plt.figure()
-    plt.xlabel('Epoch')
-    plt.ylabel('Mean Abs Error')
-    plt.plot(hist['epoch'], hist['mean_absolute_error'],
-           label='Train Error')
-    plt.plot(hist['epoch'], hist['val_mean_absolute_error'],
-           label = 'Val Error')
-    # plt.ylim([0,5])
-    plt.legend()
+        dataset = raw_dataset.copy()
+        # print(dataset.tail())
+        # print(dataset.isna().sum())
 
-    plt.figure()
-    plt.xlabel('Epoch')
-    plt.ylabel('Mean Square Error')
-    plt.plot(hist['epoch'], hist['mean_squared_error'],
-           label='Train Error')
-    plt.plot(hist['epoch'], hist['val_mean_squared_error'],
-           label = 'Val Error')
-    # plt.ylim([0,20])
-    plt.legend()
-    plt.show()
+        dataset = dataset.dropna()
+        train_dataset = dataset.sample(frac=1.0, random_state=0)
 
+        train_stats = train_dataset.describe()
+        train_stats.pop("value")
+        train_stats = train_stats.transpose()
+
+        train_labels = train_dataset.pop('value')
+
+        model = self.build_value_model(self.input_shape)
+        model.summary()
+        normed_train_data = self.norm(train_dataset, train_stats)
+
+        EPOCHS = 2500
+
+        history = model.fit(
+            normed_train_data, train_labels,
+            epochs=EPOCHS, validation_split=0.2, verbose=1,
+            callbacks=[PrintDot()])
+
+        keras.models.save_model(model, './tf_model/vf.h5')
+        hist = pd.DataFrame(history.history)
+        hist['epoch'] = history.epoch
+        hist.tail()
+
+        self.plot_history(history)
+
+
+    def build_policy_model(self, input_shape):
+        model = keras.Sequential([
+            keras.layers.Dense(64, activation=tf.nn.tanh, input_shape=[input_shape]),
+            keras.layers.Dense(64, activation=tf.nn.tanh),
+            keras.layers.Dense(2)
+        ])
+        optimizer = tf.keras.optimizers.RMSprop(0.001)
+        model.compile(loss='mean_squared_error',
+                      optimizer=optimizer,
+                      metrics=['mean_absolute_error', 'mean_squared_error'])
+        return model
+
+    def train_polFunc(self):
+        dirpath = os.path.dirname(__file__)
+        dataset_path = None
+        if not os.path.exists(dirpath + "/data/polFunc_train_filled.csv"):
+            raise ValueError("can not find the training file!!")
+        else:
+            dataset_path = dirpath + "/data/polFunc_train_filled.csv"
+        column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'a1', 'a2', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+        raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
+                                  skipinitialspace=True, skiprows=1)
+
+        dataset = raw_dataset.copy()
+        print(dataset.tail())
+        print(dataset.isna().sum())
+
+        dataset = dataset.dropna()
+        train_dataset = dataset.sample(frac=1.0, random_state=0)
+
+        train_stats = train_dataset.describe()
+        train_stats.pop("a1")
+        train_stats.pop("a2")
+        train_stats = train_stats.transpose()
+
+        train_labels = pd.concat([train_dataset.pop(x) for x in ['a1', 'a2']], 1)
+
+        model = self.build_policy_model(self.input_shape)
+        model.summary()
+        normed_train_data = self.norm(train_dataset, train_stats)
+
+        EPOCHS = 2500
+
+        history = model.fit(
+            normed_train_data, train_labels,
+            epochs=EPOCHS, validation_split=0.2, verbose=1,
+            callbacks=[PrintDot()])
+
+        keras.models.save_model(model, './tf_model/pf.h5')
+        hist = pd.DataFrame(history.history)
+        hist['epoch'] = history.epoch
+        hist.tail()
+
+        self.plot_history(history)
+
+
+
+    def norm(self, x, train_stats):
+        return (x - train_stats['mean']) / train_stats['std']
+
+    def plot_history(self, history):
+        hist = pd.DataFrame(history.history)
+        hist['epoch'] = history.epoch
+
+        plt.figure()
+        plt.xlabel('Epoch')
+        plt.ylabel('Mean Abs Error')
+        plt.plot(hist['epoch'], hist['mean_absolute_error'],
+               label='Train Error')
+        plt.plot(hist['epoch'], hist['val_mean_absolute_error'],
+               label = 'Val Error')
+        # plt.ylim([0,5])
+        plt.legend()
+
+        plt.figure()
+        plt.xlabel('Epoch')
+        plt.ylabel('Mean Square Error')
+        plt.plot(hist['epoch'], hist['mean_squared_error'],
+               label='Train Error')
+        plt.plot(hist['epoch'], hist['val_mean_squared_error'],
+               label = 'Val Error')
+        # plt.ylim([0,20])
+        plt.legend()
+        plt.show()
+
+    def save_model_weights(self):
+        assert os.path.exists('./tf_model/vf.h5')
+        assert os.path.exists('./tf_model/pf.h5')
+
+        loaded_vf_model = tf.keras.models.load_model(filepath="./tf_model/vf.h5")
+        loaded_pf_model = tf.keras.models.load_model(filepath="./tf_model/pf.h5")
+        print("see here!!")
+        print("trainable variables:", tf.trainable_variables())
+        weights = []
+        for layer in loaded_vf_model.layers:
+            print("________________________")
+            weight = layer.get_weights()
+            weights.append(weight)
+            print(weight[0])
+            print("+++")
+            print(weight[1])
+            print("________________________")
+        print("weights:", weights)
+        print("shape of weights:", np.shape(weights))
+        with open("./tf_model/vf_weights.pkl", 'wb') as f:
+            pickle.dump(weights, f)
+            print("save value weights successful!!")
+
+        weights = []
+        for layer in loaded_pf_model.layers:
+            print("________________________")
+            weight = layer.get_weights()
+            weights.append(weight)
+            print(weight[0])
+            print("+++")
+            print(weight[1])
+            print("________________________")
+        print("weights:", weights)
+        print("shape of weights:", np.shape(weights))
+        with open("./tf_model/pf_weights.pkl", 'wb') as f:
+            pickle.dump(weights, f)
+            print("save policy weights successful!!")
 
 class PrintDot(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs):
         if epoch % 100 == 0: print('')
         print('.', end='')
 
+
 if __name__ == "__main__":
-    dirpath = os.path.dirname(__file__)
-    dataset_path = None
-    if not os.path.exists(dirpath + "/data/valueFunc_train_filled.csv"):
-        raise ValueError("can not find the training file!!")
-    else:
-        dataset_path = dirpath + "/data/valueFunc_train_filled.csv"
-    column_names = ['x', 'vx', 'z', 'vz','phi','w','value','d1','d2','d3','d4','d5','d6','d7', 'd8']
-    raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
-                              skipinitialspace=True, skiprows=1)
-
-    dataset = raw_dataset.copy()
-    print(dataset.tail())
-
-    print(dataset.isna().sum())
-
-    dataset = dataset.dropna()
-
-    train_dataset = dataset.sample(frac=1.0, random_state=0)
+    trainer = Trainer(target="polFunc")
+    # trainer.train_polFunc()
+    trainer.save_model_weights()
 
 
-    train_stats = train_dataset.describe()
-    train_stats.pop("value")
-    train_stats = train_stats.transpose()
-
-    train_labels = train_dataset.pop('value')
-
-    model = build_model(train_dataset)
-    model.summary()
-    normed_train_data = norm(train_dataset, train_stats)
-
-
-    EPOCHS = 2500
-
-    history = model.fit(
-        normed_train_data, train_labels,
-        epochs=EPOCHS, validation_split=0.2, verbose=1,
-        callbacks=[PrintDot()])
-
-    keras.models.save_model(model, './model/vf.h5')
-    hist = pd.DataFrame(history.history)
-    hist['epoch'] = history.epoch
-    hist.tail()
-
-    plot_history(history)
+# if __name__ == "__main__":
+#
+#     dirpath = os.path.dirname(__file__)
+#     dataset_path = None
+#     if not os.path.exists(dirpath + "/data/valueFunc_train_linear_filled.csv"):
+#         raise ValueError("can not find the training file!!")
+#     else:
+#         dataset_path = dirpath + "/data/valueFunc_train_filled.csv"
+#     column_names = ['x', 'vx', 'z', 'vz','phi','w','value','d1','d2','d3','d4','d5','d6','d7', 'd8']
+#     raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
+#                               skipinitialspace=True, skiprows=1)
+#
+#     dataset = raw_dataset.copy()
+#     print(dataset.tail())
+#
+#     print(dataset.isna().sum())
+#
+#     dataset = dataset.dropna()
+#
+#     train_dataset = dataset.sample(frac=1.0, random_state=0)
+#
+#
+#     train_stats = train_dataset.describe()
+#     train_stats.pop("value")
+#     train_stats = train_stats.transpose()
+#
+#     train_labels = train_dataset.pop('value')
+#
+#     model = build_model(train_dataset)
+#     model.summary()
+#     normed_train_data = norm(train_dataset, train_stats)
+#
+#
+#     EPOCHS = 2500
+#
+#     history = model.fit(
+#         normed_train_data, train_labels,
+#         epochs=EPOCHS, validation_split=0.2, verbose=1,
+#         callbacks=[PrintDot()])
+#
+#     keras.models.save_model(model, './tf_model/vf.h5')
+#     hist = pd.DataFrame(history.history)
+#     hist['epoch'] = history.epoch
+#     hist.tail()
+#
+#     plot_history(history)
 
 # if __name__ == "__main__":
 #

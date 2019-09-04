@@ -167,27 +167,62 @@ class MlpPolicy_mod(object):
                                         use_bias=True)[:,0]
 
         with tf.variable_scope('pol'):
-            last_out = obz
-            for i in range(num_hid_layers):
-                last_out = tf.nn.tanh(tf.layers.dense(last_out, hid_size, name='fc%i' % (i + 1),
-                                                      kernel_initializer=U.normc_initializer(1.0)))
-            if gaussian_fixed_var and isinstance(ac_space, gym.spaces.Box):
-                # mean = tf.layers.dense(last_out, pdtype.param_shape()[0]//2, name='final', kernel_initializer=U.normc_initializer(0.01))
-                # logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0]//2], initializer=tf.zeros_initializer())
-                # logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0]//2], initializer=tf.constant_initializer([-0.69, -1.6]))
-                mean = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name='final',
-                                       kernel_initializer=U.normc_initializer(0.01))
-                logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
-                                         initializer=tf.constant_initializer([-0.69]))
-                pdparam = tf.concat([mean, mean * 0.0 + logstd], axis=1)
-            else:
-                # pdparam = tf.layers.dense(last_out, pdtype.param_shape()[0], name='final', kernel_initializer=U.normc_initializer(2.))
-                mean = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name='final',
-                                       kernel_initializer=U.normc_initializer(0.01))
+            if not load_weights_pol:
+                last_out = obz
+                for i in range(num_hid_layers):
+                    last_out = tf.nn.tanh(tf.layers.dense(last_out, hid_size, name='fc%i' % (i + 1),
+                                                          kernel_initializer=U.normc_initializer(1.0)))
+                if gaussian_fixed_var and isinstance(ac_space, gym.spaces.Box):
+                    # mean = tf.layers.dense(last_out, pdtype.param_shape()[0]//2, name='final', kernel_initializer=U.normc_initializer(0.01))
+                    # logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0]//2], initializer=tf.zeros_initializer())
+                    # logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0]//2], initializer=tf.constant_initializer([-0.69, -1.6]))
+                    mean = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name='final',
+                                           kernel_initializer=U.normc_initializer(0.01))
+                    logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
+                                             initializer=tf.constant_initializer([-0.69]))
+                    pdparam = tf.concat([mean, mean * 0.0 + logstd], axis=1)
+                else:
+                    # pdparam = tf.layers.dense(last_out, pdtype.param_shape()[0], name='final', kernel_initializer=U.normc_initializer(2.))
+                    mean = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name='final',
+                                           kernel_initializer=U.normc_initializer(0.01))
 
-                logstd = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name="logstd",
-                                         kernel_initializer=U.normc_initializer(0.405))
-                pdparam = tf.concat([mean, mean * 0.0 + logstd], axis=1)
+                    logstd = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name="logstd",
+                                             kernel_initializer=U.normc_initializer(0.405))
+                    pdparam = tf.concat([mean, mean * 0.0 + logstd], axis=1)
+            else:
+                with open("./tf_model/pf_weights.pkl", 'rb') as f:
+                    weights = pickle.load(f)
+                print("shape of weights:", np.array(weights).shape)
+                print("weights:", weights)
+
+                out_1 = tf.layers.dense(inputs=obz,
+                                        units=64,
+                                        name="fc1",
+                                        kernel_initializer=tf.constant_initializer(weights[0][0]),
+                                        bias_initializer=tf.constant_initializer(weights[0][1]),
+                                        use_bias=True,
+                                        activation=tf.nn.tanh)
+
+                out_2 = tf.layers.dense(inputs=out_1,
+                                        units=64,
+                                        name="fc2",
+                                        kernel_initializer=tf.constant_initializer(weights[1][0]),
+                                        bias_initializer=tf.constant_initializer(weights[1][1]),
+                                        use_bias=True,
+                                        activation=tf.nn.tanh)
+
+                if gaussian_fixed_var and isinstance(ac_space, gym.spaces.Box):
+                    mean = tf.layers.dense(out_2, pdtype.param_shape()[0] // 2, name='final',
+                                           kernel_initializer=tf.constant_initializer(weights[2][0]),
+                                           bias_initializer=tf.constant_initializer(weights[2][1]),
+                                           use_bias=True)
+                    logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
+                                             initializer=tf.constant_initializer([-0.69]))
+                    pdparam = tf.concat([mean, mean * 0.0 + logstd], axis=1)
+                else:
+                    raise ValueError("gaussian var should be fixed !!")
+
+
 
         self.pd = pdtype.pdfromflat(pdparam)
 
