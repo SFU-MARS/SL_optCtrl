@@ -31,10 +31,11 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 # need to be compatitable with model.sdf and world.sdf for custom setting
 # notice: it's not the gazebo pose state, not --> x,y,z,pitch,roll,yaw !!
 GOAL_STATE = np.array([4.0, 0., 9., 0., 0.75, 0.])
-START_STATE = np.array([3.18232, 0., 3., 0., 0., 0.])
+#START_STATE = np.array([3.18232, 0., 3., 0., 0., 0.])
+START_STATE = np.array([-1.5, -3.33973, 2.5, 0., 0., 0.])
 
 # obstacles position groundtruth
-OBSTACLES_POS = [(-1.5, 3), (3, 6), (-2, 7)]
+# OBSTACLES_POS = [(-1.5, 3), (3, 6), (-2, 7)]
 
 # wall 0,1,2,3
 WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.)]
@@ -153,14 +154,15 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
         return discretized_ranges
 
-    # def _in_obst(self, contact_data):
-    #
-    #     if len(contact_data.states) != 0:
-    #         if contact_data.states[0].collision1_name != "" and contact_data.states[0].collision2_name != "":
-    #             return True
-    #     else:
-    #             return False
+    def _in_obst(self, contact_data):
 
+        if len(contact_data.states) != 0:
+            if contact_data.states[0].collision1_name != "" and contact_data.states[0].collision2_name != "":
+                return True
+        else:
+            return False
+
+    '''
     def _in_obst(self, laser_data, dynamic_data):
         laser_min_range = 0.6
         # collision_min_range = 0.8
@@ -182,6 +184,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         #     if laser_min_range > laser_data.ranges[idx] > 0:
         #         return True
         return False
+    '''
 
     def _in_goal(self, state):
 
@@ -394,23 +397,20 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
         laser_data = None
         dynamic_data = None
-        # contact_data = None
+        contact_data = None
         while laser_data is None and dynamic_data is None:
             try:
                 laser_data = rospy.wait_for_message('/scan', LaserScan, timeout=5)
-                # dynamic_data = rospy.wait_for_message('/gazebo/model_states', ModelStates)
+                contact_data = rospy.wait_for_message('/gazebo_ros_bumper', ContactsState, timeout=50)
                 rospy.wait_for_service("/gazebo/get_model_state")
                 try:
-                    # contact_data = rospy.wait_for_message('/gazebo_ros_bumper', ContactsState, timeout=50)
                     dynamic_data = self.get_model_state(model_name="quadrotor")
-
                 except rospy.ServiceException as e:
                     print("/gazebo/unpause_physics service call failed")
             except:
                 pass
 
-        # self.clear_joint_effort(joint_name='left_joint')
-        # self.clear_joint_effort(joint_name='right_joint')
+
 
         rospy.wait_for_service('/gazebo/pause_physics')
         try:
@@ -467,7 +467,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.step_counter += 1
 
         # 1. when collision happens, done = True
-        if self._in_obst(laser_data, dynamic_data):
+        if self._in_obst(contact_data):
             reward += self.collision_reward
             done = True
             self.step_counter = 0

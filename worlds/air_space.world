@@ -257,7 +257,7 @@
         <kinematic>0</kinematic>
       </link>
       <link name='cube_4'>
-        <pose frame=''>-1.5 0 3 0 -0 0</pose>
+        <pose frame=''>-1.5 0 5.0 0 -0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
@@ -297,11 +297,11 @@
         <kinematic>0</kinematic>
       </link>
       <link name='cube_bigger'>
-        <pose frame=''>-2 0 7 0 -0 0</pose>
+        <pose frame=''>-1 0 9 0 -0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.8 10 1.8</size>
+              <size>1.5 10 1.5</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -322,7 +322,7 @@
           <cast_shadows>0</cast_shadows>
           <geometry>
             <box>
-              <size>1.8 10 1.8</size>
+              <size>1.5 10 1.5</size>
             </box>
           </geometry>
           <material>
@@ -337,11 +337,11 @@
         <kinematic>0</kinematic>
       </link>
       <link name='cube_big'>
-        <pose frame=''>3 0 6 0 -0 0</pose>
+        <pose frame=''>2.8 0 5 0 -0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.5 10 1.5</size>
+              <size>4.4 10 1.5</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -362,7 +362,7 @@
           <cast_shadows>0</cast_shadows>
           <geometry>
             <box>
-              <size>1.5 10 1.5</size>
+              <size>4.4 10 1.5</size>
             </box>
           </geometry>
           <material>
@@ -400,7 +400,7 @@
         <kinematic>0</kinematic>
       </link>
       <link name='start'>
-        <pose frame=''>3.18232 -3.33973 3 0 -0 0</pose>
+        <pose frame=''>-1.5 -3.33973 2.5 0 -0 0</pose>
         <visual name='visual'>
           <transparency>0.5</transparency>
           <geometry>
@@ -433,25 +433,25 @@
         <pose frame=''>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='cube_4'>
-          <pose frame=''>-1.5 0 3 0 -0 0</pose>
+          <pose frame=''>-1.5 0 5.0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='cube_big'>
-          <pose frame=''>3 0 6 0 -0 0</pose>
+          <pose frame=''>2.8 0 5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='cube_bigger'>
-          <pose frame=''>-2 0 7 0 -0 0</pose>
+          <pose frame=''>-1 0 9 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='start'>
-          <pose frame=''>3.18232 -3.33973 3 0 -0 0</pose>
+          <pose frame=''>-1.5 -3.33973 2.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>

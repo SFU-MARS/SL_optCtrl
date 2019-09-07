@@ -14,7 +14,9 @@ def create_session(num_cpu=None):
 def create_policy(name, env, vf_load=False, pol_load=False):
     ob_space = env.observation_space
     ac_space = env.action_space
+
     if vf_load:
+        print("I'M HERE, why vf_load is not false!!")
         return MlpPolicy_mod(name=name,
                      ob_space=ob_space, ac_space=ac_space,
                      hid_size=64, num_hid_layers=2, load_weights_vf=vf_load, load_weights_pol=pol_load)
@@ -23,7 +25,12 @@ def create_policy(name, env, vf_load=False, pol_load=False):
                      ob_space=ob_space, ac_space=ac_space,
                      hid_size=64, num_hid_layers=2)
 
-
+    '''
+    print("I'M HERE, NOt ANY INITIALIZATION")
+    return MlpPolicy(name=name,
+                     ob_space=ob_space, ac_space=ac_space,
+                     hid_size=64, num_hid_layers=2)
+    '''
 def initialize():
     U.initialize()
 
