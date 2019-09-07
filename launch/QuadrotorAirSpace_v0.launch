@@ -1,7 +1,7 @@
 <launch>
 
   <!-- this part is for world launching -->
-  <arg name="world_file"  default="$(env QUADROTOR_WORLD_AIR_SPACE)"/>
+  <arg name="world_file"  default="$(env QUADROTOR_WORLD_AIR_SPACE_SL_OPTCTRL)"/>
   <arg name="gui" default="true"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">

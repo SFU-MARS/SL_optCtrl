@@ -1,6 +1,6 @@
 import sys
-sys.path.remove('/opt/ros/melodic/lib/python2.7/dist-packages')
-sys.path.append('/opt/ros/melodic/lib/python2.7/dist-packages')
+#sys.path.remove('/opt/ros/melodic/lib/python2.7/dist-packages')
+#sys.path.append('/opt/ros/melodic/lib/python2.7/dist-packages')
 import gym
 from gym_foo import gym_foo
 from gym import wrappers
@@ -28,7 +28,7 @@ def train(env, algorithm, args, params=None, load=False, loadpath=None, loaditer
 
         # Initialize policy
         ppo.create_session()
-        init_policy = ppo.create_policy('pi', env, vf_load=args['vf_load'], pol_load=args['pol_load'])
+        init_policy = ppo.create_policy('pi', env, vf_load=True if args['vf_load']=="yes" else False, pol_load=True if args['pol_load']=="yes" else False)
         ppo.initialize()
 
         if load and loadpath is not None and loaditer is not None:
@@ -107,7 +107,9 @@ def train(env, algorithm, args, params=None, load=False, loadpath=None, loaditer
                 pi.save_model(args['MODEL_DIR'], iteration='best')
             if suc_percent > 0.6:
                 perf_flag = True
-            if not perf_flag or env.reward_type != 'ttr':
+            # this is not fair
+            # if not perf_flag or env.reward_type != 'ttr':
+            if not perf_flag:
                 # less timesteps_per_actorbatch to make eval faster.
                 _, _, eval_ep_mean_reward, eval_suc_percent, _, _ = algorithm.ppo_eval(env, pi, timesteps_per_actorbatch//2, max_iters=5, stochastic=False)
             else:
@@ -314,8 +316,8 @@ if __name__ == "__main__":
         parser.add_argument("--reward_type", help="which type of reward to use.", type=str, default='hand_craft')
         parser.add_argument("--algo", help="which type of algorithm to use.", type=str, default='ppo')
         parser.add_argument("--set_additional_goal", type=str, default="angle")
-        parser.add_argument("--vf_load", type=bool, default=False)
-        parser.add_argument("--pol_load", type=bool, default=False)
+        parser.add_argument("--vf_load", type=str, default="no")
+        parser.add_argument("--pol_load", type=str, default="no")
         args = parser.parse_args()
         args = vars(args)
 
@@ -324,9 +326,9 @@ if __name__ == "__main__":
             RUN_DIR = os.path.join(os.getcwd(), 'runs_icra',
                                    strftime(
                                        '%d-%b-%Y_%H-%M-%S') + args['gym_env'] + '_' + args['reward_type'] + '_' + args['algo'])
-            if args['vf_load']:
+            if args['vf_load'] == "yes":
                 RUN_DIR = RUN_DIR + '_' + 'vf'
-            if args['pol_load']:
+            if args['pol_load'] == "yes":
                 RUN_DIR = RUN_DIR + '_' + 'pol'
 
             MODEL_DIR = os.path.join(RUN_DIR, 'model')
@@ -392,8 +394,8 @@ if __name__ == "__main__":
             trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, args=args)
             trained_policy.save_model(args['MODEL_DIR'])
             #
-            # LOAD_DIR = os.environ['PROJ_HOME'] + '/runs_icra/PlanarQuadEnv-v0_hand_craft_ppo_16-Aug-2019_11-37-22/model'
-            # trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=18)
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_icra/04-Sep-2019_08-59-16PlanarQuadEnv-v0_hand_craft_ppo/model'
+            # trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=3, args=args)
 
         elif args['algo'] == "dqn":
             # Make necessary directories
