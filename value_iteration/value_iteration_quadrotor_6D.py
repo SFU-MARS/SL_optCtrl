@@ -38,7 +38,8 @@ class env_quadrotor_6d(object):
 		self.goal_z = (8.5, 9.5)
 		self.goal_vx = (-2, 2)
 		self.goal_vz = (-2, 2)
-		self.goal_theta = (0.45, 1.05)
+		# self.goal_theta = (0.45, 1.05)
+		self.goal_theta = self.theta
 		self.goal_omega = self.omega
 		self.goals = np.array([self.goal_x, self.goal_z, self.goal_vx, self.vz, self.goal_theta, self.goal_omega])
 
@@ -200,7 +201,7 @@ class env_quadrotor_6d(object):
 		except:
 	   		print(dir_path + " exist!")
 
-		file_name = "value_matrix" + "_" + str(system) + "_" +str(iteration_number)
+		file_name = "value_matrix" + "_" + str(system) + "_" + str(iteration_number)
 		print(file_name)
 
 		np.save(dir_path + file_name, self.value)
@@ -351,17 +352,18 @@ class env_quadrotor_6d(object):
 		return index
 
 	def plot_2D_result(self, dir_path, file_name):
-		save_path = "./plots/plot_2D/"
+		save_path = "./plots_quadrotor_6D/plot_2D/"
 		data = np.load(dir_path + file_name)
 		values = np.sort(data.reshape(-1))
 		plt.plot(values)
 
 		try:
-			os.mkdir(save_path)
+			os.makedirs(save_path)
 		except:
 			print(save_path + " exists!")
 
 		plt.savefig(save_path + file_name.split(".")[0])
+		plt.clf()
 
 	def plot_3D_result(self, dir_path, file_name, system = 0):
 		file = dir_path + file_name
@@ -371,7 +373,7 @@ class env_quadrotor_6d(object):
 		while theta_index < data.shape[-1]:
 			omega_index = 0
 
-			save_path = "./plots/plot_3D_" + str(system) + "/theta_" + str(theta_index)
+			save_path = "./plots_quadrotor_6D/plot_3D_" + str(system) + "/theta_" + str(theta_index)
 			try:
 				os.makedirs(save_path)
 			except:
@@ -414,7 +416,7 @@ class env_quadrotor_6d(object):
 		file = dir_path + file_name
 		data = np.load(file)
 
-		save_path = "./plots/plot_4D_" + str(system)
+		save_path = "./plots_quadrotor_6D/plot_4D_" + str(system)
 		try:
 			os.makedirs(save_path)
 		except:
@@ -453,7 +455,7 @@ class env_quadrotor_6d(object):
 			ax.set_zlabel('theta', fontsize = 15)
 
 			# plt.show()
-			fig.savefig(save_path + "/" + str(omega_index), dpi=fig.dpi)
+			fig.savefig(save_path + "/theta_" + str(omega_index), dpi=fig.dpi)
 
 			omega_index += 1
 
@@ -500,7 +502,7 @@ class env_quadrotor_6d(object):
 
 			data.at[index, 'value'] = value
 
-		data.to_csv("./refactor_valueFunc_train_linear_filled.csv")
+		data.to_csv("./refactor2_valueFunc_train_linear_filled.csv")
 
 	def algorithm_init(self, system = 0):
 		env.state_discretization()
@@ -509,17 +511,17 @@ class env_quadrotor_6d(object):
 
 
 env = env_quadrotor_6d()
-env.value_iteration(0)
-env.value_iteration(1)
+# env.value_iteration(0)
+# env.value_iteration(1)
 
 env.algorithm_init()
 
-env.plot_2D_result("./value_matrix/", "value_matrix_0_26.npy")
-env.plot_2D_result("./value_matrix/", "value_matrix_1_32.npy")
-env.plot_3D_result("./value_matrix/", "value_matrix_0_26.npy", 0)
-env.plot_3D_result("./value_matrix/", "value_matrix_1_32.npy", 1)
-env.plot_4D_result("./value_matrix/", "value_matrix_0_26.npy", 0)
-env.plot_4D_result("./value_matrix/", "value_matrix_1_32.npy", 1)
+# env.plot_2D_result("./value_matrix/", "value_matrix_0_26.npy")
+# env.plot_2D_result("./value_matrix/", "value_matrix_1_32.npy")
+# env.plot_3D_result("./value_matrix/", "value_matrix_0_26.npy", 0)
+# env.plot_3D_result("./value_matrix/", "value_matrix_1_32.npy", 1)
+# env.plot_4D_result("./value_matrix/", "value_matrix_0_26.npy", 0)
+# env.plot_4D_result("./value_matrix/", "value_matrix_1_32.npy", 1)
 env.fill_table("./valueFunc_train.csv", "./value_matrix/", 26, 32)
 
 
