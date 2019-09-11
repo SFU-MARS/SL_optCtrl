@@ -11,9 +11,10 @@ import time
 class env_dubin_car_3d(object):
 	def __init__(self):
 		########### World Setting ########## 
-		self.x = (-5, 5)
-		self.y = (0, 10)
+		self.x = (-3, 5)
+		self.y = (-5, 5)
 		self.obstacles = None
+		self.cylinders = None
 
 		########### Drone Setting ##########
 		self.theta = (-math.pi, math.pi)
@@ -25,8 +26,8 @@ class env_dubin_car_3d(object):
 		self.omega = (-2, 2)
 		self.actions = np.array([self.omega])
 		########### Goal Setting ##########
-		self.goal_x = (3.5, 4.5)
-		self.goal_y = (8.5, 9.5)
+		self.goal_x = (-3, -2)
+		self.goal_y = (-1, 0)
 		self.goal_theta = self.theta
 		self.goals = np.array([self.goal_x, self.goal_y, self.goal_theta])
 
@@ -34,15 +35,16 @@ class env_dubin_car_3d(object):
 		self.discount = 0.90
 		self.threshold = 0.5
 
-		# reward = [regula state, in goal, crashed, overspeed]
-		self.reward_list = np.array([0, 1000, -400, -200], dtype = float)
+		# reward = [regular state, in goal, crashed, overspeed]
+		self.reward_list = np.array([0, 2000, -1000, -200], dtype = float)
 
 		########## Discreteness Setting ##########
 		# 3D state
 		# 1D action
 		# (x, y, theta)
 		# (omega)
-		self.state_step_num = np.array([11, 11, 11])
+		self.state_step_num = np.array([81, 101, 11])
+		# self.state_step_num = np.array([11, 11, 11])
 		self.action_step_num = np.array([11])
 		self.dim = np.array([0, 1, 2])
 
@@ -52,12 +54,10 @@ class env_dubin_car_3d(object):
 
 		self.value = None
 		self.reward = None
+		self.flag = None
 
 		self.state_type = None
 		self.state_reward = None
-
-
-
 
 	def add_obstacle(self, x1, x2, y1, y2):
 		if ((x1 > x2) or (y1 > y2)):
@@ -92,7 +92,6 @@ class env_dubin_car_3d(object):
 		for i in range(action_dim_num):
 			self.action_grid[i] = np.linspace(self.actions[i][0], self.actions[i][1], self.action_step_num[i])
 
-
 	def state_init(self):
 		self.states = np.array(np.meshgrid(self.state_grid[0],
 											self.state_grid[1],
@@ -100,16 +99,46 @@ class env_dubin_car_3d(object):
 
 		self.value = np.zeros(self.state_step_num[self.dim], dtype = float)
 		self.reward = np.zeros(self.states.shape[0], dtype = float)
+		self.flag = np.ones(self.states.shape[0], dtype = bool)
 
-		count = 0
 		for i, s in enumerate(self.states):
 			state_type = self.state_check(s, self.dim)
 			if (state_type == 1):
 				index = tuple(self.state_to_index(s, self.dim))
 				self.value[index] = self.reward_list[state_type]
-				count += 1
+				self.flag[i] = False
+
+
+		grid_value = np.zeros(self.state_step_num[self.dim[:2]], dtype = float)
+
+
+		danger = []
+		counter = 0
+		t = time.time()
+		for i, x in enumerate(self.state_grid[0]):
+			for j, y in enumerate(self.state_grid[1]):
+				for _, c in enumerate(self.cylinders):
+					grid_value[i, j] = self.reward_list[2] * (self.distance([x, y], c[:2]) <= c[2])
+					if (grid_value[i, j] < 0):
+						# counter += 1
+						danger.append([x,y])
+
+		# print(counter)
+
+		danger = np.array(danger, dtype = float)
+		scatter = plt.scatter(danger[:, 0], danger[:, 1], c="red", s=2)
+		plt.show()
+
+		# for i, s in enumerate(self.states):
+		# 	index = tuple(self.state_to_index(s, self.dim))
+		# 	self.value[index] = grid_value[index[:2]]
+
+		# print(time.time() - t)
 
 		print("The number of states: ", self.states.shape)
+
+	def distance(self, point, cylinder):
+		return math.sqrt( (point[0] - cylinder[0]) ** 2 + (point[1] - cylinder[1]) ** 2)
 
 	def action_init(self):
 		self.acts = self.action_grid[0]
@@ -185,7 +214,6 @@ class env_dubin_car_3d(object):
 
 		return self.value[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1]], sub_states
 
-
 	def value_output(self, iteration_number, readable_file = False):
 		dir_path = "./value_matrix_car_3D/"
 		try:
@@ -209,8 +237,6 @@ class env_dubin_car_3d(object):
 				f.write(s)
 
 			f.close()
-
-
 
 	def state_check(self, s, dim):
 		# This function is used for returning the state_type of a state
@@ -384,12 +410,31 @@ class env_dubin_car_3d(object):
 		plt.show()
 		fig.savefig(save_path + "/4D_plot", dpi=fig.dpi)
 
+	def add_circle_obstacles(self):
+		dir_path = "./"
+		file_name = "track2_scaled.csv"
+
+		cylinders = pd.read_csv(dir_path + file_name)
+		cylinders_inner = cylinders[['inner_x', 'inner_y']]
+		cylinders_outer = cylinders[['outer_x', 'outer_y']]
+
+		cylinders_inner = cylinders_inner.to_numpy()
+		cylinders_outer = cylinders_outer.to_numpy()
+
+		self.cylinders = np.zeros((cylinders_inner.shape[0] + cylinders_outer.shape[0], 3), dtype = float)
+		self.cylinders[:, :-1] = np.concatenate( (cylinders_inner, cylinders_outer), axis = 0)
+		self.cylinders[:, -1] = 0.1
+
+		plt.scatter(self.cylinders[:, 0], self.cylinders[:, 1], s=1, marker='o', c='green')
+		# plt.show()
+
 
 
 
 env = env_dubin_car_3d()
+env.add_circle_obstacles()
 # env.value_iteration()
 env.algorithm_init()
 # env.plot_2D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
 # env.plot_3D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
-env.plot_4D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
+# env.plot_4D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
