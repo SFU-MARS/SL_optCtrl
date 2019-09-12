@@ -21,18 +21,18 @@ class env_dubin_car_3d(object):
 		self.ranges = np.array([self.x, self.y, self.theta])
 
 		self.v = 1
-		self.delta = 0.4
+		self.delta = 0.1
 
 		self.omega = (-2, 2)
 		self.actions = np.array([self.omega])
 		########### Goal Setting ##########
-		self.goal_x = (-3, -2)
-		self.goal_y = (-1, 0)
+		self.goal_x = (-3, -1.05)
+		self.goal_y = (3.4, 4.6)
 		self.goal_theta = self.theta
 		self.goals = np.array([self.goal_x, self.goal_y, self.goal_theta])
 
 		########### Algorithm Setting ##########
-		self.discount = 0.90
+		self.discount = 0.995
 		self.threshold = 0.5
 
 		# reward = [regular state, in goal, crashed, overspeed]
@@ -43,8 +43,9 @@ class env_dubin_car_3d(object):
 		# 1D action
 		# (x, y, theta)
 		# (omega)
-		self.state_step_num = np.array([81, 101, 11])
+		self.state_step_num = np.array([61, 81, 11])
 		# self.state_step_num = np.array([11, 11, 11])
+		# self.state_step_num = np.array([31, 31, 11])
 		self.action_step_num = np.array([11])
 		self.dim = np.array([0, 1, 2])
 
@@ -101,6 +102,8 @@ class env_dubin_car_3d(object):
 		self.reward = np.zeros(self.states.shape[0], dtype = float)
 		self.flag = np.ones(self.states.shape[0], dtype = bool)
 
+		# print(np.sum(self.flag))
+
 		for i, s in enumerate(self.states):
 			state_type = self.state_check(s, self.dim)
 			if (state_type == 1):
@@ -118,24 +121,48 @@ class env_dubin_car_3d(object):
 		for i, x in enumerate(self.state_grid[0]):
 			for j, y in enumerate(self.state_grid[1]):
 				for _, c in enumerate(self.cylinders):
-					grid_value[i, j] = self.reward_list[2] * (self.distance([x, y], c[:2]) <= c[2])
-					if (grid_value[i, j] < 0):
-						# counter += 1
+					if (self.distance([x, y], c[:2]) <= c[2]):
+						grid_value[i, j] = self.reward_list[2]
+						counter += 1
 						danger.append([x,y])
+						break
 
-		# print(counter)
+		# x1, x2, y1, y2
+		grid_value = self.add_board(grid_value, -2.99, -1.98, 3, 3.37674)
+
+		# print("counter : ", counter)
+		# print(len(danger))
 
 		danger = np.array(danger, dtype = float)
-		scatter = plt.scatter(danger[:, 0], danger[:, 1], c="red", s=2)
+		scatter = plt.scatter(danger[:, 0], danger[:, 1], c="red", s=3)
 		plt.show()
 
-		# for i, s in enumerate(self.states):
-		# 	index = tuple(self.state_to_index(s, self.dim))
-		# 	self.value[index] = grid_value[index[:2]]
+		# print(np.sum(self.flag))
 
-		# print(time.time() - t)
+		for i, s in enumerate(self.states):
+			if (self.flag[i] == False):
+				continue
+
+			index = tuple(self.state_to_index(s, self.dim))
+			if (grid_value[index[:2]] < 0):
+				# print(index)
+				self.value[index] = grid_value[index[:2]]
+				self.flag[i] = False
+
+		# print(np.sum(self.flag))
+		print(time.time() - t)
 
 		print("The number of states: ", self.states.shape)
+		print("The number of untrained states: ", np.sum(self.flag))
+
+	def add_board(self, grid_value, x1, x2, y1, y2):
+		for i, x in enumerate(self.state_grid[0]):
+			for j, y in enumerate(self.state_grid[1]):
+				if (x1 <= x  and  x <= x2  and  y1 <= y  and  y <= y2):
+					grid_value[i, j] = self.reward_list[2]
+					# print(x, y, x1, x2, y1, y2)	
+
+		return grid_value
 
 	def distance(self, point, cylinder):
 		return math.sqrt( (point[0] - cylinder[0]) ** 2 + (point[1] - cylinder[1]) ** 2)
@@ -150,6 +177,9 @@ class env_dubin_car_3d(object):
 		while True:
 			delta = 0
 			for i, s in enumerate(self.states):
+				if (self.flag[i] == False):
+					continue
+
 				best_value = -1000000
 				state_type = self.state_check(s, self.dim)
 				if (state_type > 0):
@@ -306,9 +336,9 @@ class env_dubin_car_3d(object):
 		return state_
 
 	def algorithm_init(self, system = 0):
-		env.state_discretization()
-		env.state_init()
-		env.action_init()
+		self.state_discretization()
+		self.state_init()
+		self.action_init()
 
 	def plot_2D_result(self, dir_path, file_name):
 		save_path = "./plots_cars_3D/plot_2D/"
@@ -323,7 +353,7 @@ class env_dubin_car_3d(object):
 
 		plt.savefig(save_path + file_name.split(".")[0])
 
-	def plot_3D_result(self, dir_path, file_name, system = 0):
+	def plot_3D_result(self, dir_path, file_name, system = 0, mode = "direct"):
 		file = dir_path + file_name
 		data = np.load(file)
 
@@ -334,38 +364,63 @@ class env_dubin_car_3d(object):
 			print(save_path + " exist!")
 
 
-		theta_index = 0
-		while theta_index < data.shape[-1]:
-			omega_index = 0
+		if (mode == "direct"):
+			theta_index = 0
+			while theta_index < data.shape[-1]:
+				omega_index = 0
 
+				x = np.zeros(data.shape[:-1])
+				y = np.zeros(data.shape[:-1])
+				value = np.zeros(data.shape[:-1])
+
+				for i, d in np.ndenumerate(data):
+					if (i[-1] == theta_index):
+						x[i[:-1]] = self.state_grid[0][i[0]]
+						y[i[:-1]] = self.state_grid[1][i[1]]
+						value[i[:-1]] = d
+
+
+				fig = plt.figure()
+				ax = fig.gca(projection='3d')
+
+				surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+					   linewidth=0, antialiased=False)
+				fig.colorbar(surf, shrink=0.5, aspect=5)
+
+				ax.set_xlabel('x', fontsize = 15)
+				ax.set_ylabel('y', fontsize = 15)
+				ax.set_zlabel('value', fontsize = 15)
+				title = "theta: " + str(round(self.state_grid[2][theta_index], 2))
+				ax.set_title(title, fontsize = 15)
+
+				plt.show()
+				fig.savefig(save_path + "theta_" + str(theta_index), dpi=fig.dpi)
+
+				theta_index += 1
+
+		if (mode == "average"):
 			x = np.zeros(data.shape[:-1])
 			y = np.zeros(data.shape[:-1])
-			value = np.zeros(data.shape[:-1])
+			value = np.full(data.shape[:-1], 0)
 
 			for i, d in np.ndenumerate(data):
-				if (i[-1] == theta_index):
-					x[i[:-1]] = self.state_grid[0][i[0]]
-					y[i[:-1]] = self.state_grid[1][i[1]]
-					value[i[:-1]] = d
+				x[i[:-1]] = self.state_grid[0][i[0]]
+				y[i[:-1]] = self.state_grid[1][i[1]]
+				value[i[:-1]] += d
 
+			value = value / 11
 
 			fig = plt.figure()
 			ax = fig.gca(projection='3d')
-
 			surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
-				   linewidth=0, antialiased=False)
+					linewidth=0, antialiased=False)
 			fig.colorbar(surf, shrink=0.5, aspect=5)
 
 			ax.set_xlabel('x', fontsize = 15)
 			ax.set_ylabel('y', fontsize = 15)
 			ax.set_zlabel('value', fontsize = 15)
-			title = "theta: " + str(round(self.state_grid[2][theta_index], 2))
-			ax.set_title(title, fontsize = 15)
 
-			# plt.show()
-			fig.savefig(save_path + "theta_" + str(theta_index), dpi=fig.dpi)
-
-			theta_index += 1
+			plt.show()
 
 	def plot_4D_result(self, dir_path, file_name, system = 0):
 		file = dir_path + file_name
@@ -426,15 +481,30 @@ class env_dubin_car_3d(object):
 		self.cylinders[:, -1] = 0.1
 
 		plt.scatter(self.cylinders[:, 0], self.cylinders[:, 1], s=1, marker='o', c='green')
+
+		# Goal region
+		plt.scatter(cylinders_inner[-1, 0], cylinders_inner[-1, 1], s=25, marker='o', c='blue')
+		plt.scatter(cylinders_inner[640, 0], cylinders_inner[640, 1], s=25, marker='o', c='blue')
+		plt.scatter(cylinders_outer[640, 0], cylinders_outer[640, 1], s=25, marker='o', c='blue')
+		plt.scatter(cylinders_outer[-1, 0], cylinders_outer[-1, 1], s=25, marker='o', c='blue')
+
+		# Start region
+		plt.scatter(cylinders_inner[1, 0], cylinders_inner[1, 1], s=25, marker='o', c='black')
+		plt.scatter(cylinders_outer[16, 0], cylinders_outer[16, 1], s=25, marker='o', c='black')
+		plt.scatter(cylinders_outer[1, 0], cylinders_outer[1, 1], s=25, marker='o', c='black')
+		plt.scatter(cylinders_inner[16, 0], cylinders_inner[16, 1], s=25, marker='o', c='black')
+
+
+
 		# plt.show()
 
 
 
-
-env = env_dubin_car_3d()
-env.add_circle_obstacles()
-# env.value_iteration()
-env.algorithm_init()
-# env.plot_2D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
-# env.plot_3D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
-# env.plot_4D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
+if __name__  ==  "__main__":
+	env = env_dubin_car_3d()
+	env.add_circle_obstacles()
+	env.value_iteration()
+	# env.algorithm_init()
+	# env.plot_2D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
+	# env.plot_3D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
+	# env.plot_4D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
