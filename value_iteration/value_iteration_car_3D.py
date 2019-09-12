@@ -135,7 +135,7 @@ class env_dubin_car_3d(object):
 
 		danger = np.array(danger, dtype = float)
 		scatter = plt.scatter(danger[:, 0], danger[:, 1], c="red", s=3)
-		plt.show()
+		# plt.show()
 
 		# print(np.sum(self.flag))
 
@@ -498,13 +498,48 @@ class env_dubin_car_3d(object):
 
 		# plt.show()
 
+	def fill_table(self, csv_path, dir_path, num = 0):
+		data = pd.read_csv(csv_path)
+
+		if (dir_path):
+			file = dir_path + "value_matrix_" + str(num) + ".npy"
+
+			try:
+				value = np.load(file)
+			except:
+				print("Failed to reload value matrix!")
+
+		min_value = np.min(value)
+
+		interpolating_function = RegularGridInterpolator((self.state_grid[0],
+															self.state_grid[1],
+															self.state_grid[2]), 
+															value, 
+															bounds_error = False, 
+															fill_value = min_value)
+
+
+		data = data.astype({'value': 'float'})
+
+
+		for index, row in data.iterrows():
+			state = np.array([row.x, row.y, row.theta])
+			value = interpolating_function(state)
+
+			data.at[index, 'value'] = value
+
+		data.to_csv("./valueFunc_3D_filled_by_iteration" + str(num) + ".csv")
+
 
 
 if __name__  ==  "__main__":
 	env = env_dubin_car_3d()
 	env.add_circle_obstacles()
-	env.value_iteration()
-	# env.algorithm_init()
+	# env.value_iteration()
+	env.algorithm_init()
+	env.fill_table("./valFunc_car.csv", "./value_matrix_car_3D/", 10)
+
+
 	# env.plot_2D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
 	# env.plot_3D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
 	# env.plot_4D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
