@@ -81,8 +81,10 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         # AMEND: added by xlv
         sucs[i] = suc
 
-        ob, rew, new, suc, _ = env.step(ac)
+        # ob, rew, new, suc, _ = env.step(ac)
         # print("rew:", rew)
+        ob, rew, new, info = env.step(ac)
+        suc = info['suc']
         rews[i] = rew
 
         cur_ep_ret += rew

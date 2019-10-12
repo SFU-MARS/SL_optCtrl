@@ -15,18 +15,19 @@ def create_policy(name, env, vf_load=False, pol_load=False):
     ob_space = env.observation_space
     ac_space = env.action_space
 
-    if vf_load:
-        print("I'M HERE, why vf_load is not false!!")
+    if vf_load or pol_load:
+        print("i am using mlppolicy_mod")
         return MlpPolicy_mod(name=name,
                      ob_space=ob_space, ac_space=ac_space,
                      hid_size=64, num_hid_layers=2, load_weights_vf=vf_load, load_weights_pol=pol_load)
     else:
+        print("i am using mlppolicy")
         return MlpPolicy(name=name,
                      ob_space=ob_space, ac_space=ac_space,
                      hid_size=64, num_hid_layers=2)
 
     '''
-    print("I'M HERE, NOt ANY INITIALIZATION")
+    print("I'M HERE, NO ANY INITIALIZATION")
     return MlpPolicy(name=name,
                      ob_space=ob_space, ac_space=ac_space,
                      hid_size=64, num_hid_layers=2)
