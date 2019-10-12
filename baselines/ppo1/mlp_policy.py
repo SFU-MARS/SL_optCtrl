@@ -3,12 +3,11 @@ import baselines.common.tf_util as U
 import tensorflow as tf
 import gym
 from baselines.common.distributions import make_pdtype
-import os
 
 class MlpPolicy(object):
     recurrent = False
     def __init__(self, name, *args, **kwargs):
-        with tf.variable_scope(name, reuse=tf.AUTO_REUSE):
+        with tf.variable_scope(name):
             self._init(*args, **kwargs)
             self.scope = tf.get_variable_scope().name
 
@@ -51,37 +50,12 @@ class MlpPolicy(object):
         self._act = U.function([stochastic, ob], [ac, self.vpred])
 
     def act(self, stochastic, ob):
-        ac1, vpred1 = self._act(stochastic, ob[None])
+        ac1, vpred1 =  self._act(stochastic, ob[None])
         return ac1[0], vpred1[0]
-
     def get_variables(self):
         return tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, self.scope)
-
     def get_trainable_variables(self):
         return tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.scope)
-
     def get_initial_state(self):
         return []
 
-    def save_model(self, dirname, iteration=None):
-        if iteration is not None:
-            dirname = os.path.join(dirname, 'iter_%d' % iteration)
-        else:
-            dirname = os.path.join(dirname, 'trained_model')
-
-        print('Saving model to %s' % dirname, flush=True)
-        U.save_state(dirname)
-        print('Saved!', flush=True)
-
-    def load_model(self, dirname, iteration=None):
-        if iteration is not None:
-            dirname = os.path.join(dirname, 'iter_%d' % iteration)
-        else:
-            dirname = os.path.join(dirname, 'trained_model')
-        
-        print('Loading model from %s' % dirname, flush=True)
-        U.load_state(dirname)
-        print('Loaded!', flush=True)
-
-    def print_model_details(self):
-        U.display_var_info(self.get_trainable_variables())

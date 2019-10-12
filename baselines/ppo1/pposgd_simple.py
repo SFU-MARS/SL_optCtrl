@@ -6,22 +6,18 @@ import time
 from baselines.common.mpi_adam import MpiAdam
 from baselines.common.mpi_moments import mpi_moments
 from mpi4py import MPI
-from collections import deque, defaultdict
+from collections import deque
 
 def traj_segment_generator(pi, env, horizon, stochastic):
     t = 0
     ac = env.action_space.sample() # not used, just so we have the datatype
     new = True # marks if we're on first timestep of an episode
-    start, ob = env.reset(ret_state_and_ob=True)
+    ob = env.reset()
 
     cur_ep_ret = 0 # return in current episode
     cur_ep_len = 0 # len of current episode
     ep_rets = [] # returns of completed episodes in this segment
     ep_lens = [] # lengths of ...
-
-    # BI: Added these for our work.
-    # start_rews keeps track of the reward from each start.
-    start_rews = defaultdict(list)
 
     # Initialize history arrays
     obs = np.array([ob for _ in range(horizon)])
@@ -40,9 +36,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         if t > 0 and t % horizon == 0:
             yield {"ob" : obs, "rew" : rews, "vpred" : vpreds, "new" : news,
                     "ac" : acs, "prevac" : prevacs, "nextvpred": vpred * (1 - new),
-                    "ep_rets" : ep_rets, "ep_lens" : ep_lens, 
-                    # BI: Added this for our work.
-                    "start_rews": start_rews}
+                    "ep_rets" : ep_rets, "ep_lens" : ep_lens}
             # Be careful!!! if you change the downstream algorithm to aggregate
             # several of these batches, then be sure to do a deepcopy
             ep_rets = []
@@ -62,13 +56,9 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         if new:
             ep_rets.append(cur_ep_ret)
             ep_lens.append(cur_ep_len)
-
-            # Added these for our work.
-            start_rews[start.tostring()].append(cur_ep_ret)
-
             cur_ep_ret = 0
             cur_ep_len = 0
-            start, ob = env.reset(ret_state_and_ob=True)
+            ob = env.reset()
         t += 1
 
 def add_vtarg_and_adv(seg, gamma, lam):
@@ -107,7 +97,6 @@ def learn(env, policy_fn, *,
     ret = tf.placeholder(dtype=tf.float32, shape=[None]) # Empirical return
 
     lrmult = tf.placeholder(name='lrmult', dtype=tf.float32, shape=[]) # learning rate multiplier, updated with schedule
-    clip_param = clip_param * lrmult # Annealed cliping parameter epislon
 
     ob = U.get_placeholder_cached(name="ob")
     ac = pi.pdtype.sample_placeholder([None])
@@ -178,7 +167,7 @@ def learn(env, policy_fn, *,
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
         vpredbefore = seg["vpred"] # predicted value function before udpate
         atarg = (atarg - atarg.mean()) / atarg.std() # standardized advantage function estimate
-        d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)
+        d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), deterministic=pi.recurrent)
         optim_batchsize = optim_batchsize or ob.shape[0]
 
         if hasattr(pi, "ob_rms"): pi.ob_rms.update(ob) # update running mean/std for policy
@@ -221,6 +210,8 @@ def learn(env, policy_fn, *,
         logger.record_tabular("TimeElapsed", time.time() - tstart)
         if MPI.COMM_WORLD.Get_rank()==0:
             logger.dump_tabular()
+
+    return pi
 
 def flatten_lists(listoflists):
     return [el for list_ in listoflists for el in list_]

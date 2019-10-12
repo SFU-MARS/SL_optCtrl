@@ -6,23 +6,28 @@ from tensorflow.contrib.staging import StagingArea
 
 from baselines import logger
 from baselines.her.util import (
-    import_function, store_args, flatten_grads, transitions_in_episode_batch)
+    import_function, store_args, flatten_grads, transitions_in_episode_batch, convert_episode_to_batch_major)
 from baselines.her.normalizer import Normalizer
 from baselines.her.replay_buffer import ReplayBuffer
 from baselines.common.mpi_adam import MpiAdam
+from baselines.common import tf_util
 
 
 def dims_to_shapes(input_dims):
     return {key: tuple([val]) if val > 0 else tuple() for key, val in input_dims.items()}
 
 
+global DEMO_BUFFER #buffer for demonstrations
+
 class DDPG(object):
     @store_args
     def __init__(self, input_dims, buffer_size, hidden, layers, network_class, polyak, batch_size,
                  Q_lr, pi_lr, norm_eps, norm_clip, max_u, action_l2, clip_obs, scope, T,
                  rollout_batch_size, subtract_goals, relative_goals, clip_pos_returns, clip_return,
+                 bc_loss, q_filter, num_demo, demo_batch_size, prm_loss_weight, aux_loss_weight,
                  sample_transitions, gamma, reuse=False, **kwargs):
         """Implementation of DDPG that is used in combination with Hindsight Experience Replay (HER).
+            Added functionality to use demonstrations for training to Overcome exploration problem.
 
         Args:
             input_dims (dict of ints): dimensions for the observation (o), the goal (g), and the
@@ -50,6 +55,12 @@ class DDPG(object):
             sample_transitions (function) function that samples from the replay buffer
             gamma (float): gamma used for Q learning updates
             reuse (boolean): whether or not the networks should be reused
+            bc_loss: whether or not the behavior cloning loss should be used as an auxilliary loss
+            q_filter: whether or not a filter on the q value update should be used when training with demonstartions
+            num_demo: Number of episodes in to be used in the demonstration buffer
+            demo_batch_size: number of samples to be used from the demonstrations buffer, per mpi thread
+            prm_loss_weight: Weight corresponding to the primary loss
+            aux_loss_weight: Weight corresponding to the auxilliary loss also called the cloning loss
         """
         if self.clip_return is None:
             self.clip_return = np.inf
@@ -84,13 +95,16 @@ class DDPG(object):
             self._create_network(reuse=reuse)
 
         # Configure the replay buffer.
-        buffer_shapes = {key: (self.T if key != 'o' else self.T+1, *input_shapes[key])
+        buffer_shapes = {key: (self.T-1 if key != 'o' else self.T, *input_shapes[key])
                          for key, val in input_shapes.items()}
         buffer_shapes['g'] = (buffer_shapes['g'][0], self.dimg)
-        buffer_shapes['ag'] = (self.T+1, self.dimg)
+        buffer_shapes['ag'] = (self.T, self.dimg)
 
         buffer_size = (self.buffer_size // self.rollout_batch_size) * self.rollout_batch_size
         self.buffer = ReplayBuffer(buffer_shapes, buffer_size, self.T, self.sample_transitions)
+
+        global DEMO_BUFFER
+        DEMO_BUFFER = ReplayBuffer(buffer_shapes, buffer_size, self.T, self.sample_transitions) #initialize the demo buffer; in the same way as the primary data buffer
 
     def _random_action(self, n):
         return np.random.uniform(low=-self.max_u, high=self.max_u, size=(n, self.dimu))
@@ -105,6 +119,11 @@ class DDPG(object):
         o = np.clip(o, -self.clip_obs, self.clip_obs)
         g = np.clip(g, -self.clip_obs, self.clip_obs)
         return o, g
+
+    def step(self, obs):
+        actions = self.get_actions(obs['observation'], obs['achieved_goal'], obs['desired_goal'])
+        return actions, None, None, None
+
 
     def get_actions(self, o, ag, g, noise_eps=0., random_eps=0., use_target_net=False,
                     compute_Q=False):
@@ -138,6 +157,63 @@ class DDPG(object):
         else:
             return ret
 
+    def init_demo_buffer(self, demoDataFile, update_stats=True): #function that initializes the demo buffer
+
+        demoData = np.load(demoDataFile) #load the demonstration data from data file
+        info_keys = [key.replace('info_', '') for key in self.input_dims.keys() if key.startswith('info_')]
+        info_values = [np.empty((self.T - 1, 1, self.input_dims['info_' + key]), np.float32) for key in info_keys]
+
+        demo_data_obs = demoData['obs']
+        demo_data_acs = demoData['acs']
+        demo_data_info = demoData['info']
+
+        for epsd in range(self.num_demo): # we initialize the whole demo buffer at the start of the training
+            obs, acts, goals, achieved_goals = [], [] ,[] ,[]
+            i = 0
+            for transition in range(self.T - 1):
+                obs.append([demo_data_obs[epsd][transition].get('observation')])
+                acts.append([demo_data_acs[epsd][transition]])
+                goals.append([demo_data_obs[epsd][transition].get('desired_goal')])
+                achieved_goals.append([demo_data_obs[epsd][transition].get('achieved_goal')])
+                for idx, key in enumerate(info_keys):
+                    info_values[idx][transition, i] = demo_data_info[epsd][transition][key]
+
+
+            obs.append([demo_data_obs[epsd][self.T - 1].get('observation')])
+            achieved_goals.append([demo_data_obs[epsd][self.T - 1].get('achieved_goal')])
+
+            episode = dict(o=obs,
+                           u=acts,
+                           g=goals,
+                           ag=achieved_goals)
+            for key, value in zip(info_keys, info_values):
+                episode['info_{}'.format(key)] = value
+
+            episode = convert_episode_to_batch_major(episode)
+            global DEMO_BUFFER
+            DEMO_BUFFER.store_episode(episode) # create the observation dict and append them into the demonstration buffer
+            logger.debug("Demo buffer size currently ", DEMO_BUFFER.get_current_size()) #print out the demonstration buffer size
+
+            if update_stats:
+                # add transitions to normalizer to normalize the demo data as well
+                episode['o_2'] = episode['o'][:, 1:, :]
+                episode['ag_2'] = episode['ag'][:, 1:, :]
+                num_normalizing_transitions = transitions_in_episode_batch(episode)
+                transitions = self.sample_transitions(episode, num_normalizing_transitions)
+
+                o, g, ag = transitions['o'], transitions['g'], transitions['ag']
+                transitions['o'], transitions['g'] = self._preprocess_og(o, ag, g)
+                # No need to preprocess the o_2 and g_2 since this is only used for stats
+
+                self.o_stats.update(transitions['o'])
+                self.g_stats.update(transitions['g'])
+
+                self.o_stats.recompute_stats()
+                self.g_stats.recompute_stats()
+            episode.clear()
+
+        logger.info("Demo buffer size: ", DEMO_BUFFER.get_current_size()) #print out the demonstration buffer size
+
     def store_episode(self, episode_batch, update_stats=True):
         """
         episode_batch: array of batch_size x (T or T+1) x dim_key
@@ -153,7 +229,7 @@ class DDPG(object):
             num_normalizing_transitions = transitions_in_episode_batch(episode_batch)
             transitions = self.sample_transitions(episode_batch, num_normalizing_transitions)
 
-            o, o_2, g, ag = transitions['o'], transitions['o_2'], transitions['g'], transitions['ag']
+            o, g, ag = transitions['o'], transitions['g'], transitions['ag']
             transitions['o'], transitions['g'] = self._preprocess_og(o, ag, g)
             # No need to preprocess the o_2 and g_2 since this is only used for stats
 
@@ -185,7 +261,18 @@ class DDPG(object):
         self.pi_adam.update(pi_grad, self.pi_lr)
 
     def sample_batch(self):
-        transitions = self.buffer.sample(self.batch_size)
+        if self.bc_loss: #use demonstration buffer to sample as well if bc_loss flag is set TRUE
+            transitions = self.buffer.sample(self.batch_size - self.demo_batch_size)
+            global DEMO_BUFFER
+            transitions_demo = DEMO_BUFFER.sample(self.demo_batch_size) #sample from the demo buffer
+            for k, values in transitions_demo.items():
+                rolloutV = transitions[k].tolist()
+                for v in values:
+                    rolloutV.append(v.tolist())
+                transitions[k] = np.array(rolloutV)
+        else:
+            transitions = self.buffer.sample(self.batch_size) #otherwise only sample from primary buffer
+
         o, o_2, g = transitions['o'], transitions['o_2'], transitions['g']
         ag, ag_2 = transitions['ag'], transitions['ag_2']
         transitions['o'], transitions['g'] = self._preprocess_og(o, ag, g)
@@ -227,10 +314,7 @@ class DDPG(object):
 
     def _create_network(self, reuse=False):
         logger.info("Creating a DDPG agent with action space %d x %s..." % (self.dimu, self.max_u))
-
-        self.sess = tf.get_default_session()
-        if self.sess is None:
-            self.sess = tf.InteractiveSession()
+        self.sess = tf_util.get_session()
 
         # running averages
         with tf.variable_scope('o_stats') as vs:
@@ -247,6 +331,9 @@ class DDPG(object):
         batch_tf = OrderedDict([(key, batch[i])
                                 for i, key in enumerate(self.stage_shapes.keys())])
         batch_tf['r'] = tf.reshape(batch_tf['r'], [-1, 1])
+
+        #choose only the demo buffer samples
+        mask = np.concatenate((np.zeros(self.batch_size - self.demo_batch_size), np.ones(self.demo_batch_size)), axis = 0)
 
         # networks
         with tf.variable_scope('main') as vs:
@@ -270,8 +357,25 @@ class DDPG(object):
         clip_range = (-self.clip_return, 0. if self.clip_pos_returns else np.inf)
         target_tf = tf.clip_by_value(batch_tf['r'] + self.gamma * target_Q_pi_tf, *clip_range)
         self.Q_loss_tf = tf.reduce_mean(tf.square(tf.stop_gradient(target_tf) - self.main.Q_tf))
-        self.pi_loss_tf = -tf.reduce_mean(self.main.Q_pi_tf)
-        self.pi_loss_tf += self.action_l2 * tf.reduce_mean(tf.square(self.main.pi_tf / self.max_u))
+
+        if self.bc_loss ==1 and self.q_filter == 1 : # train with demonstrations and use bc_loss and q_filter both
+            maskMain = tf.reshape(tf.boolean_mask(self.main.Q_tf > self.main.Q_pi_tf, mask), [-1]) #where is the demonstrator action better than actor action according to the critic? choose those samples only
+            #define the cloning loss on the actor's actions only on the samples which adhere to the above masks
+            self.cloning_loss_tf = tf.reduce_sum(tf.square(tf.boolean_mask(tf.boolean_mask((self.main.pi_tf), mask), maskMain, axis=0) - tf.boolean_mask(tf.boolean_mask((batch_tf['u']), mask), maskMain, axis=0)))
+            self.pi_loss_tf = -self.prm_loss_weight * tf.reduce_mean(self.main.Q_pi_tf) #primary loss scaled by it's respective weight prm_loss_weight
+            self.pi_loss_tf += self.prm_loss_weight * self.action_l2 * tf.reduce_mean(tf.square(self.main.pi_tf / self.max_u)) #L2 loss on action values scaled by the same weight prm_loss_weight
+            self.pi_loss_tf += self.aux_loss_weight * self.cloning_loss_tf #adding the cloning loss to the actor loss as an auxilliary loss scaled by its weight aux_loss_weight
+
+        elif self.bc_loss == 1 and self.q_filter == 0: # train with demonstrations without q_filter
+            self.cloning_loss_tf = tf.reduce_sum(tf.square(tf.boolean_mask((self.main.pi_tf), mask) - tf.boolean_mask((batch_tf['u']), mask)))
+            self.pi_loss_tf = -self.prm_loss_weight * tf.reduce_mean(self.main.Q_pi_tf)
+            self.pi_loss_tf += self.prm_loss_weight * self.action_l2 * tf.reduce_mean(tf.square(self.main.pi_tf / self.max_u))
+            self.pi_loss_tf += self.aux_loss_weight * self.cloning_loss_tf
+
+        else: #If  not training with demonstrations
+            self.pi_loss_tf = -tf.reduce_mean(self.main.Q_pi_tf)
+            self.pi_loss_tf += self.action_l2 * tf.reduce_mean(tf.square(self.main.pi_tf / self.max_u))
+
         Q_grads_tf = tf.gradients(self.Q_loss_tf, self._vars('main/Q'))
         pi_grads_tf = tf.gradients(self.pi_loss_tf, self._vars('main/pi'))
         assert len(self._vars('main/Q')) == len(Q_grads_tf)
@@ -306,7 +410,7 @@ class DDPG(object):
         logs += [('stats_g/mean', np.mean(self.sess.run([self.g_stats.mean])))]
         logs += [('stats_g/std', np.mean(self.sess.run([self.g_stats.std])))]
 
-        if prefix is not '' and not prefix.endswith('/'):
+        if prefix != '' and not prefix.endswith('/'):
             return [(prefix + '/' + key, val) for key, val in logs]
         else:
             return logs
@@ -338,3 +442,7 @@ class DDPG(object):
         assert(len(vars) == len(state["tf"]))
         node = [tf.assign(var, val) for var, val in zip(vars, state["tf"])]
         self.sess.run(node)
+
+    def save(self, save_path):
+        tf_util.save_variables(save_path)
+

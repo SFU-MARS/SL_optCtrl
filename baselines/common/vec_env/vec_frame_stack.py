@@ -1,4 +1,4 @@
-from . import VecEnvWrapper
+from .vec_env import VecEnvWrapper
 import numpy as np
 from gym import spaces
 
@@ -28,6 +28,3 @@ class VecFrameStack(VecEnvWrapper):
         self.stackedobs[...] = 0
         self.stackedobs[..., -obs.shape[-1]:] = obs
         return self.stackedobs
-
-    def close(self):
-        self.venv.close()

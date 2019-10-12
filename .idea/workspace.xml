@@ -2,16 +2,347 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/test_bicycle_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MPC/car_MPC_trajs/test_samps_10.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MPC/track2_scaled.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/backup/polFunc.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/car/polFunc.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/car/valueFunc_filled.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/data_gen.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/quad/polFunc.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ddpg/bench/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ddpg/training.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/launchs/QuadrotorAirSpace_v0.launch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/launchs/ackermann_vehicle.launch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/test_behavior_cloning/MPC_quad_no_additional_done.npz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/test_behavior_cloning/backup/MPC_quad_no_additional_done.npz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/test_behavior_cloning/backup/PART_MPC_quad.npz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/test_behavior_cloning/backup/dummy_expert_cartpole.npz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/test_behavior_cloning/full_MPC_quad.npz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/test_behavior_cloning/test_behavior_cloning.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_ddpg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/worlds/track_world_gen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/gen_unicycle_state_input_cell.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/generate_orient_matrix.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/ltv_mpc.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/nonlinear_mpc.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/ode_unicycle_fun_a_input.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/plot_inputs.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/plot_position_in_sim.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/plot_positions.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/plot_states.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/run_simulation.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/track2.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/LTV MPC Racing Reference Tracking with Boundary/unicycle_approx_next_state.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/generate_rectangle_obstacle_constraint_mats.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/nonlinear_mpc_static_obstacle.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/ode_unicycle_fun_a_input.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/plot_inputs.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/plot_moving_traj.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/plot_obstacle.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/plot_prediction.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/plot_states.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Nonlinear MPC IPOPT Obstacle Avoidance Fixed Reference/run_simulation.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/circle.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/data/init_states_200.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/data/test_200.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/data/warmstart_no_obst_center_circle.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/draw_goal.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/generate_rectangle_obstacle_constraint_mats.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/get_quad_6D_params.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/mpc_quad_6D_traj_solver.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/odefun_quad_6D.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/plot_obstacle.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/sample_circle.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/sample_init_state.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/sim_multiple_samps.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MPC/Quadrotor Goal Track/sim_trajectory_solver.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/a2c/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/a2c/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/a2c/a2c.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/a2c/runner.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/a2c/utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acer/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acer/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acer/acer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acer/buffer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acer/defaults.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acer/policies.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acer/runner.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/acktr.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/acktr_cont.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/acktr_disc.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/kfac.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/kfac_utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/policies.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/run_mujoco.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/acktr/value_functions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/bench/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/bench/benchmarks.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/bench/benchmarks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/bench/monitor.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/bench/monitor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/atari_wrappers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/cg.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/cmd_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/console_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/dataset.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/distributions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/filters.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/identity_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/input.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/math_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/misc_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/mpi_adam.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/mpi_adam_optimizer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/mpi_fork.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/mpi_moments.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/mpi_running_mean_std.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/mpi_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/policies.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/retro_wrappers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/runners.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/running_mean_std.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/running_stat.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/schedules.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/segment_tree.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/envs/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/envs/fixed_sequence_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/envs/identity_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/envs/mnist_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_cartpole.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_doc_examples.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_fixed_sequence.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_identity.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_mnist.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_schedules.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_segment_tree.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_serialization.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/test_tf_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tests/util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tf_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/tile_images.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/dummy_vec_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/shmem_vec_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/subproc_vec_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/test_vec_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/vec_frame_stack.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/vec_monitor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/common/vec_env/vec_normalize.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ddpg/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ddpg/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ddpg/ddpg.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/ddpg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ddpg/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ddpg/memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/memory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ddpg/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ddpg/noise.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/noise.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ddpg/training.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/build_graph.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/deepq.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/defaults.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/custom_cartpole.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/enjoy_cartpole.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/enjoy_mountaincar.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/enjoy_pong.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/enjoy_retro.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/run_atari.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/run_retro.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/train_cartpole.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/experiments/train_mountaincar.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/replay_buffer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/deepq/utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/adversary.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/behavior_clone.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/dataset/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/dataset/mujoco_dset.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/gail-eval.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/mlp_policy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/HalfCheetah-normalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/HalfCheetah-normalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/HalfCheetah-unnormalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/HalfCheetah-unnormalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Hopper-normalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Hopper-normalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Hopper-unnormalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Hopper-unnormalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Humanoid-normalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Humanoid-normalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Humanoid-unnormalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Humanoid-unnormalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/HumanoidStandup-normalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/HumanoidStandup-normalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/HumanoidStandup-unnormalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/HumanoidStandup-unnormalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Walker2d-normalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Walker2d-normalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Walker2d-unnormalized-deterministic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/Walker2d-unnormalized-stochastic-scores.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/gail-result.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/halfcheetah-training.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/hopper-training.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/humanoid-training.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/humanoidstandup-training.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/result/walker2d-training.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/run_mujoco.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/statistics.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/gail/trpo_mpi.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/actor_critic.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/ddpg.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/experiment/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/experiment/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/experiment/play.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/experiment/plot.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/experiment/train.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/her.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/normalizer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/replay_buffer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/rollout.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/her/util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/logger.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/cnn_policy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/mlp_policy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/pposgd_simple.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/run_atari.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/run_humanoid.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/run_mujoco.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1-standard/run_robotics.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_bicycle_env/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1/cnn_policy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1/mlp_policy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1/pposgd_simple.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1/run_atari.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo1/run_mujoco.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo2/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo2/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_behavior_cloning/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo2/defaults.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/ppo2/ppo2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/results_plotter.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/run.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/trpo_mpi/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/trpo_mpi/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/trpo_mpi/defaults.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselines/trpo_mpi/trpo_mpi.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/atari_wrappers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/cg.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/cmd_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/console_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/dataset.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/distributions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/filters.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/identity_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/input.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/math_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/misc_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/mpi_adam.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/mpi_adam_optimizer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/mpi_fork.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/mpi_moments.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/mpi_running_mean_std.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/mpi_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/policies.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/retro_wrappers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/runners.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/running_mean_std.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/running_stat.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/schedules.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/segment_tree.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/envs/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/envs/fixed_sequence_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/envs/identity_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/envs/mnist_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_cartpole.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_doc_examples.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_fixed_sequence.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_identity.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_mnist.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_schedules.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_segment_tree.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_serialization.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/test_tf_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tests/util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tf_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/tile_images.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/dummy_vec_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/shmem_vec_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/subproc_vec_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/test_vec_env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/vec_frame_stack.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/vec_monitor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/vec_env/vec_normalize.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/example.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/example.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/polFunc_train.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/polFunc_train.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/polFunc_train_filled.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/polFunc_train_filled.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/samples.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/samples.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test_200.mat" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/test_200.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/training_result_2500epochs_polFunc.png" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/training_result_2500epochs_polFunc.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/training_result_2500epochs_valfunc.png" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/training_result_2500epochs_valfunc.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/valueFunc_train.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/valueFunc_train.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/valueFunc_train_filled.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/valueFunc_train_filled.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/valueFunc_train_linear_filled.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/backup/valueFunc_train_linear_filled.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" beforeDir="false" afterPath="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo_params.json" beforeDir="false" afterPath="$PROJECT_DIR$/ppo_params.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/launch/BicycleTrack_v0.launch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/launch/DubinsCarCircuitGround_v0.launch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/air_space/model.config" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/air_space/model.sdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/air_space/model.sdf.backup" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/circuit_ground/model.config" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/circuit_ground/model.sdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo1_utils/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo1_utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo1_utils/cnn_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/cnn_policy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo1_utils/mlp_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/mlp_policy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo1_utils/pposgd_simple.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/pposgd_simple.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo1_utils/run_atari.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/run_atari.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo1_utils/run_mujoco.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/run_mujoco.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ppo_params.json" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo_params.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quick_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/quick_trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quick_trainer_mod.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_bicycle_env.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_bicycle_env/test_bicycle_env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_model.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tf_model/pf.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tf_model/pf_weights.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tf_model/vf.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tf_model/vf_weights.pkl" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/worlds/air_space.world" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/air_space.world" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro" beforeDir="false" afterPath="$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/value_iteration/value_iteration.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/worlds/air_space.world" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/backup/air_space_backup.world" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/worlds/air_space.world.backup" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/air_space_201910.world" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/worlds/circuit_ground.world" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/backup/air_space_2.world" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/worlds/spawn_population.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/worlds/track.world" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/track.world" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,117 +351,32 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/SL_optCtrl$test_bicycle_env.coverage" NAME="test_bicycle_env Coverage Results" MODIFIED="1567828802640" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$utils.coverage" NAME="utils Coverage Results" MODIFIED="1566928942104" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer.coverage" NAME="quick_trainer Coverage Results" MODIFIED="1567037161492" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$test_bicycle_env.coverage" NAME="test_bicycle_env Coverage Results" MODIFIED="1568253204520" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$utils.coverage" NAME="utils Coverage Results" MODIFIED="1568756809220" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer.coverage" NAME="quick_trainer Coverage Results" MODIFIED="1570124406213" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer_mod.coverage" NAME="quick_trainer_mod Coverage Results" MODIFIED="1567121173358" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optControl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562626926228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562628146915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$spawn_population.coverage" NAME="spawn_population Coverage Results" MODIFIED="1567905883278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/worlds" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$PlanarQuadEnv_v0.coverage" NAME="PlanarQuadEnv_v0 Coverage Results" MODIFIED="1569726247736" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gym_foo/gym_foo/envs" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$test_behavior_cloning.coverage" NAME="test_behavior_cloning Coverage Results" MODIFIED="1570139917690" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/stable-baselines/my_tests" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/train_ppo.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="513">
-              <caret line="401" column="40" lean-forward="true" selection-start-line="401" selection-start-column="40" selection-end-line="401" selection-end-column="40" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="1" column="9" lean-forward="true" selection-start-line="1" selection-start-column="9" selection-end-line="1" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/test_bicycle_env.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="79" column="59" lean-forward="true" selection-start-line="79" selection-start-column="59" selection-end-line="79" selection-end-column="59" />
-              <folding>
-                <element signature="e#0#41#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ppo.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="17" column="14" selection-start-line="17" selection-start-column="7" selection-end-line="17" selection-end-column="14" />
-              <folding>
-                <element signature="e#0#58#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="283">
-              <caret line="40" column="57" selection-start-line="40" selection-start-column="57" selection-end-line="40" selection-end-column="57" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ppo1_utils/mlp_policy.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2898">
-              <caret line="168" column="38" selection-start-line="168" selection-start-column="38" selection-end-line="168" selection-end-column="38" />
-              <folding>
-                <element signature="e#0#64#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="24" column="9" lean-forward="true" selection-start-line="24" selection-start-column="9" selection-end-line="24" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/quick_trainer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#19#0" expanded="true" />
-                <element signature="e#196#228#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ppo_params.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="1" column="15" selection-start-line="1" selection-start-column="15" selection-end-line="1" selection-end-column="15" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -141,15 +387,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>srv_reset_proxy</find>
-      <find>get_model_state</find>
-      <find>gMin</find>
-      <find>brs_engine</find>
-      <find>PrintDot</find>
-      <find>cube_bigger</find>
-      <find>start</find>
+      <find>world</find>
+      <find>state_space</find>
+      <find>action_space</find>
+      <find>4D</find>
       <find>cube_4</find>
       <find>cube_big</find>
+      <find>cube_bigger</find>
+      <find>start</find>
+      <find>load</find>
+      <find>loading ex</find>
+      <find>self.srv</find>
+      <find>self.srv_unpause</find>
+      <find>self.srv_pause</find>
+      <find>self.srv_reset_proxy</find>
+      <find>self.srv_spawn_model</find>
+      <find>self.srv_get_model_state</find>
+      <find>self.srv_set_model_state</find>
+      <find>self.srv_get_link_state</find>
+      <find>self.srv_set_link_state</find>
+      <find>env_type</find>
+      <find>init</find>
+      <find>param_noise_adaption_interval</find>
+      <find>step</find>
+      <find>START_STATE</find>
+      <find>n_steps</find>
+      <find>self.obs</find>
+      <find>max_action</find>
+      <find>in</find>
+      <find>pol_load</find>
+      <find>in goal</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -158,22 +425,53 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" />
-        <option value="$PROJECT_DIR$/ppo.py" />
-        <option value="$PROJECT_DIR$/run.sh" />
-        <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" />
-        <option value="$PROJECT_DIR$/ppo_params.json" />
+        <option value="$PROJECT_DIR$/launch/BicycleTrack_v0.launch" />
+        <option value="$PROJECT_DIR$/worlds/track.world" />
+        <option value="$PROJECT_DIR$/worlds/spawn_population.py" />
+        <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" />
         <option value="$PROJECT_DIR$/worlds/air_space.world" />
-        <option value="$PROJECT_DIR$/train_ppo.py" />
+        <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/__init__.py" />
+        <option value="$PROJECT_DIR$/ppo_params.json" />
+        <option value="$PROJECT_DIR$/baselines/common/tf_util.py" />
+        <option value="$PROJECT_DIR$/data/quad/tmp/README.md" />
+        <option value="$PROJECT_DIR$/tf_model/quad/tmp_new_env/README.md" />
+        <option value="$PROJECT_DIR$/ppo.py" />
         <option value="$PROJECT_DIR$/test_bicycle_env.py" />
+        <option value="$PROJECT_DIR$/launch/ackermann_vehicle.launch" />
+        <option value="$PROJECT_DIR$/utils.py" />
+        <option value="$PROJECT_DIR$/data/quad/polFunc.csv" />
+        <option value="$PROJECT_DIR$/worlds/explore/air_space_backup.world" />
+        <option value="$PROJECT_DIR$/baselines/her/experiment/data_generation/fetch_data_generation.py" />
+        <option value="$PROJECT_DIR$/common/README.md" />
+        <option value="$PROJECT_DIR$/train_ddpg.py" />
+        <option value="$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro" />
+        <option value="$PROJECT_DIR$/ddpg/ddpg.py" />
+        <option value="$PROJECT_DIR$/worlds/air_space_2.world" />
+        <option value="$PROJECT_DIR$/train_ppo.py" />
+        <option value="$PROJECT_DIR$/stable-baselines/my_test/test_behavior_cloning.py" />
+        <option value="$PROJECT_DIR$/ddpg/training.py" />
+        <option value="$PROJECT_DIR$/run.sh" />
+        <option value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/ppo2/ppo2.py" />
+        <option value="$PROJECT_DIR$/quick_trainer.py" />
+        <option value="$PROJECT_DIR$/ppo1_utils/mlp_policy.py" />
+        <option value="$PROJECT_DIR$/ppo1_utils/pposgd_simple.py" />
+        <option value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/trpo_mpi/utils.py" />
+        <option value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/common/policies.py" />
+        <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" />
+        <option value="$PROJECT_DIR$/stable-baselines/my_tests/test_behavior_cloning.py" />
+        <option value="$PROJECT_DIR$/worlds/air_space_backup.world" />
+        <option value="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" />
+        <option value="$PROJECT_DIR$/spawn_population.py" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/quick_trainer_mod.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="6" />
-    <option name="y" value="120" />
-    <option name="width" value="1914" />
-    <option name="height" value="1028" />
+    <option name="x" value="1920" />
+    <option name="y" value="24" />
+    <option name="width" value="1898" />
+    <option name="height" value="1021" />
   </component>
   <component name="ProjectId" id="1QFu7W7sDTMUYbur65K90YTUkjh" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -182,7 +480,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -190,53 +487,11 @@
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-              <item name="envs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="launch" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="ppo1_utils" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="runs_icra" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="urdfs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="worlds" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -245,12 +500,22 @@
     <property name="last_opened_file_path" value="/opt/ros/melodic/lib/python2.7/dist-packages" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/worlds" />
+      <recent name="$PROJECT_DIR$/stable-baselines/my_tests" />
+      <recent name="$PROJECT_DIR$/MPC" />
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/baselines" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/data" />
+      <recent name="$PROJECT_DIR$/ppo1" />
+      <recent name="$PROJECT_DIR$/test/test_behavior_cloning" />
+      <recent name="$PROJECT_DIR$/test/test_bicycle_env" />
+      <recent name="$PROJECT_DIR$" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -265,7 +530,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.test_bicycle_env">
+  <component name="RunManager" selected="Python.test_behavior_cloning">
     <configuration name="run.sh" type="BashConfigurationType" factoryName="Bash" temporary="true">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="bash" />
@@ -277,20 +542,20 @@
       <option name="PARAMETERS" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="quick_trainer" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="PlanarQuadEnv_v0" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/gym_foo/gym_foo/envs" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/quick_trainer.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -299,7 +564,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="quick_trainer_mod" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="quick_trainer" type="PythonConfigurationType" factoryName="Python">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -312,7 +577,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/quick_trainer_mod.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/quick_trainer.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -321,20 +586,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="spawn_population" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="test_behavior_cloning" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/worlds" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/stable-baselines/my_tests" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/worlds/spawn_population.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/stable-baselines/my_tests/test_behavior_cloning.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -356,7 +621,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_bicycle_env.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/test_bicycle_env/test_bicycle_env.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -372,13 +637,13 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="$USER_HOME$/.conda/envs/light_test/bin/python" />
+      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/data_gen.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -391,17 +656,17 @@
       <item itemvalue="Bash.run.sh" />
       <item itemvalue="Python.quick_trainer" />
       <item itemvalue="Python.utils" />
-      <item itemvalue="Python.quick_trainer_mod" />
-      <item itemvalue="Python.spawn_population" />
       <item itemvalue="Python.test_bicycle_env" />
+      <item itemvalue="Python.PlanarQuadEnv_v0" />
+      <item itemvalue="Python.test_behavior_cloning" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.test_bicycle_env" />
+        <item itemvalue="Python.test_behavior_cloning" />
         <item itemvalue="Bash.run.sh" />
-        <item itemvalue="Python.spawn_population" />
+        <item itemvalue="Python.PlanarQuadEnv_v0" />
         <item itemvalue="Python.utils" />
-        <item itemvalue="Python.quick_trainer_mod" />
+        <item itemvalue="Python.test_bicycle_env" />
       </list>
     </recent_temporary>
   </component>
@@ -434,24 +699,26 @@
       <workItem from="1567405389149" duration="1374000" />
       <workItem from="1567486676241" duration="6491000" />
       <workItem from="1567573406245" duration="17550000" />
-      <workItem from="1567794143330" duration="14099000" />
+      <workItem from="1567794143330" duration="106061000" />
+      <workItem from="1568755695723" duration="10285000" />
+      <workItem from="1569353954104" duration="123139000" />
+      <workItem from="1570838782840" duration="3806000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31649000" />
+    <option name="totallyTimeSpent" value="260841000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="0" width="1922" height="1201" extended-state="6" />
-    <editor active="true" />
+    <frame x="1919" y="0" width="1922" height="1201" extended-state="7" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25159913" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21808511" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.41983318" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39944392" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32201746" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.476367" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -459,14 +726,37 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.36813188" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="SciView" order="3" />
-      <window_info anchor="right" id="Database" order="4" />
+      <window_info anchor="right" id="Database" order="3" weight="0.32995737" />
+      <window_info anchor="right" id="SciView" order="4" weight="0.6529851" />
     </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15831557" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.31325302" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.476367" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.9425394" />
+      <window_info anchor="bottom" id="Python Console" order="12" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Database" order="3" weight="0.32995737" />
+      <window_info anchor="right" id="SciView" order="4" weight="0.6529851" />
+    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -507,60 +797,299 @@
       </map>
     </option>
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/worlds/spawn_population.py</url>
-          <line>7</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/SL_optCtrl$utils.coverage" NAME="utils Coverage Results" MODIFIED="1567396106628" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer.coverage" NAME="quick_trainer Coverage Results" MODIFIED="1567401487797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$spawn_population.coverage" NAME="spawn_population Coverage Results" MODIFIED="1567491465422" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/worlds" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/run.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="20" selection-start-line="20" selection-end-line="20" />
+    <entry file="file://$PROJECT_DIR$/urdfs/quadrotor.urdf.xacro">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log/28-Sep-2019_12-22-27_PlanarQuadEnv-v0_hand_craft_ddpg/log.txt" />
+    <entry file="file://$PROJECT_DIR$/data/quad/polFunc_filled.csv">
+      <provider selected="true" editor-type-id="csv-text-editor">
+        <state relative-caret-position="1640">
+          <caret line="82" column="24" selection-start-line="82" selection-start-column="24" selection-end-line="82" selection-end-column="24" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/worlds/air_space.world">
+    <entry file="file://$PROJECT_DIR$/stable-baselines/my_tests/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/stable-baselines/tests/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/setup.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8028">
-          <caret line="446" column="33" selection-start-line="446" selection-start-column="33" selection-end-line="446" selection-end-column="33" />
+        <state relative-caret-position="800">
+          <caret line="40" lean-forward="true" selection-start-line="40" selection-end-line="40" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ppo.py">
+    <entry file="file://$USER_HOME$/.local/lib/python3.5/site-packages/pandas/core/generic.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
-          <caret line="17" column="14" selection-start-line="17" selection-start-column="7" selection-end-line="17" selection-end-column="14" />
+          <caret line="5060" selection-start-line="5060" selection-end-line="5060" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/common/base_class.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="358">
+          <caret line="157" selection-start-line="157" selection-end-line="157" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/stable_baselines/ppo2/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/common/runners.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="20" column="36" selection-start-line="20" selection-start-column="36" selection-end-line="20" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/stable_baselines/bench/monitor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="85" column="16" lean-forward="true" selection-start-line="85" selection-start-column="16" selection-end-line="85" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/stable_baselines/ddpg/policies.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="52" column="8" selection-start-line="52" selection-start-column="8" selection-end-line="52" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/stable_baselines/common/policies.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="353">
+          <caret line="180" column="8" selection-start-line="180" selection-start-column="8" selection-end-line="180" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/baselines/common/policies.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="173">
+          <caret line="73" column="8" selection-start-line="73" selection-start-column="8" selection-end-line="73" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/ppo2/ppo2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="156">
+          <caret line="475" column="34" selection-start-line="475" selection-start-column="34" selection-end-line="475" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="104">
+          <caret line="192" column="85" selection-start-line="192" selection-start-column="85" selection-end-line="192" selection-end-column="85" />
+          <folding>
+            <element signature="e#0#64#0" expanded="true" />
+            <element signature="e#265#4945#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train_ppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="10" column="27" selection-start-line="10" selection-start-column="27" selection-end-line="10" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/stable_baselines/ppo2/ppo2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-353">
+          <caret line="468" column="44" selection-start-line="468" selection-start-column="44" selection-end-line="468" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/worlds/backup/air_space_backup.world">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-5073" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/worlds/backup/air_space_2.world">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-589">
+          <caret line="266" column="41" lean-forward="true" selection-start-line="266" selection-start-column="41" selection-end-line="266" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="836">
+          <caret line="44" column="30" lean-forward="true" selection-start-line="44" selection-start-column="30" selection-end-line="44" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/common/policies.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="279">
+          <caret line="576" column="44" selection-start-line="576" selection-start-column="44" selection-end-line="576" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/trpo_mpi/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="19">
+          <caret line="38" selection-start-line="38" selection-end-line="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/launchs/QuadrotorAirSpace_v0.launch">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="437">
+          <caret line="23" column="119" lean-forward="true" selection-start-line="23" selection-start-column="119" selection-end-line="23" selection-end-column="119" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/worlds/air_space_201910.world">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="402" column="26" lean-forward="true" selection-start-line="402" selection-start-column="23" selection-end-line="402" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="606">
+          <caret line="287" column="34" selection-start-line="287" selection-start-column="34" selection-end-line="287" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1/pposgd_simple.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-190">
+          <caret line="52" column="24" lean-forward="true" selection-start-line="52" selection-start-column="24" selection-end-line="52" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train_ddpg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-228">
+          <caret line="25" column="11" lean-forward="true" selection-start-line="25" selection-start-column="11" selection-end-line="25" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-551">
+          <caret line="124" selection-start-line="124" selection-end-line="124" />
           <folding>
             <element signature="e#0#58#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ppo1_utils/mlp_policy.py">
+    <entry file="file://$PROJECT_DIR$/ppo1/ppo_params.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gazebo_env.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2898">
-          <caret line="168" column="38" selection-start-line="168" selection-start-column="38" selection-end-line="168" selection-end-column="38" />
+        <state>
           <folding>
-            <element signature="e#0#64#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/globals.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/rl_utils.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/reward_norm_visualize.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/my_tests/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/urdfs/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/value_iteration/value_iteration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1329">
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/quick_trainer_mod.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1140">
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="19">
+            <caret line="1" column="38" selection-start-line="1" selection-start-column="38" selection-end-line="1" selection-end-column="38" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="13" selection-start-line="13" selection-end-line="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/test_bicycle_env/test_bicycle_env.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1120">
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/quick_trainer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="1947">
+          <caret line="367" selection-start-line="367" selection-end-line="367" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
             <element signature="e#196#228#0" />
@@ -568,53 +1097,71 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ppo_params.json">
+    <entry file="file://$PROJECT_DIR$/data/data_gen.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="15" selection-start-line="1" selection-start-column="15" selection-end-line="1" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/train_ppo.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="513">
-          <caret line="401" column="40" lean-forward="true" selection-start-line="401" selection-start-column="40" selection-end-line="401" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="9" lean-forward="true" selection-start-line="1" selection-start-column="9" selection-end-line="1" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="24" column="9" lean-forward="true" selection-start-line="24" selection-start-column="9" selection-end-line="24" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="40" column="57" selection-start-line="40" selection-start-column="57" selection-end-line="40" selection-end-column="57" />
+        <state relative-caret-position="4579">
+          <caret line="446" column="25" selection-start-line="446" selection-start-column="25" selection-end-line="446" selection-end-column="25" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#21268#21370#0" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test_bicycle_env.py">
+    <entry file="file://$PROJECT_DIR$/worlds/track_world_gen.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="79" column="59" lean-forward="true" selection-start-line="79" selection-start-column="59" selection-end-line="79" selection-end-column="59" />
+        <state relative-caret-position="-103">
+          <caret line="9" column="57" selection-start-line="9" selection-start-column="57" selection-end-line="9" selection-end-column="57" />
           <folding>
-            <element signature="e#0#41#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/pickle_analysis.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/memory.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ddpg/training.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="83" column="15" selection-start-line="83" selection-start-column="15" selection-end-line="83" selection-end-column="15" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/test_behavior_cloning/test_behavior_cloning.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3477">
+          <caret line="235" selection-start-line="235" selection-end-line="235" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-684">
+          <folding>
+            <element signature="e#0#16#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/stable_baselines/trpo_mpi/trpo_mpi.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="280" column="39" selection-start-line="280" selection-start-column="39" selection-end-line="280" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>

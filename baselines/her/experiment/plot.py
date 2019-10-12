@@ -1,3 +1,5 @@
+# DEPRECATED, use baselines.common.plot_util instead
+
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -37,12 +39,12 @@ def load_results(file):
 
 def pad(xs, value=np.nan):
     maxlen = np.max([len(x) for x in xs])
-    
+
     padded_xs = []
     for x in xs:
         if x.shape[0] >= maxlen:
             padded_xs.append(x)
-    
+
         padding = np.ones((maxlen - x.shape[0],) + x.shape[1:]) * value
         x_padded = np.concatenate([x, padding], axis=0)
         assert x_padded.shape[1:] == x.shape[1:]
@@ -67,7 +69,7 @@ for curr_path in paths:
         print('skipping {}'.format(curr_path))
         continue
     print('loading {} ({})'.format(curr_path, len(results['epoch'])))
-    with open(os.path.join(curr_path, 'ppo_params.json'), 'r') as f:
+    with open(os.path.join(curr_path, 'params.json'), 'r') as f:
         params = json.load(f)
 
     success_rate = np.array(results['test/success_rate'])

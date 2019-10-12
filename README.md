@@ -1,2 +1,2 @@
 # SL_optCtrl
-supervised learning from optimal control problem.
+Imitation Learning from Demonstration as Initialization for Reinforcement Learning

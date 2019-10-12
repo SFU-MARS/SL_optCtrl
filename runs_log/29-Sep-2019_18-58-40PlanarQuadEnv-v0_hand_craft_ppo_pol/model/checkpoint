@@ -1,0 +1,2 @@
+model_checkpoint_path: "/local-scratch/xlv/SL_optCtrl/runs_log/29-Sep-2019_18-58-40PlanarQuadEnv-v0_hand_craft_ppo_pol/model/iter_0"
+all_model_checkpoint_paths: "/local-scratch/xlv/SL_optCtrl/runs_log/29-Sep-2019_18-58-40PlanarQuadEnv-v0_hand_craft_ppo_pol/model/iter_0"

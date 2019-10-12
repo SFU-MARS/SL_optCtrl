@@ -3,12 +3,14 @@ from baselines.common.tests.envs.fixed_sequence_env import FixedSequenceEnv
 
 from baselines.common.tests.util import simple_test
 from baselines.run import get_learn_function
+from baselines.common.tests import mark_slow
+
 
 common_kwargs = dict(
     seed=0,
     total_timesteps=50000,
 )
-    
+
 learn_kwargs = {
     'a2c': {},
     'ppo2': dict(nsteps=10, ent_coef=0.0, nminibatches=1),
@@ -21,7 +23,7 @@ learn_kwargs = {
 alg_list = learn_kwargs.keys()
 rnn_list = ['lstm']
 
-@pytest.mark.slow
+@mark_slow
 @pytest.mark.parametrize("alg", alg_list)
 @pytest.mark.parametrize("rnn", rnn_list)
 def test_fixed_sequence(alg, rnn):
@@ -33,10 +35,9 @@ def test_fixed_sequence(alg, rnn):
     kwargs = learn_kwargs[alg]
     kwargs.update(common_kwargs)
 
-    episode_len = 5
-    env_fn = lambda: FixedSequenceEnv(10, episode_len=episode_len)
+    env_fn = lambda: FixedSequenceEnv(n_actions=10, episode_len=5)
     learn = lambda e: get_learn_function(alg)(
-        env=e, 
+        env=e,
         network=rnn,
         **kwargs
     )
@@ -47,5 +48,5 @@ def test_fixed_sequence(alg, rnn):
 if __name__ == '__main__':
     test_fixed_sequence('ppo2', 'lstm')
 
-    
+
 

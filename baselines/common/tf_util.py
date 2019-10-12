@@ -1,4 +1,3 @@
-import joblib
 import numpy as np
 import tensorflow as tf  # pylint: ignore-module
 import copy
@@ -58,26 +57,15 @@ def get_session(config=None):
 
 def make_session(config=None, num_cpu=None, make_default=False, graph=None):
     """Returns a session that will use <num_cpu> CPU's only"""
-    '''
     if num_cpu is None:
         num_cpu = int(os.getenv('RCALL_NUM_CPU', multiprocessing.cpu_count()))
-
     if config is None:
         config = tf.ConfigProto(
             allow_soft_placement=True,
             inter_op_parallelism_threads=num_cpu,
             intra_op_parallelism_threads=num_cpu)
         config.gpu_options.allow_growth = True
-    '''
-    if config is None:
-        # config = tf.ConfigProto(
-        #     device_count = {'GPU':0}
-        #
-        # )
-        config=tf.ConfigProto()
-        config.allow_soft_placement=True
-        config.gpu_options.allow_growth = True
-        # config.log_device_placement = True
+
     if make_default:
         return tf.InteractiveSession(config=config, graph=graph)
     else:
@@ -176,6 +164,10 @@ def function(inputs, outputs, updates=None, givens=None):
     outputs: [tf.Variable] or tf.Variable
         list of outputs or a single output to be returned from function. Returned
         value will also have the same shape.
+    updates: [tf.Operation] or tf.Operation
+        list of update functions or single update function that will be run whenever
+        the function is called. The return is ignored.
+
     """
     if isinstance(outputs, list):
         return _Function(inputs, outputs, updates, givens=givens)
@@ -193,6 +185,7 @@ class _Function(object):
             if not hasattr(inpt, 'make_feed_dict') and not (type(inpt) is tf.Tensor and len(inpt.op.inputs) == 0):
                 assert False, "inputs should all be placeholders, constants, or have a make_feed_dict method"
         self.inputs = inputs
+        self.input_names = {inp.name.split("/")[-1].split(":")[0]: inp for inp in inputs}
         updates = updates or []
         self.update_group = tf.group(*updates)
         self.outputs_update = list(outputs) + [self.update_group]
@@ -204,15 +197,17 @@ class _Function(object):
         else:
             feed_dict[inpt] = adjust_shape(inpt, value)
 
-    def __call__(self, *args):
-        assert len(args) <= len(self.inputs), "Too many arguments provided"
+    def __call__(self, *args, **kwargs):
+        assert len(args) + len(kwargs) <= len(self.inputs), "Too many arguments provided"
         feed_dict = {}
-        # Update the args
-        for inpt, value in zip(self.inputs, args):
-            self._feed_input(feed_dict, inpt, value)
         # Update feed dict with givens.
         for inpt in self.givens:
             feed_dict[inpt] = adjust_shape(inpt, feed_dict.get(inpt, self.givens[inpt]))
+        # Update the args
+        for inpt, value in zip(self.inputs, args):
+            self._feed_input(feed_dict, inpt, value)
+        for inpt_name, value in kwargs.items():
+            self._feed_input(feed_dict, self.input_names[inpt_name], value)
         results = get_session().run(self.outputs_update, feed_dict=feed_dict)[:-1]
         return results
 
@@ -234,8 +229,6 @@ def intprod(x):
 
 def flatgrad(loss, var_list, clip_norm=None):
     grads = tf.gradients(loss, var_list)
-    print("var_list:", var_list)
-    print("grads:", grads)
     if clip_norm is not None:
         grads = [tf.clip_by_norm(grad, clip_norm=clip_norm) for grad in grads]
     return tf.concat(axis=0, values=[
@@ -306,18 +299,23 @@ def display_var_info(vars):
         if "/Adam" in name or "beta1_power" in name or "beta2_power" in name: continue
         v_params = np.prod(v.shape.as_list())
         count_params += v_params
-        if "/b:" in name or "/biases" in name: continue    # Wx+b, bias is not interesting to look at => count params, but not print
+        if "/b:" in name or "/bias" in name: continue    # Wx+b, bias is not interesting to look at => count params, but not print
         logger.info("   %s%s %i params %s" % (name, " "*(55-len(name)), v_params, str(v.shape)))
 
     logger.info("Total model parameters: %0.2f million" % (count_params*1e-6))
 
 
-def get_available_gpus():
-    # recipe from here:
-    # https://stackoverflow.com/questions/38559755/how-to-get-current-available-gpus-in-tensorflow?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+def get_available_gpus(session_config=None):
+    # based on recipe from https://stackoverflow.com/a/38580201
+
+    # Unless we allocate a session here, subsequent attempts to create one
+    # will ignore our custom config (in particular, allow_growth=True will have
+    # no effect).
+    if session_config is None:
+        session_config = get_session()._config
 
     from tensorflow.python.client import device_lib
-    local_device_protos = device_lib.list_local_devices()
+    local_device_protos = device_lib.list_local_devices(session_config)
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
 # ================================================================
@@ -325,13 +323,19 @@ def get_available_gpus():
 # ================================================================
 
 def load_state(fname, sess=None):
+    from baselines import logger
+    logger.warn('load_state method is deprecated, please use load_variables instead')
     sess = sess or get_session()
     saver = tf.train.Saver()
     saver.restore(tf.get_default_session(), fname)
 
 def save_state(fname, sess=None):
+    from baselines import logger
+    logger.warn('save_state method is deprecated, please use save_variables instead')
     sess = sess or get_session()
-    os.makedirs(os.path.dirname(fname), exist_ok=True)
+    dirname = os.path.dirname(fname)
+    if any(dirname):
+        os.makedirs(dirname, exist_ok=True)
     saver = tf.train.Saver()
     saver.save(tf.get_default_session(), fname)
 
@@ -339,24 +343,33 @@ def save_state(fname, sess=None):
 # TODO: ensure there is no subtle differences and remove one
 
 def save_variables(save_path, variables=None, sess=None):
+    import joblib
     sess = sess or get_session()
-    variables = variables or tf.trainable_variables()
+    variables = variables or tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
 
     ps = sess.run(variables)
     save_dict = {v.name: value for v, value in zip(variables, ps)}
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    dirname = os.path.dirname(save_path)
+    if any(dirname):
+        os.makedirs(dirname, exist_ok=True)
     joblib.dump(save_dict, save_path)
 
 def load_variables(load_path, variables=None, sess=None):
+    import joblib
     sess = sess or get_session()
-    variables = variables or tf.trainable_variables()
+    variables = variables or tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
 
     loaded_params = joblib.load(os.path.expanduser(load_path))
     restores = []
-    for v in variables:
-        restores.append(v.assign(loaded_params[v.name]))
-    sess.run(restores)
+    if isinstance(loaded_params, list):
+        assert len(loaded_params) == len(variables), 'number of variables loaded mismatches len(variables)'
+        for d, v in zip(loaded_params, variables):
+            restores.append(v.assign(d))
+    else:
+        for v in variables:
+            restores.append(v.assign(loaded_params[v.name]))
 
+    sess.run(restores)
 
 # ================================================================
 # Shape adjustment for feeding into tf placeholders
