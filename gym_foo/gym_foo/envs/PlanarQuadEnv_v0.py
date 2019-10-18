@@ -42,10 +42,9 @@ WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.)]
 
 
 class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
-    def __init__(self, **kwargs):
+    def __init__(self, reward_type, set_additional_goal, **kwargs):
         # Launch the simulation with the given launchfile name
         gazebo_env.GazeboEnv.__init__(self, "QuadrotorAirSpace_v0.launch")
-        # self.vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=5)
 
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
         self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
@@ -80,8 +79,10 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
         # controls are two thrusts
         # here high_action and low_action is only used by DDPG and stable_baseline's PPO2. Set [-1,1] is to be consistent with the default DDPG action range
-        high_action = np.array([1., 1.])
-        low_action  = np.array([-1., -1.])
+        # high_action = np.array([1., 1.])
+        # low_action  = np.array([-1., -1.])
+        high_action = np.array([12.0, 12.0])
+        low_action  = np.array([0.0, 0.0])
 
         self.state_space = spaces.Box(low=low_state, high=high_state)
         self.observation_space = spaces.Box(low=low_obsrv, high=high_obsrv)
@@ -97,8 +98,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
 
         self.pre_obsrv = None
-        self.reward_type = None
-        self.set_additional_goal = None
+        self.reward_type = reward_type
+        self.set_additional_goal = set_additional_goal
         # self.brsEngine = None
         self.vf_load = False
         self.pol_load = False
@@ -358,14 +359,12 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         # --------------------------------------------------------------------
 
 
-        # no matter if we use pol_load. Remember when doing supervised learning, normalize obs and rescale actions
-        # use [-1,1] is to be consisten with DDPG and PPO2 (from stable_baselines) default action range
-        # rescale from [-1,1] -> [0,12] because MPC control range is [0,12], not [7,10]
-        # print("action:", action)
+        # --- no matter if we use pol_load. Remember when doing supervised learning, normalize obs and rescale actions ---
+        # --- use [-1,1] is to be consisten with DDPG and PPO2 (from stable_baselines) default action range ---
+        # --- rescale from [-1,1] -> [0,12] because MPC control range is [0,12], not [7,10] ---
+        print("action:", action)
         action = np.clip(action, -1, 1)
         action = [0 + (12 - 0) * (a_i - (-1)) / (1- (-1)) for a_i in action]
-        # print("action:", action)
-
 
         pre_phi = self.pre_obsrv[4]
         wrench = Wrench()

@@ -10,106 +10,19 @@ from tensorflow import keras
 import numpy as np
 import pickle
 
-# class SL_valueLearner(object):
-#     def __init__(self):
-#         self.batch_size  = 50
-#         self.input_size  = 6 + 8
-#         # self.keep_prob   = 1
-#         # self.epoch = 50
-#         # self.train_data_size = 35000
-#         # self.test_data_size  = 15000
-#         self.train_data_size = 7000
-#         self.test_data_size  = 3000
-#
-#     def read_data(self, use='train'):
-#         if use == 'train':
-#             data = pd.read_csv('./data/valueFunc_train.csv')
-#         elif use == 'test':
-#             data = pd.read_csv('./data/valueFunc_test.csv')
-#         length = len(data)
-#
-#         X = []
-#         y = []
-#
-#         for dx, values in data.iterrows():
-#             vect = []
-#             vect.extend(values[0:6])
-#             vect.extend(values[7:])
-#             # print("vect", vect)
-#             vect = np.array(vect)
-#             X.append(vect)
-#
-#             v_gt = values[6]
-#             y.append([v_gt])
-#
-#         X = np.array(X)
-#         y = np.array(y)
-#
-#         print("read data for " + use + ' ...', np.shape(X))
-#         print("read label for " + use + ' ...', np.shape(y))
-#
-#         return X,y
-#
-#
-#     def dense_layer(input, in_size, out_size, activation_function=None):
-#         Weights = tf.Variable(tf.random_normal([in_size, out_size]))
-#         biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-#         Wx_plus_b = tf.matmul(input, Weights) + biases  # not actived yet
-#         Wx_plus_b = tf.nn.dropout(Wx_plus_b, keep_prob=keep_prob_s)
-#         if activation_function is None:
-#             output = Wx_plus_b
-#         else:
-#             output = activation_function(Wx_plus_b)
-#         return output
-#
-#
-#     def build_graph(self):
-#         self.xs = tf.placeholder(tf.float32, [None, self.input_size])
-#         self.ys = tf.placeholder(tf.float32, [None, 1])
-#
-#         # TODO: maybe need to normalize input xs
-#         # xs = xs.normalize()
-#         self.hidden_out1 = dense_layer(xs, self.input_size, 64, activation_function=tf.nn.tanh)
-#         self.hidden_out2 = dense_layer(hidden_out1, 64, 64, activation_function=tf.nn.tanh)
-#         self.vpred = dense_layer(hidden_out2, 64, 1, activation_function=None)
-#
-#         self.loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - vpred), reduction_indices=[1]))
-#         self.train_step = tf.train.AdamOptimizer(0.01).minimize(loss)
-#
-#     def train(self):
-#         X_train, y_train = read_data(use='train')
-#
-#         with tf.Session() as sess:
-#             init = tf.initialize_all_variables()
-#             sess.run(init)
-#
-#             # total iter_num = data_size / batch_size * epoch_num
-#             for iter in range(self.epoch * self.train_data_size / self.batch_size):
-#                 start = (iter * batch_size) % self.train_data_size
-#                 end   = min(start + batch_size, self.train_data_size)
-#
-#                 _, pred, loss = sess.run([train_step, vpred, loss], feed_dict={xs: X_train[start:end], ys: y_train[start:end], keep_prob_s: keep_prob})
-#
-#                 if iter % 50 == 0:
-#                     print("iter: ", '%04d' % (iter + 1), "loss: ", los)
-#
-#     def test(self):
-#         X_test, y_test = read_data(use='test')
-#
-#         # TODO: load trained model for test
 
 class Trainer(object):
-    def __init__(self, target='valueFunc', agent='quad'):
+    def __init__(self, target='valFunc', agent='quad'):
         self.agent = agent
         if self.agent == 'quad':
-            if target == 'valueFunc':
+            if target == 'valFunc':
                 self.input_shape = 14
                 self.model = self.build_value_model(self.input_shape)
             elif target == 'polFunc':
                 self.input_shape = 14
                 self.model = self.build_policy_model(self.input_shape)
         elif self.agent == 'car':
-            if target == 'valueFunc':
+            if target == 'valFunc':
                 self.input_shape = 13
                 self.model = self.build_value_model(self.input_shape)
             elif target == 'polFunc':
@@ -124,7 +37,8 @@ class Trainer(object):
             keras.layers.Dense(64, activation=tf.nn.tanh),
             keras.layers.Dense(1)
         ])
-        optimizer = tf.keras.optimizers.RMSprop(0.001)
+        # optimizer = tf.keras.optimizers.RMSprop(0.001)
+        optimizer = tf.keras.optimizers.Adam(lr=1e-3, epsilon=1e-8)
         model.compile(loss='mean_squared_error',
                       optimizer = optimizer,
                       metrics=['mean_absolute_error', 'mean_squared_error'])
@@ -149,17 +63,17 @@ class Trainer(object):
         dirpath = os.path.dirname(__file__)
         dataset_path = None
         if self.agent == 'car':
-            if not os.path.exists(dirpath + "/data/car/valueFunc_filled.csv"):
+            if not os.path.exists(dirpath + "/data/car/valFunc_filled.csv"):
                 raise ValueError("can not find the training file for car example!!")
             else:
-                dataset_path = dirpath + "/data/car/valueFunc_filled.csv"
+                dataset_path = dirpath + "/data/car/valFunc_filled.csv"
             column_names = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
             model_saving_path = './tf_model/car/vf.h5'
         elif self.agent == 'quad':
-            if not os.path.exists(dirpath + "/data/quad/valueFunc_filled.csv"):
+            if not os.path.exists(dirpath + "/data/quad/valFunc_filled.csv"):
                 raise ValueError("can not find the training file for quad example!!")
             else:
-                dataset_path = dirpath + "/data/quad/valueFunc_filled.csv"
+                dataset_path = dirpath + "/data/quad/valFunc_filled.csv"
             column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
             model_saving_path = './tf_model/quad/vf.h5'
 
@@ -183,8 +97,8 @@ class Trainer(object):
         model.summary()
         normed_train_data = self.norm(train_dataset, train_stats)
 
+        # EPOCHS = 2500
         EPOCHS = 2500
-
         history = model.fit(
             normed_train_data, train_labels,
             epochs=EPOCHS, validation_split=0.2, verbose=1,
@@ -361,9 +275,21 @@ class PrintDot(keras.callbacks.Callback):
 
 
 if __name__ == "__main__":
-    trainer = Trainer(target="polFunc", agent='quad')
+    """
+    Train policy network model and save weights
+    """
+    # trainer = Trainer(target="polFunc", agent='quad')
     # trainer.train_polFunc(less_data=False)
-    trainer.save_model_weights(type='pol')
+    # trainer.save_model_weights(type='pol')
+
+
+    """
+    Train value network model
+    """
+    trainer = Trainer(target="valFunc", agent='quad')
+    # trainer.train_valueFunc()
+    trainer.save_model_weights(type='val')
+
 
 
 # if __name__ == "__main__":
