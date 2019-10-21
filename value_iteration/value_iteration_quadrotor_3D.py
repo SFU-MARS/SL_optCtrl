@@ -18,7 +18,7 @@ class env_quadrotor_3d(object):
 
 		########### Drone Setting ##########
 		self.vx = (-5, 5)
-		self.vz = (-5, 5)
+		self.vz = (-6, 10)
 		self.theta = (-math.pi, math.pi)
 		self.omega = (-2*math.pi, 2*math.pi)
 		self.ranges = np.array([self.x, self.z, self.theta])
@@ -47,7 +47,7 @@ class env_quadrotor_3d(object):
 		# 3D action
 		# (x, z, theta)
 		# (vx, vz, omega)
-		self.state_step_num = np.array([21, 21, 9])
+		self.state_step_num = np.array([21, 31, 9])
 		self.action_step_num = np.array([5, 5, 6])
 		self.all_step_num = np.concatenate((self.state_step_num, self.action_step_num), axis = None)
 
@@ -186,6 +186,24 @@ class env_quadrotor_3d(object):
 			return 2
 
 		return 0
+
+	def check_crash_with_boundary(self, s, width):
+		# return 2 = crashed
+		# return 0 = no crash
+
+		if (self.obstacles is not None and len(self.obstacles)):
+			for obs in self.obstacles:
+				if (s[0] >= obs[0] - width  and  s[0]  <= obs[1] + width  and  
+					s[1] >= obs[2] - width  and  s[1]  <= obs[3] + width):
+					return 2
+
+		if (s[0] < self.ranges[0][0] + width  or  s[0] > self.ranges[0][1] - width):
+			return 2
+		if (s[1] < self.ranges[1][0] + width  or  s[1] > self.ranges[1][1] - width):
+			return 2
+
+		return 0
+
 
 	def check_overspeed(self, s):
 		# return 3 = overspeed
@@ -416,12 +434,23 @@ class env_quadrotor_3d(object):
 
 	def generate_samples_interpolate(self, n):
 		data = []
-		for dim in self.all:
-			d = np.random.uniform(dim[0], dim[1], n)
-			data.append(d)
-		data = np.array(data)
-		data = data.transpose()
-		
+		crash = 0
+
+		while (len(data) < n):
+			sample = []
+			for dim in self.all:
+				v = np.random.uniform(dim[0], dim[1], 1)
+				sample.append(v)
+			sample = np.array(sample, dtype = float).reshape(-1)
+			if (self.check_crash_with_boundary(sample[:3], width = 0.1) == 2):
+				crash += 1
+				continue
+
+			data.append(sample)
+
+		print(crash)
+		data = np.array(data, dtype = float)
+
 		dir_path = "./value_matrix_quadrotor_3D/"
 		file_name = "q_value_matrix_3.npy"
 		self.qvalue = np.load(dir_path + file_name)
@@ -450,12 +479,45 @@ class env_quadrotor_3d(object):
 	
 		dataset.to_csv("./qvalue.csv")
 
+	def fill_mpc_table(self):
+		file_path = "./test_samps_150_right_cleaned.csv"
+		# file_path = "./test_data.csv"
+		value_file_name = "./value_matrix_quadrotor_3D/q_value_matrix_3.npy"
+
+		data = pd.read_csv(file_path)
+		self.qvalue = np.load(value_file_name)
+
+		# print(max(data.vx))
+		# print(min(data.vx))
+
+		interpolating_function = RegularGridInterpolator((self.state_grid[0],
+															self.state_grid[1],
+															self.state_grid[2],
+															self.action_grid[0],
+															self.action_grid[1],
+															self.action_grid[2]),
+															self.qvalue,
+															bounds_error = False,
+															fill_value = self.reward_list[2])
+
+		qvalue = np.empty(data.shape[0], dtype = float)
+		for index, row in data.iterrows():
+			x = np.array([row.x, row.z, row.phi, row.vx, row.vz, row.w])
+			value = interpolating_function(x)
+			qvalue[index] = value
+		data['value'] = qvalue
+		# data.to_csv("./mpc_filled_value.csv")
+		data.to_csv("./test_samps_150_right_cleaned_filled.csv")
+
 
 
 
 env = env_quadrotor_3d()
 env.algorithm_init()
-env.generate_samples_interpolate(20000)
+# env.generate_samples_interpolate(20000)
 # env.value_output(0, True)
 # env.value_iteration()
-# env.plot_3D_result("./value_matrix_quadrotor_3D", "/value_matrix_3.npy", "average")
+# env.plot_3D_result("./value_matrix_quadrotor_3D", "/value_matrix_3.npy", "max")
+env.fill_mpc_table()
+
+
