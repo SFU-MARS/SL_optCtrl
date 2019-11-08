@@ -25,4 +25,8 @@
   output="screen">
   </node>
 
+  <!--<node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -1.5 -y -3.33973 -z 2.5 -model quadrotor"-->
+  <!--output="screen">-->
+  <!--</node>-->
+
 </launch>

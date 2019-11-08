@@ -1,11 +1,14 @@
-from ppo1_utils.mlp_policy import MlpPolicy, MlpPolicy_mod
-from ppo1_utils.pposgd_simple import *
+from ppo1.mlp_policy import MlpPolicy, MlpPolicy_mod
+from ppo1.pposgd_simple import *
 from collections import defaultdict
 from baselines.common import tf_util as U
 import numpy as np
 from collections import Counter
 import globals
 import pickle
+
+import pandas as pd
+import os, sys
 
 def create_session(num_cpu=None):
     U.make_session(num_cpu=num_cpu).__enter__()
@@ -139,7 +142,11 @@ def ppo_learn(env, policy,
     surr1 = ratio * atarg # surrogate from conservative policy iteration
     surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
     pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
-    vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
+    # vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
+    # AMEND: do not update weights of value network
+    vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
+    print("vf_loss:", vf_loss)
+
     total_loss = pol_surr + pol_entpen + vf_loss
     losses = [pol_surr, pol_entpen, vf_loss, meankl, meanent]
     loss_names = ["pol_surr", "pol_entpen", "vf_loss", "kl", "ent"]
@@ -212,6 +219,9 @@ def ppo_learn(env, policy,
 
         # ob, ac, atarg, ret, td1ret = map(np.concatenate, (obs, acs, atargs, rets, td1rets))
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
+        print("obs shape:", np.shape(ob))
+
+
         if save_obs:
             globals.g_iter_id += 1
             tmp_seg = {}
@@ -233,6 +243,16 @@ def ppo_learn(env, policy,
         #     rewards_map[start] += rewards[start]
 
         vpredbefore = seg["vpred"] # predicted value function before udpate
+        print("vpred shape:", np.shape(vpredbefore))
+
+        # --- collect real-time sim data and its vpred --- #
+        with open(os.environ['PROJ_HOME_3'] + '/tests/test_value_prediction/ppo_runs_data_2.csv', 'a') as f:
+            vpred_shaped = vpredbefore.reshape(-1,1)
+            obs_vpred = np.concatenate((ob, vpred_shaped), axis=1)
+            df_obs_vpred = pd.DataFrame(obs_vpred,columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'vpred_ppo'])
+            df_obs_vpred.to_csv(f, header=True)
+
+
         atarg = (atarg - atarg.mean()) / atarg.std() # standardized advantage function estimate
         d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)
         optim_batchsize = optim_batchsize or ob.shape[0]

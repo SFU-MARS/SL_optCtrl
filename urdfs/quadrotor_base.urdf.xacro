@@ -7,7 +7,8 @@
     <xacro:macro name="quadrotor_base_macro">
         <link name="base_link">
             <inertial>
-                <mass value="1.00"/>
+                <!--<mass value="1.00"/>-->
+                <mass value="1.25" />
                 <origin xyz="0 0 0"/>
                 <inertia ixx="0.125" ixy="0.0" ixz="0.0" iyy="0.125" iyz="0.0" izz="0.125"/>
             </inertial>
@@ -27,7 +28,7 @@
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
                     <!--<box size=".8 .8 .25" />-->
-                    <box size=".8 .8 .36" />
+                    <box size=".8 .8 .6" />
                     <!--<mesh>-->
                         <!--<uri>model://quadrotor/meshes/quadrotor_base.dae</uri>-->
                     <!--</mesh>-->

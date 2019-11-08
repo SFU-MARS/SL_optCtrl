@@ -6,6 +6,7 @@ from baselines.common.distributions import make_pdtype
 import os
 import pickle
 import numpy as np
+import pandas as pd
 
 class MlpPolicy(object):
     recurrent = False
@@ -123,9 +124,12 @@ class MlpPolicy_mod(object):
 
         ob = U.get_placeholder(name="ob", dtype=tf.float32, shape=[sequence_length] + list(ob_space.shape))
 
+        # ob = tf.Print(ob, [ob])
+
         with tf.variable_scope("obfilter"):
             self.ob_rms = RunningMeanStd(shape=ob_space.shape)
-
+            # self.ob_rms.mean = tf.Print(self.ob_rms.mean, [self.ob_rms.mean], "xubo print ob_rms_mean:")
+            # self.ob_rms.std  = tf.Print(self.ob_rms.std, [self.ob_rms.std], "xubo print ob_rms_std:")
 
         with tf.variable_scope('vf'):
             if not load_weights_vf:
@@ -137,12 +141,34 @@ class MlpPolicy_mod(object):
                     print("hid size:", hid_size)
                 self.vpred = tf.layers.dense(last_out, 1, name='final', kernel_initializer=U.normc_initializer(1.0))[:, 0]
             else:
-                with open(os.environ['PROJ_HOME_3'] + "/tf_model/quad/vf_weights.pkl", 'rb') as f:
+                with open(os.environ['PROJ_HOME_3'] + "/tf_model/quad/vf_merged_weights.pkl", 'rb') as f:
                     weights = pickle.load(f)
-                    print("shape of weights:", np.array(weights).shape)
-                    print("weights:", weights)
-                    print("loading external val weights!")
-                    obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
+                    # print("shape of weights:", np.array(weights).shape)
+                    # print("weights:", weights)
+                    print("loading external value weights!")
+
+                    # --- prepare stats for proper normalization --- #
+                    print("preparing stats mean and std for normalization ...")
+                    val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_filled.csv"
+                    val_filled_mpc_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_mpc_filled.csv"
+                    assert os.path.exists(val_filled_mpc_path) and os.path.exists(val_filled_path)
+                    colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7','d8']
+                    val_filled = pd.read_csv(val_filled_path, names=colnames, na_values="?", comment='\t', sep=",",
+                                             skipinitialspace=True, skiprows=1)
+                    val_filled_mpc = pd.read_csv(val_filled_mpc_path, names=colnames, na_values="?", comment='\t',
+                                                 sep=",",
+                                                 skipinitialspace=True, skiprows=1)
+
+                    stats_source = pd.concat([val_filled.copy(), val_filled_mpc.copy()])
+                    stats_source.dropna()
+                    stats_source.pop('value')
+                    stats = stats_source.describe()
+                    stats = stats.transpose()
+                    # ----------------------------------------------- #
+
+                    # obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
+                    # obz = tf.Print(obz, [obz], "xubo print obz:")
+                    obz = tf.clip_by_value((ob - np.array(stats['mean'])) / np.array(stats['std']), -5.0, 5.0)
                     out_1 = tf.layers.dense(inputs=obz,
                                               units=64,
                                               name="fc1",
@@ -165,6 +191,7 @@ class MlpPolicy_mod(object):
                                             kernel_initializer=tf.constant_initializer(weights[2][0]),
                                             bias_initializer=tf.constant_initializer(weights[2][1]),
                                             use_bias=True)[:,0]
+                    # self.vpred = tf.Print(self.vpred, [self.vpred], "xubo print vpred: ")
 
         with tf.variable_scope('pol'):
             if not load_weights_pol:

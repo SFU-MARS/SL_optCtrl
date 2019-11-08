@@ -29,13 +29,20 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # FOR TEST NEW WORLD.
 # need to be compatitable with model.sdf and world.sdf for custom setting
+
 # notice: it's not the gazebo pose state, not --> x,y,z,pitch,roll,yaw !!
 GOAL_STATE = np.array([4.0, 0., 9., 0., 0.75, 0.])
+
 # START_STATE = np.array([3.18232, 0., 3., 0., 0., 0.])
 # START_STATE = np.array([-1.5, -3.33973, 2.5, 0., 0., 0.])
-START_STATE = np.array([-1.5, 0, 2.5, 0, 0, 0])
+START_STATE = np.array([3.5, 0, 2.5, 0, 0, 0])
+
 # obstacles position groundtruth
 # OBSTACLES_POS = [(-1.5, 3), (3, 6), (-2, 7)]
+# (xpos, zpos, xsize, zsize)
+OBSTACLES_POS = [(-2, 5, 1.5, 1.5),
+                 (0, 8.5, 1.5, 1.0),
+                 (3.5, 5, 3, 1.5)]
 
 # wall 0,1,2,3
 WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.)]
@@ -100,9 +107,11 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.pre_obsrv = None
         self.reward_type = reward_type
         self.set_additional_goal = set_additional_goal
+
+        # no need any more
         # self.brsEngine = None
-        self.vf_load = False
-        self.pol_load = False
+
+        # used to monitor episode steps
         self.step_counter = 0
 
         # make it consistent between MPC and RL control stepsize. MPC: 0.05s; RL: 0.05s as well set at .world file
@@ -124,14 +133,18 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
             if laser_data.ranges[new_i] == float('Inf') or np.isinf(laser_data.ranges[new_i]):
+                # discretized_ranges.append(float('Inf'))
                 discretized_ranges.append(10)
             elif np.isnan(laser_data.ranges[new_i]):
-                discretized_ranges.append(0)
+                discretized_ranges.append(float('Nan'))
+                # discretized_ranges.append(0)
             else:
                 discretized_ranges.append(laser_data.ranges[new_i])
+                # discretized_ranges.append(int(laser_data.ranges[new_i]))
 
         return discretized_ranges
 
+    """
     def _in_obst(self, contact_data):
 
         if len(contact_data.states) != 0:
@@ -139,29 +152,31 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
                 return True
         else:
             return False
+    """
 
+    def _in_obst(self, laser_data, dynamic_data):
+         laser_min_range = 0.6
+         # collision_min_range = 0.8
+         tmp_x = dynamic_data.pose.position.x
+         tmp_y = dynamic_data.pose.position.y
+         tmp_z = dynamic_data.pose.position.z
 
-    # def _in_obst(self, laser_data, dynamic_data):
-    #     laser_min_range = 0.6
-    #     # collision_min_range = 0.8
-    #     tmp_x = dynamic_data.pose.position.x
-    #     tmp_y = dynamic_data.pose.position.y
-    #     tmp_z = dynamic_data.pose.position.z
-    #
-    #     if tmp_z <= laser_min_range:
-    #         # print("tmp_z:", tmp_z)
-    #         return True
-    #     if Euclid_dis((tmp_x, tmp_z), OBSTACLES_POS[0]) < 1.3 or Euclid_dis((tmp_x, tmp_z), OBSTACLES_POS[1]) < 1.3 \
-    #             or Euclid_dis((tmp_x, tmp_z), OBSTACLES_POS[2]) < 1.5 \
-    #             or np.abs(tmp_x - WALLS_POS[0][0]) < laser_min_range or np.abs(tmp_x - WALLS_POS[1][0]) < laser_min_range \
-    #             or np.abs(tmp_z - WALLS_POS[2][1]) < laser_min_range:
-    #         return True
-    #
-    #     # check the obstacle by sensor reflecting data
-    #     # for idx, item in enumerate(laser_data.ranges):
-    #     #     if laser_min_range > laser_data.ranges[idx] > 0:
-    #     #         return True
-    #     return False
+         if tmp_z <= laser_min_range:
+             # print("tmp_z:", tmp_z)
+             return True
+         if Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[0][0], OBSTACLES_POS[0][1])) < 0.5*np.sqrt((OBSTACLES_POS[0][2])**2 + (OBSTACLES_POS[0][3])**2) + 0.5 \
+            or Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[1][0], OBSTACLES_POS[1][1])) < 0.5*np.sqrt((OBSTACLES_POS[1][2])**2 + (OBSTACLES_POS[1][3])**2) + 0.5 \
+            or Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[2][0], OBSTACLES_POS[2][1])) < 0.5*np.sqrt((OBSTACLES_POS[2][2])**2 + (OBSTACLES_POS[2][3])**2) + 0.5 \
+            or np.abs(tmp_x - WALLS_POS[0][0]) < laser_min_range \
+            or np.abs(tmp_x - WALLS_POS[1][0]) < laser_min_range \
+            or np.abs(tmp_z - WALLS_POS[2][1]) < laser_min_range:
+             return True
+
+         # check the obstacle by sensor reflecting data
+         # for idx, item in enumerate(laser_data.ranges):
+         #     if laser_min_range > laser_data.ranges[idx] > 0:
+         #         return True
+         return False
 
 
     def _in_goal(self, state):
@@ -254,10 +269,6 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
         obsrv = [x, vx, z, vz, pitch, w] + discretized_laser_data
 
-        if any(np.isnan(np.array(obsrv))):
-            logger.record_tabular("found nan in observation:", obsrv)
-            obsrv = self.reset()
-
         # print("obs:", obsrv)
         return obsrv
 
@@ -285,7 +296,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
                 dynamic_data = self.get_model_state(model_name="quadrotor")
             else:
                 # print("proceeding customized resetting function!!")
-                cus_reset = self.customized_reset(np.random.choice(len(self.customized_reset)))
+                cus_reset = self.customized_reset[np.random.choice(len(self.customized_reset))]
                 self.reset_proxy()
                 pose = Pose()
                 pose.position.x = cus_reset[0]
@@ -362,9 +373,12 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         # --- no matter if we use pol_load. Remember when doing supervised learning, normalize obs and rescale actions ---
         # --- use [-1,1] is to be consisten with DDPG and PPO2 (from stable_baselines) default action range ---
         # --- rescale from [-1,1] -> [0,12] because MPC control range is [0,12], not [7,10] ---
-        print("action:", action)
-        action = np.clip(action, -1, 1)
-        action = [0 + (12 - 0) * (a_i - (-1)) / (1- (-1)) for a_i in action]
+        # print("action before:", action)
+        action = np.clip(action, -2, 2)
+        # action = [0 + (12 - 0) * (a_i - (-1)) / (1- (-1)) for a_i in action]
+        action = [7 + (10 - 7) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
+        # print("action after:", action)
+
 
         pre_phi = self.pre_obsrv[4]
         wrench = Wrench()
@@ -403,7 +417,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
 
         laser_data = rospy.wait_for_message('/scan', LaserScan, timeout=5)
-        contact_data = rospy.wait_for_message('/gazebo_ros_bumper', ContactsState, timeout=50)
+        # contact_data = rospy.wait_for_message('/gazebo_ros_bumper', ContactsState, timeout=50)
         # print("contact data:", contact_data)
 
         rospy.wait_for_service('/gazebo/pause_physics')
@@ -412,8 +426,21 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         except rospy.ServiceException as e:
             print("/gazebo/pause_physics service call failed")
 
+        done = False
+        suc = False
+        self.step_counter += 1
+
+
         obsrv = self.get_obsrv(laser_data, dynamic_data)
+        # --- special solution for nan/inf observation (especially in case of any invalid sensor readings) --- #
+        if any(np.isnan(np.array(obsrv))) or any(np.isinf(np.array(obsrv))):
+            logger.record_tabular("found nan or inf in observation:", obsrv)
+            obsrv = self.pre_obsrv
+            done = True
+            self.step_counter = 0
+
         self.pre_obsrv = obsrv
+
 
         assert self.reward_type is not None
         reward = 0
@@ -452,20 +479,23 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             reward += -np.sqrt(delta_x ** 2 + delta_z ** 2 + 10.0 * delta_theta ** 2)
         else:
             raise ValueError("no option for step reward!")
-        #
+
         # print("step reward:", reward)
         # print("self.reward_type:", self.reward_type)
-        done = False
-        suc = False
-        self.step_counter += 1
+
 
         # 1. when collision happens, done = True
+        if self._in_obst(laser_data, dynamic_data):
+            reward += self.collision_reward
+            done = True
+            self.step_counter = 0
+        """
         if self._in_obst(contact_data):
             reward += self.collision_reward
             done = True
             self.step_counter = 0
             # print("obstacle!")
-
+        """
         # 2. In the neighbor of goal state, done is True as well. Only considering velocity and pos
         if self._in_goal(np.array(obsrv[:6])):
             reward += self.goal_reward

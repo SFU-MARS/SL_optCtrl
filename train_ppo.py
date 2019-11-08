@@ -194,11 +194,8 @@ if __name__ == "__main__":
         # ---------------------------------------------------
 
         # Initialize environment and reward type
-        env = gym.make(args['gym_env'])
-        env.reward_type = args['reward_type']
-        env.set_additional_goal = args['set_additional_goal']
-        env.vf_load = True if args['vf_load'] == "yes" else False
-        env.pol_load = True if args['pol_load'] == "yes" else False
+        env = gym.make(args['gym_env'], reward_type=args['reward_type'], set_additional_goal=args['set_additional_goal'])
+
         logger.record_tabular("algo", args['algo'])
         logger.record_tabular("env", args['gym_env'])
         logger.record_tabular("env.set_additional_goal", env.set_additional_goal)
@@ -212,7 +209,7 @@ if __name__ == "__main__":
             maybe_mkdir(args['MODEL_DIR'])
             maybe_mkdir(args['FIGURE_DIR'])
             maybe_mkdir(args['RESULT_DIR'])
-            ppo_params_json = os.environ['PROJ_HOME_3']+'/ppo_params.json'
+            ppo_params_json = os.environ['PROJ_HOME_3']+'/ppo1/ppo_params.json'
 
             # Start to train the policy
             trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, args=args)
