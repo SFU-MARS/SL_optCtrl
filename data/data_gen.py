@@ -55,9 +55,9 @@ class Data_Generator(object):
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
             if sensor_data.ranges[new_i] == float('Inf') or np.isinf(sensor_data.ranges[new_i]):
-                discretized_ranges.append(10)
+                discretized_ranges.append(float('Inf'))
             elif np.isnan(sensor_data.ranges[new_i]):
-                discretized_ranges.append(0)
+                discretized_ranges.append(float('Nan'))
             else:
                 # discretized_ranges.append(int(sensor_data.ranges[new_i]))
                 discretized_ranges.append(sensor_data.ranges[new_i])
@@ -412,7 +412,7 @@ class Data_Generator(object):
 
             with open(unfilled_filename, 'r') as csvfile1, open(filled_filename, 'w', newline='') as csvfile2:
                 reader = csv.DictReader(csvfile1)
-                if data_form == 'valFunc':
+                if data_form == 'valFunc' or data_form == 'valFunc_mpc':
                     fieldnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7','d8']
                 elif data_form == 'polFunc':
                     fieldnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'a1', 'a2', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
@@ -436,7 +436,7 @@ class Data_Generator(object):
                     vz = float(row['vz'])
                     phi= float(row['phi'])
                     w  = float(row['w'])
-                    print("current state:", [x,vx,z,vz,phi,w])
+                    # print("current state:", [x,vx,z,vz,phi,w])
                     self.init_quad(x, vx, z, vz, phi, w)
 
                     sensor_data = None
@@ -460,8 +460,10 @@ class Data_Generator(object):
                     except rospy.ServiceException as e:
                         print("/gazebo/pause_physics service call failed")
                     discrete_sensor_data = self.discretize_sensor(sensor_data, 8)
-
-                    if data_form == 'valFunc':
+                    # --- ignore any invalid sensor readings --- #
+                    if np.isnan(discrete_sensor_data).any() or np.isinf(discrete_sensor_data).any():
+                        continue
+                    if data_form == 'valFunc' or data_form == 'valFunc_mpc':
                         value = float(row['value'])
                         tmp_dict = {'x': x, 'vx': vx, 'z': z, 'vz': vz, 'phi': phi, 'w': w, 'value':value,
                                     'd1': discrete_sensor_data[0],
@@ -486,7 +488,7 @@ class Data_Generator(object):
                                     'd6': discrete_sensor_data[5],
                                     'd7': discrete_sensor_data[6],
                                     'd8': discrete_sensor_data[7]}
-                        print("tmp_dict:", tmp_dict)
+                        # print("tmp_dict:", tmp_dict)
                         assert tmp_dict
                     else:
                         raise ValueError("invalid data form!!")
@@ -499,7 +501,7 @@ class Data_Generator(object):
 
             with open(unfilled_filename, 'r') as csvfile1, open(filled_filename, 'w', newline='') as csvfile2:
                 reader = csv.DictReader(csvfile1)
-                if data_form == 'valFunc':
+                if data_form == 'valFunc' or data_form == 'valFunc_mpc':
                     fieldnames = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5',
                                   'd6', 'd7', 'd8']
                 elif data_form == 'polFunc':
@@ -525,7 +527,7 @@ class Data_Generator(object):
                     delta = float(row['delta'])
                     vel = float(row['vel'])
 
-                    print("current state:", [x, y, theta, delta, vel])
+                    # print("current state:", [x, y, theta, delta, vel])
                     # Here since we want sensor data and sensor data is not related to delta and vel
                     self.init_car(x, y, theta)
 
@@ -551,7 +553,7 @@ class Data_Generator(object):
                         print("/ackermann_vehicle/gazebo/pause_physics service call failed")
                     discrete_sensor_data = self.discretize_sensor(sensor_data, 8)
 
-                    if data_form == 'valFunc':
+                    if data_form == 'valFunc' or data_form == 'valFunc_mpc':
                         value = float(row['value'])
                         tmp_dict = {'x': x, 'y': y, 'theta': theta, 'delta': delta, 'vel': vel, 'value':value,
                                     'd1': discrete_sensor_data[0],
@@ -578,22 +580,12 @@ class Data_Generator(object):
                     else:
                         raise ValueError("invalid data form!!")
 
-
-                    print("tmp_dict:", tmp_dict)
                     assert tmp_dict
                     writer.writerow(tmp_dict)
 
-    def data_clean(self, data_form='valFunc', agent='quad'):
-        filled_filename = os.environ['PROJ_HOME_3'] + '/data/quad/' + data_form + '_filled' + '.csv'
-        assert os.path.exists(filled_filename)
-        df = pd.read_csv(filled_filename)
-        condition = [df['d1'] != 10 and df['d2'] != 10 and  df['d3'] != 10 and  df['d4'] != 10 and df['d5'] != 10 and df['d6'] != 10 and df['d7'] != 10 and df['d8'] != 10]
-        df = df[condition]
-        cleaned_filename = os.environ['PROJ_HOME_3'] + '/data/quad/' + data_form + '_filled_cleaned' + '.csv'
-        df.to_csv(cleaned_filename)
+
 if __name__ == "__main__":
     print(sys.path)
     data_gen = Data_Generator()
-    # data_gen.data_clean(data_form='valFunc', agent='quad')
-    data_gen.gen_data(data_form='valFunc', agent='quad')
+    data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
     # data_gen.gen_data(data_form='polFunc', agent='quad')

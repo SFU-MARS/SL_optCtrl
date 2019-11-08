@@ -6,6 +6,7 @@ print(sns.__version__)
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
+from keras import backend as K
 
 import numpy as np
 import pickle
@@ -38,7 +39,8 @@ class Trainer(object):
             keras.layers.Dense(1)
         ])
         # optimizer = tf.keras.optimizers.RMSprop(0.001)
-        optimizer = tf.keras.optimizers.Adam(lr=1e-3, epsilon=1e-8)
+        # optimizer = tf.keras.optimizers.Adam(lr=0.001, epsilon=1e-8)
+        optimizer = tf.keras.optimizers.Adadelta()
         model.compile(loss='mean_squared_error',
                       optimizer = optimizer,
                       metrics=['mean_absolute_error', 'mean_squared_error'])
@@ -59,7 +61,7 @@ class Trainer(object):
         return model
 
 
-    def train_valueFunc(self):
+    def train_valFunc(self):
         dirpath = os.path.dirname(__file__)
         dataset_path = None
         if self.agent == 'car':
@@ -77,32 +79,28 @@ class Trainer(object):
             column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
             model_saving_path = './tf_model/quad/vf.h5'
 
-        raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
-                                  skipinitialspace=True, skiprows=1)
+        raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
 
         dataset = raw_dataset.copy()
-        # print(dataset.tail())
-        # print(dataset.isna().sum())
 
         dataset = dataset.dropna()
         train_dataset = dataset.sample(frac=1.0, random_state=0)
 
-        train_stats = train_dataset.describe()
-        train_stats.pop("value")
-        train_stats = train_stats.transpose()
+        stats = train_dataset.describe()
+        stats.pop("value")
+        stats = stats.transpose()
 
         train_labels = train_dataset.pop('value')
 
         model = self.build_value_model(self.input_shape)
         model.summary()
-        normed_train_data = self.norm(train_dataset, train_stats)
+        normed_train_data = self.norm(train_dataset, stats)
 
-        # EPOCHS = 2500
-        EPOCHS = 2500
+        EPOCHS = 5000
         history = model.fit(
-            normed_train_data, train_labels,
+            normed_train_data, train_labels, batch_size=64,
             epochs=EPOCHS, validation_split=0.2, verbose=1,
-            callbacks=[PrintDot()])
+            callbacks=[PrintDot(), LrDecay()])
 
         keras.models.save_model(model, model_saving_path)
         hist = pd.DataFrame(history.history)
@@ -177,10 +175,57 @@ class Trainer(object):
 
         self.plot_history(history)
 
+    def train_valFunc_merged(self):
+        dirpath = os.path.dirname(__file__)
+        val_filled_path = None
+        val_filled_mpc_path = None
+        if self.agent == 'car':
+            val_filled_mpc_path = dirpath + "/data/car/valFunc_mpc_filled.csv"
+            val_filled_path = dirpath + "/data/car/valFunc_filled.csv"
+            assert os.path.exists(val_filled_mpc_path) and os.path.exists(val_filled_path)
+            column_names = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+            model_saving_path = './tf_model/car/vf_merged.h5'
+        elif self.agent == 'quad':
+            val_filled_mpc_path = dirpath + "/data/quad/valFunc_mpc_filled.csv"
+            val_filled_path = dirpath + "/data/quad/valFunc_filled.csv"
+            assert os.path.exists(val_filled_mpc_path) and os.path.exists(val_filled_path)
+            column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+            model_saving_path = './tf_model/quad/vf_merged.h5'
+
+        val_filled = pd.read_csv(val_filled_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
+        val_filled_mpc = pd.read_csv(val_filled_mpc_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
+
+        dataset = pd.concat([val_filled.copy(), val_filled_mpc.copy()])
+        dataset = dataset.dropna()
+        train_dataset = dataset.sample(frac=1.0, random_state=0)
+
+        stats = train_dataset.describe()
+        stats.pop("value")
+        stats = stats.transpose()
+
+        train_labels = train_dataset.pop('value')
+
+        model = self.build_value_model(self.input_shape)
+        model.summary()
+        normed_train_data = self.norm(train_dataset, stats)
+
+        EPOCHS = 2500
+        history = model.fit(
+            normed_train_data, train_labels, batch_size=128,
+            epochs=EPOCHS, validation_split=0.2, verbose=1,
+            callbacks=[PrintDot()])
+
+        keras.models.save_model(model, model_saving_path)
+        hist = pd.DataFrame(history.history)
+        hist['epoch'] = history.epoch
+        hist.tail()
+
+        self.plot_history(history)
 
 
-    def norm(self, x, train_stats):
-        return (x - train_stats['mean']) / train_stats['std']
+    def norm(self, x, stats):
+        return (x - stats['mean']) / stats['std']
+
 
     def plot_history(self, history):
         hist = pd.DataFrame(history.history)
@@ -207,64 +252,28 @@ class Trainer(object):
         plt.legend()
         plt.show()
 
-    def save_model_weights(self, type):
-        if self.agent == 'quad':
-            vf_model_path = './tf_model/quad/vf.h5'
-            pf_model_path = './tf_model/quad/pf.h5'
-            vf_weights_savepath = './tf_model/quad/vf_weights.pkl'
-            pf_weights_savepath = './tf_model/quad/pf_weights.pkl'
-        elif self.agent == 'car':
-            vf_model_path = './tf_model/car/vf.h5'
-            pf_model_path = './tf_model/car/pf.h5'
-            vf_weights_savepath = './tf_model/car/vf_weights.pkl'
-            pf_weights_savepath = './tf_model/car/pf_weights.pkl'
+    def save_model_weights(self, model_path):
+        dir_path = os.path.dirname(model_path)
+        # print(dir_path)
+        model_weights_savepath = dir_path + '/' + os.path.splitext(model_path.split('/')[-1])[0] + '_weights.pkl'
 
-        if type == 'val':
-            assert os.path.exists(vf_model_path)
-            loaded_vf_model = tf.keras.models.load_model(filepath=vf_model_path)
-            print("trainable variables of valFunc model for " + self.agent + ":", tf.trainable_variables())
-            weights = []
-            for layer in loaded_vf_model.layers:
-                print("________________________")
-                print("layer name:", layer.name)
-                weight = layer.get_weights()
-                if layer.name.split('_')[0] != 'dropout':
-                    weights.append(weight)
-                # print(weight[0])
-                # print("+++")
-                # print(weight[1])
-                print("________________________")
-            print("weights:", weights)
-            print("shape of weights:", np.shape(weights))
+        assert os.path.exists(model_path)
+        model = tf.keras.models.load_model(filepath=model_path)
+        weights = []
+        print("starting saving weights for model {}".format(model_path.split('/')[-1]))
+        for layer in model.layers:
+            print("________________________")
+            print("layer name:", layer.name)
+            weight = layer.get_weights()
+            if layer.name.split('_')[0] != 'dropout':
+                weights.append(weight)
+            print("________________________")
+        print("weights:", weights)
+        print("shape of weights:", np.shape(weights))
 
-            with open(vf_weights_savepath, 'wb') as f:
-                pickle.dump(weights, f)
-                print("save value weights for " + self.agent + " successful!!")
-        elif type == 'pol':
-            assert os.path.exists(pf_model_path)
-            loaded_pf_model = tf.keras.models.load_model(filepath=pf_model_path)
-            print("trainable variables of polFunc model for " + self.agent + ":", tf.trainable_variables())
-
-            weights = []
-            for layer in loaded_pf_model.layers:
-                print("________________________")
-                print("layer name:", layer.name)
-                weight = layer.get_weights()
-                if layer.name.split('_')[0] != 'dropout':
-                    weights.append(weight)
-                # print(weight[0])
-                # print("+++")
-                # print(weight[1])
-                print("________________________")
-            print("weights:", weights)
-            print("shape of weights:", np.shape(weights))
-
-            with open(pf_weights_savepath, 'wb') as f:
-                pickle.dump(weights, f)
-                print("save policy weights for" + self.agent + " successful!!")
-        else:
-            raise ValueError("invalid saving type!!")
-
+        with open(model_weights_savepath, 'wb') as f:
+            pickle.dump(weights, f)
+            print("saving weights successfully for model {}!!".format(model_path.split('/')[-1]))
 
 
 
@@ -272,6 +281,20 @@ class PrintDot(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs):
         if epoch % 100 == 0: print('')
         print('.', end='')
+
+class LrDecay(keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs):
+        lr = self.model.optimizer.lr
+        lr_with_decay = lr
+        if epoch % 200 == 0:
+            lr_with_decay = lr * 0.985
+            print("updating lr by 0.975!!!")
+        self.model.optimizer.lr = lr_with_decay
+        # print(tf.Print(iterations, [iterations]))
+        # print(K.eval(lr_with_decay))
+        # self.model.optimizer.lr = lr_with_decay
+        # print(K.eval(self.model.optimizer.lr))
+
 
 
 if __name__ == "__main__":
@@ -287,8 +310,8 @@ if __name__ == "__main__":
     Train value network model
     """
     trainer = Trainer(target="valFunc", agent='quad')
-    # trainer.train_valueFunc()
-    trainer.save_model_weights(type='val')
+    trainer.train_valFunc_merged()
+    # trainer.save_model_weights("./tf_model/quad/vf_merged.h5")
 
 
 
