@@ -122,6 +122,77 @@ class env_quadrotor_r6d(object):
 				self.value[index] = self.reward_list[state_type]
 				delete_list.append(i)
 
+	def action_init(self):
+		self.acts = np.array(np.meshgrid(self.action_grid[0],
+										self.action_grid[1])).T.reshape(-1, self.actions.shape[0])
+
+	def value_iteration(self):
+		iteration = 0
+		while True:
+			delta = 0
+			for i, s in enumerate(self.states):
+				best_value = -10000000
+				state_type = self.state_check(s)
+				if (state_type > 0):
+					continue
+
+				current_reward = self.reward[i]
+
+				for i, a in enumerate(self.acts):
+					s_ = self.state_transition(s, a)
+
+					next_step_type = self.state_check(s_)
+					if (next_step_type >= 2):
+						next_step_value = self.reward_list[next_step_type]
+					else:
+						sub_value_matrix, sub_states = self.seek_neighbors_values(s_)
+						interpolating_function = RegularGridInterpolator((sub_states[0],
+																			sub_states[1],
+																			sub_states[2],
+																			sub_states[3],
+																			sub_states[4],
+																			sub_states[5]),
+																			sub_value_matrix,
+																			bounds_error = False,
+																			fill_value = self.reward_list[2])
+
+						next_step_value = interpolating_function(s_)
+
+					index_s = self.state_to_index(s)
+					index_a = self.action_to_index(a)
+					index_all = self.combine_to_tuple(index_s, index_a)
+
+					self.qvalue[index_all] = current_reward + self.discount * next_step_value
+					best_value = max(best_value, current_reward + self.discount * next_step_value)
+
+				index = tuple(self.state_to_index(s))
+				current_delta = abs(best_value - self.value[index])
+				delta = max(delta, current_delta)
+				self.value[index] = best_value
+
+			self.value_output(iteration, True)
+			print("iteration %d:" %(iteration))
+			print("delta: ", delta)
+			print("\n\n")
+
+			iteration += 1
+
+			if (delta < self.threshold):
+				break
+
+	def state_transition(self, state, action):
+		action_sum = np.sum(action)
+		action_diff = action[0] - action[1]
+
+		#TODO.....
+		state_ = np.array([state[0] + state[1] * self.delta,
+							state[1] + self.delta / self.mass * (-self.trans * state[1] + math.sin(state[2]) * action_sum),
+							state[2] + state[3] * self.delta,
+							state[3] + self.delta / self.inertia * (-self.rot * state[3] + self.length * action_diff)])
+
+		#TODO.....
+
+
 	def state_check(self, s):
 		temp = 0
 		temp = self.check_goal(s)
@@ -145,20 +216,24 @@ class env_quadrotor_r6d(object):
 
 		return 1
 
-	def check_crash(self, s):
+	def check_crash(self, s, width, radius):
 		# return 2 = crashed
 		# return 0 = no crash
 
-		if (self.obstacles is not None  and  Len(self.obstacles)):
+		if (self.obstacles is not None  and  len(self.obstacles)):
 			for obs in self.obstacles:
-				if (s[0] >= obs[0]  and  s[0] <= obs[1]):
-					return 2
-				if (s[1] >= obs[2]  and  s[1] <= obs[3]):
+				if (s[0] >= obs[0] - width - radius  and  
+					s[0] <= obs[1] + width + radius  and
+					s[1] >= obs[2] - width - radius  and  
+					s[1] <= obs[3] + width + radius):
 					return 2
 
-		if (s[0] < self.ranges[0][0]  or  s[0] > self.ranges[0][1]):
+		if (s[0] <= self.ranges[0][0] + radius  or  
+			s[0] >= self.ranges[0][1] - radius):
 			return 2
-		if (s[1] < self.ranges[1][0]  or  s[1] > self.ranges[1][1]):
+
+		if (s[1] < self.ranges[1][0] + radius  or  
+			s[1] > self.ranges[1][1] - radius):
 			return 2
 
 		return 0 
@@ -177,6 +252,27 @@ class env_quadrotor_r6d(object):
 
 		return 0
 		
+	def state_to_index(self, s):
+		grid = np.copy(self.state_grid)
+
+		index = []
+		for i, v in enumerate(s):
+			grid[i] = np.absolute(grid[i] - v)
+			index.append(grid[i].argmin())
+
+		return index
+
+	def action_to_index(self, a):
+		grid = np.copy(self.action_grid)
+
+		index = []
+		for i, v in enumerate(a):
+			grid[i] = np.absolute(grid[i] - v)
+			index.append(grid[i].argmin())
+
+		return index
+
+
 
 
 if __name__ == "__main__":
