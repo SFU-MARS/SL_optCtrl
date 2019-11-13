@@ -15,7 +15,7 @@ class env_car_4d(object):
 		self.z = (0, 10)
 		self.obstacles = None
 
-		########### Drone Setting ##########
+		########### Car Setting ##########
 		self.x = (0, 10)
 		self.y = (0, 10)
 		self.theta = (-math.pi, math.pi)
@@ -26,15 +26,19 @@ class env_car_4d(object):
 
 		self.ranges = np.array([self.x, self.y, self.theta, self.steer_angle])
 		self.actions = np.array([self.v, self.omega])
+
+		self.length = 0.3
 		########### Goal Setting ##########
 		self.goal_x = (8, 10)
 		self.goal_z = (8, 10)
 		self.goal_theta = self.theta
-		self.goals = np.array([self.goal_x, self.goal_z, self.goal_theta])
+		self.goal_steer_angle = self.steer_angle
+		self.goals = np.array([self.goal_x, self.goal_z, self.goal_theta, self.goal_steer_angle])
 
 		########### Algorithm Setting ##########
 		self.discount = 0.90
 		self.threshold = 0.5
+		self.delta = 0.2
 
 		# reward = [regula state, in goal, crashed]
 		self.reward_list = np.array([0, 1000, -400], dtype = float)
@@ -44,7 +48,7 @@ class env_car_4d(object):
 		# 2D action
 		# (x, y, theta, steer_angle)
 		# (v, omega)
-		self.state_step_num = np.array([21, 31, 9, 12])
+		self.state_step_num = np.array([5, 5, 9, 5])
 		self.action_step_num = np.array([5, 5])
 		self.all_step_num = np.concatenate((self.state_step_num, self.action_step_num), axis = None)
 
@@ -107,13 +111,13 @@ class env_car_4d(object):
 				self.value[index] = self.reward_list[state_type]
 				self.reward[i] = self.reward_list[state_type]
 
-		print(self.states)
+		# print(self.states)
 
 
 	def action_init(self):
 		self.acts = np.array(np.meshgrid(self.action_grid[0],
 										self.action_grid[1])).T.reshape(-1, self.actions.shape[0])
-		print(self.acts)
+		# print(self.acts)
 
 	def state_check(self, s):
 		temp = 0
@@ -275,25 +279,34 @@ class env_car_4d(object):
 		return self.value[r[0][0]:r[0][1], 
 							r[1][0]:r[1][1], 
 							r[2][0]:r[2][1], 
-							f[3][0]:r[3][1]], sub_states
+							r[3][0]:r[3][1]], sub_states
 
-	# TODO:
-	# def state_transition(self, state, action):
-	# 	state_ = np.array([state[0] + action[0] * self.delta,
-	# 						state[1] + action[1] * self.delta,
-	# 						state[2] + action[2] * self.delta])
+	def state_transition(self, state, action):
+		state_ = np.array([state[0] + self.delta * action[0] * math.cos(state[2] + state[3]),
+							state[1] + self.delta * action[0] * math.sin(state[2] + state[3]),
+							state[2] + (self.delta * action[0] * math.sin(state[3])) / self.length,
+							state[3] + self.delta * action[1]	])
 
-	# 	while (state_[2] > self.theta[1]):
-	# 		state_[2] = self.theta[0] + (state_[2] - self.theta[1])
+		while (state_[2] > self.theta[1]):
+			state_[2] = self.theta[0] + (state_[2] - self.theta[1])
 
-	# 	while (state_[2] < self.theta[0]):
-	# 		state_[2] = self.theta[1] + (state_[2] - self.theta[0])
+		while (state_[2] < self.theta[0]):
+			state_[2] = self.theta[1] + (state_[2] - self.theta[0])
 
-	# 	return state_
+		while (state_[3] > self.steer_angle[1]):
+			state_[3] = self.steer_angle[0] + (state_[3] - self.steer_angle[1])
+
+		while (state_[3] < self.steer_angle[0]):
+			state_[3] = self.steer_angle[1] + (state_[3] - self.steer_angle[0])
+
+		return state_
 
 
 
 
 env = env_car_4d()
 env.algorithm_init()
-# env.value_iteration()
+# state = np.array([1, 2, math.pi / 2, math.pi / 4], dtype = float)
+# action = np.array([1, math.pi / 8], dtype = float)
+# print(env.state_transition(state, action))
+env.value_iteration()
