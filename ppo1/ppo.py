@@ -143,9 +143,11 @@ def ppo_learn(env, policy,
     surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
     pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
     # vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
-    # AMEND: do not update weights of value network
+
+
+    # # AMEND: do not update weights of value network, if loading customized external value initialization.
     vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
-    print("vf_loss:", vf_loss)
+    # print("vf_loss:", vf_loss)
 
     total_loss = pol_surr + pol_entpen + vf_loss
     losses = [pol_surr, pol_entpen, vf_loss, meankl, meanent]
@@ -242,16 +244,18 @@ def ppo_learn(env, policy,
         # for start in rewards:
         #     rewards_map[start] += rewards[start]
 
-        vpredbefore = seg["vpred"] # predicted value function before udpate
-        print("vpred shape:", np.shape(vpredbefore))
+
 
         # --- collect real-time sim data and its vpred --- #
-        with open(os.environ['PROJ_HOME_3'] + '/tests/test_value_prediction/ppo_runs_data_2.csv', 'a') as f:
+        vpredbefore = seg["vpred"]  # predicted value function before udpate
+        print("vpred shape:", np.shape(vpredbefore))
+
+        with open(os.environ['PROJ_HOME_3'] + '/tests/test_value_prediction/ppo_runs_data_original_valueFunc.csv', 'a') as f:
             vpred_shaped = vpredbefore.reshape(-1,1)
             obs_vpred = np.concatenate((ob, vpred_shaped), axis=1)
             df_obs_vpred = pd.DataFrame(obs_vpred,columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'vpred_ppo'])
             df_obs_vpred.to_csv(f, header=True)
-
+        # ------------------------------------------------ #
 
         atarg = (atarg - atarg.mean()) / atarg.std() # standardized advantage function estimate
         d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)

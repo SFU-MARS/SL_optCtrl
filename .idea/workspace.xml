@@ -2,40 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/test_value_prediction/test_value_prediction.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_vpg_off_policy/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_vpg_off_policy/saver.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/data_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_gen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/quad/polFunc_filled_good.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/quad/valFunc.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/quad/valFunc_filled.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" beforeDir="false" afterPath="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/launch/ackermann_vehicle.launch" beforeDir="false" afterPath="$PROJECT_DIR$/launch/ackermann_vehicle.launch" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ppo1/mlp_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/mlp_policy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ppo1/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/ppo_params.json" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo_params.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/quick_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/quick_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs_log/29-Sep-2019_18-58-40PlanarQuadEnv-v0_hand_craft_ppo_pol/log.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs_log/29-Sep-2019_18-58-40PlanarQuadEnv-v0_hand_craft_ppo_pol/model/checkpoint" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs_log/29-Sep-2019_18-58-40PlanarQuadEnv-v0_hand_craft_ppo_pol/model/iter_0.data-00000-of-00001" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs_log/29-Sep-2019_18-58-40PlanarQuadEnv-v0_hand_craft_ppo_pol/model/iter_0.index" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs_log/29-Sep-2019_18-58-40PlanarQuadEnv-v0_hand_craft_ppo_pol/model/iter_0.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs_log/29-Sep-2019_18-58-40PlanarQuadEnv-v0_hand_craft_ppo_pol/progress.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_VPG_off_policy/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_transition_mismatch/test_transition_mismatch.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_VPG_off_policy/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_vpg_off_policy/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_VPG_off_policy/test_VPG_off_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_vpg_off_policy/test_vpg_off_policy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_VPG_off_policy/vpg.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_vpg_off_policy/vpg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_VPG_off_policy/vpg_transitions.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tf_model/quad/pf.h5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tf_model/quad/pf_weights.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tf_model/quad/vf.h5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tf_model/quad/vf_weights.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_value_prediction/.~lock.ppo_runs_data_2.csv#" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_value_prediction/ppo_runs_data.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_value_prediction/ppo_runs_data_2.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tf_model/quad/vf_merged.h5" beforeDir="false" afterPath="$PROJECT_DIR$/tf_model/quad/vf_from_vi_merged_data.h5" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tf_model/quad/vf_merged_weights.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/tf_model/quad/vf_from_vi_merged_data_weights.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro" beforeDir="false" afterPath="$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/worlds/air_space_201910.world" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/air_space_201910.world" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/urdfs/tmp.urdf" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -62,7 +44,7 @@
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_errors.coverage" NAME="test_errors Coverage Results" MODIFIED="1571707901279" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_possible_errors" />
     <SUITE FILE_PATH="coverage/SL_optControl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562626926228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_ACER.coverage" NAME="test_ACER Coverage Results" MODIFIED="1571191822315" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_ACER" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$test_weight_transfer.coverage" NAME="test_weight_transfer Coverage Results" MODIFIED="1571205947831" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_weight_transfer" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$test_weight_transfer.coverage" NAME="test_weight_transfer Coverage Results" MODIFIED="1573776759249" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_weight_transfer" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_VPG_off_policy.coverage" NAME="test_VPG_off_policy Coverage Results" MODIFIED="1572050627600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_VPG_off_policy" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_behavior_cloning.coverage" NAME="test_behavior_cloning Coverage Results" MODIFIED="1570139917690" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/stable-baselines/my_tests" />
   </component>
@@ -85,44 +67,70 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="167">
-              <caret line="244" column="75" selection-start-line="244" selection-start-column="75" selection-end-line="244" selection-end-column="75" />
+            <state relative-caret-position="132">
+              <caret line="149" column="32" selection-start-line="149" selection-start-column="32" selection-end-line="149" selection-end-column="32" />
+              <folding>
+                <element signature="e#0#52#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ppo1/pposgd_simple.py">
+        <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
-              <caret line="41" column="25" selection-start-line="41" selection-start-column="25" selection-end-line="41" selection-end-column="25" />
+            <state relative-caret-position="464">
+              <caret line="140" column="48" selection-start-line="140" selection-start-column="48" selection-end-line="140" selection-end-column="48" />
               <folding>
-                <element signature="e#0#74#0" expanded="true" />
+                <element signature="e#0#64#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="164">
+              <caret line="23" column="17" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="325">
+              <caret line="524" column="19" selection-start-line="524" selection-start-column="19" selection-end-line="524" selection-end-column="63" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/train_ppo.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="545">
+              <caret line="91" column="18" selection-start-line="91" selection-start-column="18" selection-end-line="91" selection-end-column="18" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
+        <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="156" column="47" lean-forward="true" selection-start-line="156" selection-start-column="47" selection-end-line="156" selection-end-column="47" />
+            <state relative-caret-position="487">
+              <caret line="143" column="17" lean-forward="true" selection-start-line="143" selection-start-column="17" selection-end-line="143" selection-end-column="17" />
               <folding>
-                <element signature="e#0#64#0" expanded="true" />
-                <element signature="e#265#4945#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/baselines/common/tf_util.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-171">
-              <caret line="136" column="4" selection-start-line="136" selection-start-column="4" selection-end-line="136" selection-end-column="4" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
+                <element signature="e#0#10#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -131,10 +139,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/quick_trainer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="812">
-              <caret line="197" column="71" selection-start-line="197" selection-start-column="71" selection-end-line="197" selection-end-column="71" />
+            <state relative-caret-position="198">
+              <caret line="266" column="40" selection-start-line="266" selection-start-column="40" selection-end-line="266" selection-end-column="40" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
+                <element signature="e#12553#12581#0" />
               </folding>
             </state>
           </provider>
@@ -143,21 +152,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/run.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="20" column="15" selection-start-line="20" selection-start-column="15" selection-end-line="20" selection-end-column="15" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/test_value_prediction.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="287">
-              <caret line="154" column="8" selection-start-line="154" selection-start-column="8" selection-end-line="154" selection-end-column="8" />
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-                <element signature="e#2337#2365#0" />
-              </folding>
+            <state relative-caret-position="180">
+              <caret line="10" column="34" selection-start-line="10" selection-start-column="34" selection-end-line="10" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -173,14 +169,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>max_action</find>
-      <find>in</find>
-      <find>pol_load</find>
-      <find>in goal</find>
-      <find>pretrain</find>
-      <find>choice</find>
-      <find>core</find>
-      <find>replay</find>
       <find>normalize</find>
       <find>num_procs</find>
       <find>mlp</find>
@@ -203,6 +191,14 @@
       <find>run</find>
       <find>vpred</find>
       <find>vf_loss</find>
+      <find>session</find>
+      <find>pi/vf/fc2/kernel</find>
+      <find>pi/vf/final/kernel</find>
+      <find>pi/vf/final/bias</find>
+      <find>cube</find>
+      <find>cube_1</find>
+      <find>get_model_state</find>
+      <find>self.state_space</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -212,12 +208,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/worlds/air_space_2.world" />
-        <option value="$PROJECT_DIR$/stable-baselines/my_test/test_behavior_cloning.py" />
-        <option value="$PROJECT_DIR$/ddpg/training.py" />
-        <option value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/ppo2/ppo2.py" />
-        <option value="$PROJECT_DIR$/ppo1_utils/mlp_policy.py" />
-        <option value="$PROJECT_DIR$/ppo1_utils/pposgd_simple.py" />
         <option value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/trpo_mpi/utils.py" />
         <option value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/stable_baselines/common/policies.py" />
         <option value="$PROJECT_DIR$/stable-baselines/my_tests/test_behavior_cloning.py" />
@@ -230,7 +220,6 @@
         <option value="$PROJECT_DIR$/acer/replay_memory.py" />
         <option value="$PROJECT_DIR$/test/test_ACER/test_ACER.py" />
         <option value="$PROJECT_DIR$/acer/__init__.py" />
-        <option value="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" />
         <option value="$PROJECT_DIR$/acer/main.py" />
         <option value="$PROJECT_DIR$/tests/test_ACER/test_ACER.py" />
         <option value="$PROJECT_DIR$/spinningup/spinup/utils/run_utils.py" />
@@ -252,21 +241,29 @@
         <option value="$PROJECT_DIR$/tests/test_vpg_off_policy/core.py" />
         <option value="$PROJECT_DIR$/tests/test_vpg_off_policy/vpg.py" />
         <option value="$PROJECT_DIR$/tests/test_transition_mismatch/test_transition_mismatch.py" />
-        <option value="$PROJECT_DIR$/train_ppo.py" />
         <option value="$PROJECT_DIR$/urdfs/quadrotor_base.urdf.xacro" />
         <option value="$PROJECT_DIR$/worlds/air_space_201910.world" />
-        <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" />
         <option value="$PROJECT_DIR$/ppo1/ppo_params.json" />
-        <option value="$PROJECT_DIR$/run.sh" />
         <option value="$PROJECT_DIR$/worlds/air_space_tmp.world" />
         <option value="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" />
         <option value="$PROJECT_DIR$/tests/test_value_prediction/test_value_prediction.py" />
-        <option value="$PROJECT_DIR$/ppo1/ppo.py" />
+        <option value="$PROJECT_DIR$/train_ppo.py" />
+        <option value="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" />
         <option value="$PROJECT_DIR$/ppo1/mlp_policy.py" />
+        <option value="$PROJECT_DIR$/ppo1/ppo.py" />
+        <option value="$PROJECT_DIR$/runs_log/14-Nov-2019_16-22-26PlanarQuadEnv-v0_hand_craft_ppo_vf/README.md" />
+        <option value="$PROJECT_DIR$/runs_log/14-Nov-2019_16-59-22PlanarQuadEnv-v0_hand_craft_ppo_vf/README.md" />
+        <option value="$PROJECT_DIR$/run.sh" />
+        <option value="$PROJECT_DIR$/runs_log/15-Nov-2019_13-36-22PlanarQuadEnv-v0_hand_craft_ppo_vf/README.md" />
+        <option value="$PROJECT_DIR$/launch/ackermann_vehicle.launch" />
+        <option value="$PROJECT_DIR$/worlds/playground.world" />
+        <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" />
+        <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-1" />
     <option name="y" value="24" />
     <option name="width" value="840" />
     <option name="height" value="1002" />
@@ -294,8 +291,20 @@
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="quad" type="462c0819:PsiDirectoryNode" />
+              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
+              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
+              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
+              <item name="envs" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
@@ -352,6 +361,12 @@
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="tests" type="462c0819:PsiDirectoryNode" />
+              <item name="test_weight_transfer" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
               <item name="tf_model" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -385,19 +400,19 @@
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/worlds" />
-      <recent name="$PROJECT_DIR$/data/quad" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/stable-baselines/my_tests" />
-      <recent name="$PROJECT_DIR$/MPC" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/tests/test_VPG_off_policy" />
       <recent name="$PROJECT_DIR$/data/backup/20191014" />
       <recent name="$PROJECT_DIR$/data/backup" />
       <recent name="$PROJECT_DIR$/data" />
       <recent name="$PROJECT_DIR$/ppo1" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/runs_log/15-Nov-2019_13-36-22PlanarQuadEnv-v0_hand_craft_ppo_vf" />
+      <recent name="$PROJECT_DIR$/worlds" />
+      <recent name="$PROJECT_DIR$/data/quad" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/stable-baselines/my_tests" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -438,28 +453,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/quick_trainer.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="saver" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="SL_optControl" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/test_vpg_off_policy" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/test_vpg_off_policy/saver.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -534,21 +527,43 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="test_weight_transfer" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="SL_optControl" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/test_weight_transfer" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Bash.run.sh" />
       <item itemvalue="Python.quick_trainer" />
-      <item itemvalue="Python.saver" />
       <item itemvalue="Python.test_vpg_off_policy" />
       <item itemvalue="Python.test_transition_mismatch" />
       <item itemvalue="Python.test_value_prediction" />
+      <item itemvalue="Python.test_weight_transfer" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Bash.run.sh" />
+        <item itemvalue="Python.test_weight_transfer" />
         <item itemvalue="Python.test_value_prediction" />
         <item itemvalue="Python.test_transition_mismatch" />
         <item itemvalue="Python.test_vpg_off_policy" />
-        <item itemvalue="Python.saver" />
       </list>
     </recent_temporary>
   </component>
@@ -601,12 +616,14 @@
       <workItem from="1572562129157" duration="5047000" />
       <workItem from="1572651882916" duration="39619000" />
       <workItem from="1572905212175" duration="1740000" />
-      <workItem from="1573079212354" duration="8982000" />
+      <workItem from="1573079212354" duration="10684000" />
+      <workItem from="1573606039065" duration="4152000" />
+      <workItem from="1573767283558" duration="26898000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="482285000" />
+    <option name="totallyTimeSpent" value="515037000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -621,12 +638,12 @@
     <frame x="-1" y="24" width="1682" height="1003" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25243902" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2597561" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49939024" visible="true" weight="0.42393735" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49939024" weight="0.46420583" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39597315" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -635,13 +652,13 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32938644" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50060976" side_tool="true" weight="0.20357941" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.30425057" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.89330304" />
       <window_info anchor="bottom" id="Python Console" order="12" weight="0.3291714" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Database" order="3" weight="0.3294621" />
-      <window_info anchor="right" id="SciView" order="4" side_tool="true" weight="0.65182924" />
+      <window_info anchor="right" id="SciView" order="4" side_tool="true" weight="0.6512195" />
     </layout>
     <layout-to-restore>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15831557" />
@@ -728,90 +745,6 @@
     <SUITE FILE_PATH="coverage/SL_optCtrl$spawn_population.coverage" NAME="spawn_population Coverage Results" MODIFIED="1567491465422" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/worlds" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/spinningup/spinup/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3674">
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spinningup/setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
-          <folding>
-            <element signature="e#0#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spinningup/spinup/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#13#52#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spinningup/spinup/algos/vpg/core.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1064">
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spinningup/spinup/user_config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/tensorflow/python/framework/op_def_library.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="482" selection-start-line="482" selection-end-line="482" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/tensorflow/python/ops/array_ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="1113" selection-start-line="1113" selection-end-line="1113" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/tensorflow/python/ops/gen_array_ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="1029" selection-start-line="1029" selection-end-line="1029" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/lib/python3.5/site-packages/tensorflow/python/framework/ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="930" selection-start-line="930" selection-end-line="930" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/spinningup/spinup/utils/mpi_tf.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="134">
-          <caret line="25" column="30" selection-start-line="25" selection-start-column="30" selection-end-line="25" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/spinningup/spinup/algos/vpg/vpg.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
@@ -841,15 +774,6 @@
           <caret line="19" column="20" lean-forward="true" selection-start-line="19" selection-start-column="20" selection-end-line="19" selection-end-column="20" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -942,16 +866,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/train_ppo.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3469">
-          <caret line="214" column="58" selection-start-line="214" selection-start-column="58" selection-end-line="214" selection-end-column="58" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/runs_log/02-Nov-2019_13-04-05PlanarQuadEnv-v0_distance_ppo/log.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="206">
@@ -976,16 +890,6 @@
       <provider selected="true" editor-type-id="csv-text-editor" />
       <provider editor-type-id="csv-table-editor">
         <state showInfoPanel="true" fixedHeaders="false" rowLines="3" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4356">
-          <caret line="269" column="65" selection-start-line="269" selection-start-column="16" selection-end-line="269" selection-end-column="65" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/baselines/common/mpi_running_mean_std.py">
@@ -1041,19 +945,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/quick_trainer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="812">
-          <caret line="197" column="71" selection-start-line="197" selection-start-column="71" selection-end-line="197" selection-end-column="71" />
-          <folding>
-            <element signature="e#0#19#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/train_ddpg.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/test_value_prediction.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="287">
+        <state relative-caret-position="812">
           <caret line="154" column="8" selection-start-line="154" selection-start-column="8" selection-end-line="154" selection-end-column="8" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
@@ -1062,33 +959,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/run.sh">
+    <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/ppo_runs_data_2.csv">
+      <provider selected="true" editor-type-id="LargeFileEditor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/stable_baselines/common/base_class.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="20" column="15" selection-start-line="20" selection-start-column="15" selection-end-line="20" selection-end-column="15" />
+        <state relative-caret-position="169">
+          <caret line="431" column="8" selection-start-line="431" selection-start-column="8" selection-end-line="431" selection-end-column="8" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/baselines/common/tf_util.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-171">
-          <caret line="136" column="4" selection-start-line="136" selection-start-column="4" selection-end-line="136" selection-end-column="4" />
+        <state relative-caret-position="270">
+          <caret line="330" selection-start-line="330" selection-end-line="330" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="167">
-          <caret line="244" column="75" selection-start-line="244" selection-start-column="75" selection-end-line="244" selection-end-column="75" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ppo1/pposgd_simple.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
+        <state relative-caret-position="-882">
           <caret line="41" column="25" selection-start-line="41" selection-start-column="25" selection-end-line="41" selection-end-column="25" />
           <folding>
             <element signature="e#0#74#0" expanded="true" />
@@ -1096,13 +989,130 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log/14-Nov-2019_16-22-26PlanarQuadEnv-v0_hand_craft_ppo_vf/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor>
+            <caret column="91" selection-start-column="91" selection-end-column="91" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/quick_trainer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="266" column="40" selection-start-line="266" selection-start-column="40" selection-end-line="266" selection-end-column="40" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+            <element signature="e#12553#12581#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/ppo_runs_data_original_valueFunc.csv">
+      <provider selected="true" editor-type-id="csv-text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="164">
+          <caret line="23" column="17" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="156" column="47" lean-forward="true" selection-start-line="156" selection-start-column="47" selection-end-line="156" selection-end-column="47" />
+        <state relative-caret-position="464">
+          <caret line="140" column="48" selection-start-line="140" selection-start-column="48" selection-end-line="140" selection-end-column="48" />
           <folding>
             <element signature="e#0#64#0" expanded="true" />
-            <element signature="e#265#4945#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log/14-Nov-2019_16-59-22PlanarQuadEnv-v0_hand_craft_ppo_vf/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="18">
+            <caret line="1" column="33" selection-start-line="1" selection-start-column="33" selection-end-line="1" selection-end-column="33" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="149" column="32" selection-start-line="149" selection-start-column="32" selection-end-line="149" selection-end-column="32" />
+          <folding>
+            <element signature="e#0#52#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="10" column="34" selection-start-line="10" selection-start-column="34" selection-end-line="10" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log/15-Nov-2019_13-36-22PlanarQuadEnv-v0_hand_craft_ppo_vf/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="54">
+            <caret line="3" selection-start-line="3" selection-end-line="3" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/worlds/playground.world">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="239" column="41" lean-forward="true" selection-start-line="239" selection-start-column="41" selection-end-line="239" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/urdfs/tmp.urdf">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/launch/ackermann_vehicle.launch">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="494">
+          <caret line="64" column="58" lean-forward="true" selection-start-line="64" selection-start-column="58" selection-end-line="64" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train_ppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="545">
+          <caret line="91" column="18" selection-start-line="91" selection-start-column="18" selection-end-line="91" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="325">
+          <caret line="524" column="19" selection-start-line="524" selection-start-column="19" selection-end-line="524" selection-end-column="63" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="487">
+          <caret line="143" column="17" lean-forward="true" selection-start-line="143" selection-start-column="17" selection-end-line="143" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>

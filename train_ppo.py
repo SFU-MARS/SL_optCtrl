@@ -170,8 +170,7 @@ if __name__ == "__main__":
         RUN_DIR = MODEL_DIR = FIGURE_DIR = RESULT_DIR = None
         if args['algo'] == "ppo":
             RUN_DIR = os.path.join(os.getcwd(), 'runs_log',
-                                   strftime(
-                                       '%d-%b-%Y_%H-%M-%S') + args['gym_env'] + '_' + args['reward_type'] + '_' + args['algo'])
+                                   strftime('%d-%b-%Y_%H-%M-%S') + args['gym_env'] + '_' + args['reward_type'] + '_' + args['algo'])
             if args['vf_load'] == "yes":
                 RUN_DIR = RUN_DIR + '_' + 'vf'
             if args['pol_load'] == "yes":
@@ -216,7 +215,8 @@ if __name__ == "__main__":
             trained_policy.save_model(args['MODEL_DIR'])
             #
             # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_icra/04-Sep-2019_08-59-16PlanarQuadEnv-v0_hand_craft_ppo/model'
-            # trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=3, args=args)
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log/02-Nov-2019_22-34-26PlanarQuadEnv-v0_hand_craft_ppo/model'
+            # trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer='best', args=args)
 
         else:
             raise ValueError("arg algorithm is invalid!")
