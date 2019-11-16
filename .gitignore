@@ -1,2 +1,3 @@
-data/backup/
 runs_log/
+data/backup/
+tests/**/*.csv
