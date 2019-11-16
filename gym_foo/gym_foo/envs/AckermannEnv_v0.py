@@ -27,10 +27,19 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 
 
-# For ackermann bicycle model, the dynamics is 5D.
+# For ackermann bicycle model, the dynamics is 4D.
+"""
+state: (x,y,theta,delta)
+control: (v, w)
+
+    x_dot = v * cos(\theta + \delta)
+    y_dot = v * sin(\theta + \delta)
+    theta_dot = v * sin(\delta) / L
+    delta_dot = w
+"""
 # x, y, theta, steering_angle
-# GOAL_STATE = ...
-START_STATE = np.array([4.2422, 0, 1.5804, 0, 0])
+GOAL_STATE = np.array([4.0, 4.0, 1.5804, 0])
+START_STATE = np.array([-0.22, -3.27, 1.5804, 0])
 
 
 class AckermannEnv_v0(gazebo_env.GazeboEnv):
@@ -38,11 +47,11 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
         # Launch the simulation with the given launchfile name
         gazebo_env.GazeboEnv.__init__(self, "DubinsCarCircuitGround_v0.launch")
 
-        self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
-        self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
-        self.reset_proxy = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
-        self.get_model_states = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
-        self.set_model_states = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+        self.unpause = rospy.ServiceProxy('/ackermann_vehicle/gazebo/unpause_physics', Empty)
+        self.pause = rospy.ServiceProxy('/ackermann_vehicle/gazebo/pause_physics', Empty)
+        self.reset_proxy = rospy.ServiceProxy('/ackermann_vehicle/gazebo/reset_simulation', Empty)
+        self.get_model_state = rospy.ServiceProxy('/ackermann_vehicle/gazebo/get_model_state', GetModelState)
+        self.set_model_state = rospy.ServiceProxy('/ackermann_vehicle/gazebo/set_model_state', SetModelState)
         srv_get_link_state = rospy.ServiceProxy('/ackermann_vehicle/gazebo/get_link_state', GetLinkState)
         srv_set_link_state = rospy.ServiceProxy('/ackermann_vehicle/gazebo/set_link_state', SetLinkState)
 
@@ -51,15 +60,11 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
         self._seed()
 
         self.laser_num = 8
-        self.state_dim = 5
+        self.state_dim = 4
         self.action_dim = 2
 
-        # high_state = np.array([5., 5., np.pi, 2., 0.5])
-        # high_action = np.array([2., .5])
-        # high_obsrv = np.array([5., 5., np.pi, 2., 0.5] + [5 * 2] * self.laser_num)
-        # self.state_space = spaces.Box(low=-high_state, high=high_state)
-        # self.action_space = spaces.Box(low=-high_action, high=high_action)
-        # self.observation_space = spaces.Box(low=np.array([-5, -5, -np.pi, -2, -0.5] + [0]*self.laser_num), high=high_obsrv)
+        self.goal_pos_tolerance = 1.0
+        self.goal_theta_tolerance = 0.75
 
         self.goal_state = GOAL_STATE
         self.start_state = START_STATE
@@ -72,6 +77,7 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
         self.reward_type = None
         self.set_additional_goal = None
         # self.brsEngine = None
+
         self.vf_load = False
         self.pol_load = False
 
@@ -82,22 +88,25 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
     def _discretize_laser(self, laser_data, new_ranges):
 
         discretized_ranges = []
+
         full_ranges = float(len(laser_data.ranges))
         # print("laser ranges num: %d" % full_ranges)
 
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
             if laser_data.ranges[new_i] == float('Inf') or np.isinf(laser_data.ranges[new_i]):
-                discretized_ranges.append(10.)
+                discretized_ranges.append(float('Inf'))
+                # discretized_ranges.append(10)
             elif np.isnan(laser_data.ranges[new_i]):
-                discretized_ranges.append(0.)
+                discretized_ranges.append(float('Nan'))
+                # discretized_ranges.append(0)
             else:
-                discretized_ranges.append(int(laser_data.ranges[new_i]))
+                discretized_ranges.append(laser_data.ranges[new_i])
+                # discretized_ranges.append(int(laser_data.ranges[new_i]))
 
         return discretized_ranges
 
     # def _in_obst(self, laser_data):
-    #
     #     min_range = 0.4
     #     for idx, item in enumerate(laser_data.ranges):
     #         if min_range > laser_data.ranges[idx] > 0:
@@ -118,26 +127,18 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
         x = state[0]
         y = state[1]
         theta = state[2]
-        vel = state[3]
-        steering_angle = state[4]
+        steering_angle = state[3]
 
         # In ackermann bicycle model, velocity is no longer part of state, so we remove the option of set_additional_goal as 'vel'
         if self.set_additional_goal == 'None':
-            if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= 1.0:
+            if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= self.goal_pos_tolerance:
                 print("in goal!!")
                 return True
             else:
                 return False
         elif self.set_additional_goal == 'angle':
-            if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= 1.0 \
-                and abs(theta - self.goal_state[2]) < 0.40:
-                print("in goal!!")
-                return True
-            else:
-                return False
-        elif self.set_additional_goal == 'vel':
-            if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= 1.0 \
-                and abs(vel - self.goal_state[3]) < 0.40:
+            if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= self.goal_pos_tolerance \
+                and abs(theta - self.goal_state[2]) < self.goal_theta_tolerance:
                 print("in goal!!")
                 return True
             else:
@@ -167,7 +168,7 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
         # axis: sxyz
         _, _, theta = euler_from_quaternion([ox, oy, oz, ow])
         # velocity, just linear velocity along x-axis
-        v = model_dys.twist.linear.x
+        # v = model_dys.twist.linear.x
 
         # ------- Proceed on left front wheel link ------- #
         lox = lfw_dys.link_state.pose.orientation.x
@@ -195,11 +196,7 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
 
         delta = (lyaw + ryaw) / 2
 
-        obsrv = [x, y, theta, v, delta] + discretized_laser_data
-
-        if any(np.isnan(np.array(obsrv))):
-            logger.record_tabular("found nan in observation:", obsrv)
-            obsrv = self.reset()
+        obsrv = [x, y, theta, delta] + discretized_laser_data
 
         return obsrv
 
@@ -211,8 +208,8 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
             pose = Pose()
             pose.position.x = np.random.uniform(low=START_STATE[0]-0.5, high=START_STATE[0]+0.5)
             pose.position.y = np.random.uniform(low=START_STATE[1]-0.5, high=START_STATE[1]+0.5)
-            pose.position.z = self.get_model_states(model_name="mobile_base").pose.position.z
-            theta = np.random.uniform(low=START_STATE[2], high=START_STATE[2]+np.pi)
+            pose.position.z = self.get_model_state(model_name="ackermann_vehicle").pose.position.z
+            theta = np.random.uniform(low=START_STATE[2]-0.75, high=START_STATE[2]+0.75)
             ox, oy, oz, ow = quaternion_from_euler(0.0, 0.0, theta)
             pose.orientation.x = ox
             pose.orientation.y = oy
@@ -220,11 +217,11 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
             pose.orientation.w = ow
 
             reset_state = ModelState()
-            reset_state.model_name = "mobile_base"
+            reset_state.model_name = "ackermann_vehicle"
             reset_state.pose = pose
-            self.set_model_states(reset_state)
+            self.set_model_state(reset_state)
         except rospy.ServiceException as e:
-            print("# Resets the state of the environment and returns an initial observation.")
+            print("# Resets service call failed")
 
         # Unpause simulation to make observation
         rospy.wait_for_service('/ackermann_vehicle/gazebo/unpause_physics')
@@ -243,16 +240,16 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
             # ----- obtain laser and contact data -----
             try:
                 laser_data = rospy.wait_for_message('/scan', LaserScan, timeout=5)
-                contact_data = rospy.wait_for_message('/gazebo_ros_bumper', ContactsState, timeout=50)
+                contact_data = rospy.wait_for_message('/gazebo_ros_bumper', ContactsState, timeout=10)
             except ROSException as e:
-                print("# laser data return failed")
+                print("# laser data or contact data return failed")
 
             # ------ obtain whole model dys data -------
             rospy.wait_for_service("/ackermann_vehicle/gazebo/get_model_state")
             try:
-                model_dys = self.get_model_states(model_name="ackermann_vehicle")
+                model_dys = self.get_model_state(model_name="ackermann_vehicle")
             except rospy.ServiceException as e:
-                print("/ackermann_vehicle/gazebo/get_model_states service call failed")
+                print("/ackermann_vehicle/gazebo/get_model_state service call failed")
 
             # ------ obtain link states of left front wheel and right front wheel ------
             rospy.wait_for_service("/ackermann_vehicle/gazebo/get_link_state")
@@ -261,8 +258,7 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
                 rfw_dys = srv_get_link_state(link_name='right_front_wheel', reference_frame='base_link')
             except rospy.ServiceException as e:
                 print("# /ackermann_vehicle/gazebo/get_link_state service call failed")
-        
-        # print("laser data", laser_data)
+
         rospy.wait_for_service('/ackermann_vehicle/gazebo/pause_physics')
         try:
             self.pause()
@@ -275,7 +271,6 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
         return np.asarray(obsrv)
 
     def step(self, action):
-        
         # print("entering to setp func")
         rospy.wait_for_service('/ackermann_vehicle/gazebo/unpause_physics')
         try:
@@ -286,8 +281,10 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
         if sum(np.isnan(action)) > 0:
             raise ValueError("Passed in nan to step! Action: " + str(action))
 
-        # control #1: acceleration: [-2, 2] --> [-1, 1]
-        acc = -1.0 + (1 - (-1.0)) * (action[0] - (-2)) / (2 - (-2))
+        # first clip to desired range:
+        action = np.clip(action, -2, 2)
+        # control #1: velocity: [-2, 2] --> [-2, 2], no transformation required
+        vel = action[0]
         # control #2: steering angle rate: [-2,2] --> [-0.5, 0.5]
         steering_rate = -0.5 + (0.5 - (-0.5)) * (action[1] - (-2)) / (2 - (-2))
 
@@ -296,7 +293,8 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
         # ack_msg.header.frame_id = ''
         ack_msg.drive.steering_angle = 0.75 if steering_rate >= 0 else -0.75
         ack_msg.drive.steering_angle_velocity = steering_rate
-        ack_msg.drive.speed = 5.0 if acc >= 0 else -5.0
+        # ack_msg.drive.speed = 5.0 if acc >= 0 else -5.0
+        ack_msg.drive.speed = vel
         ack_publisher.publish(ack_msg)
 
 
@@ -335,6 +333,12 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
             print("# /ackermann_vehicle/gazebo/pause_physics service call failed")
 
         obsrv = self.get_obsrv(laser_data, model_dys, lfw_dys, rfw_dys)
+        # --- special solution for nan/inf observation (especially in case of any invalid sensor readings) --- #
+        if any(np.isnan(np.array(obsrv))) or any(np.isinf(np.array(obsrv))):
+            logger.record_tabular("found nan or inf in observation:", obsrv)
+            obsrv = self.pre_obsrv
+            done = True
+            self.step_counter = 0
         self.pre_obsrv = obsrv
 
         assert self.reward_type is not None
@@ -384,7 +388,7 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
             self.step_counter = 0
 
         # 2. In the neighbor of goal state, done is True as well. Only considering velocity and pos
-        if self._in_goal(np.array(obsrv[:5])):
+        if self._in_goal(np.array(obsrv[:4])):
             reward += self.goal_reward
             done = True
             suc  = True
@@ -396,8 +400,7 @@ class AckermannEnv_v0(gazebo_env.GazeboEnv):
             done = True
             self.step_counter = 0
 
-
-        return np.asarray(obsrv), reward, done, suc, {}
+        return np.asarray(obsrv), reward, done, {'suc':suc}
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)

@@ -39,15 +39,17 @@ limitations under the License.
 
   <arg name="namespace"   default="ackermann_vehicle"/>
   <!--<arg name="world"       default="empty" doc="worlds: [empty, warehouse, checkerboard]"/>-->
-  <arg name="world"       default="$(env BICYCLE_MODEL_TRACK)"/>
+  <arg name="world"       default="$(env BICYCLE_MODEL_PLAYGROUND)"/>
+  <!--<arg name="world"       default="warehouse" />-->
   <arg name="cmd_timeout" default="0.5"/>
   <arg name="rectify"     default="true" />
   <arg name="stereo_view" default="false" />
 
   <!-- Vehicle pose -->
-  <arg name="x"           default="4.2422"/>
-  <arg name="y"           default="0.0"/>
-  <arg name="z"           default="0.1"/>
+  <arg name="x"           default="-0.22"/>
+  <arg name="y"           default="-3.27"/>
+  <!--<arg name="z"           default="0.1"/>-->
+  <arg name="z"           default="0.2"/>
   <arg name="roll"        default="0.0"/>
   <arg name="pitch"       default="0.0"/>
   <arg name="yaw"         default="1.5804"/>

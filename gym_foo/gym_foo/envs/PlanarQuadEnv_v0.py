@@ -133,8 +133,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
             if laser_data.ranges[new_i] == float('Inf') or np.isinf(laser_data.ranges[new_i]):
-                # discretized_ranges.append(float('Inf'))
-                discretized_ranges.append(10)
+                discretized_ranges.append(float('Inf'))
+                # discretized_ranges.append(10)
             elif np.isnan(laser_data.ranges[new_i]):
                 discretized_ranges.append(float('Nan'))
                 # discretized_ranges.append(0)
@@ -513,7 +513,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             self.step_counter = 0
             # print("tilt too much")
         # maximum episode length allowed
-        if self.step_counter >= 30:
+        if self.step_counter >= 100:
             done = True
             self.step_counter = 0
             # print('exceed max length')
