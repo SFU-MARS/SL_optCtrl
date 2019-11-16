@@ -2,22 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/launch/ackermann_vehicle.launch" beforeDir="false" afterPath="$PROJECT_DIR$/launch/ackermann_vehicle.launch" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/mlp_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/mlp_policy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_value_prediction/.~lock.ppo_runs_data_2.csv#" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_value_prediction/ppo_runs_data.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_value_prediction/ppo_runs_data_2.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tf_model/quad/vf_merged.h5" beforeDir="false" afterPath="$PROJECT_DIR$/tf_model/quad/vf_from_vi_merged_data.h5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tf_model/quad/vf_merged_weights.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/tf_model/quad/vf_from_vi_merged_data_weights.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/urdfs/tmp.urdf" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -127,8 +112,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="487">
-              <caret line="143" column="17" lean-forward="true" selection-start-line="143" selection-start-column="17" selection-end-line="143" selection-end-column="17" />
+            <state relative-caret-position="-341">
+              <caret line="142" column="27" lean-forward="true" selection-start-line="142" selection-start-column="27" selection-end-line="142" selection-end-column="27" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -618,12 +603,12 @@
       <workItem from="1572905212175" duration="1740000" />
       <workItem from="1573079212354" duration="10684000" />
       <workItem from="1573606039065" duration="4152000" />
-      <workItem from="1573767283558" duration="26898000" />
+      <workItem from="1573767283558" duration="27226000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="515037000" />
+    <option name="totallyTimeSpent" value="515365000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -636,7 +621,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="24" width="1682" height="1003" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2597561" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -1109,8 +1093,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="487">
-          <caret line="143" column="17" lean-forward="true" selection-start-line="143" selection-start-column="17" selection-end-line="143" selection-end-column="17" />
+        <state relative-caret-position="-341">
+          <caret line="142" column="27" lean-forward="true" selection-start-line="142" selection-start-column="27" selection-end-line="142" selection-end-column="27" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
