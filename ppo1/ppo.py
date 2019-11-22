@@ -108,6 +108,7 @@ def ppo_learn(env, policy,
         clip_param, entcoeff,                           # clipping parameter epsilon, entropy coeff
         optim_epochs, optim_stepsize, optim_batchsize,  # optimization hypers
         gamma, lam,                                     # advantage estimation
+        args,
         max_timesteps=0, max_episodes=0, max_iters=0, max_seconds=0,  # time constraint
         callback=None,  # you can do anything in the callback, since it takes locals(), globals()
         adam_epsilon=1e-5,
@@ -142,11 +143,16 @@ def ppo_learn(env, policy,
     surr1 = ratio * atarg # surrogate from conservative policy iteration
     surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
     pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
-    # vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
 
+    if args['vf_load'] == "yes":
+        vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
+        print("loading external valfunc and vf_loss is fixed!")
+    else:
+        vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
+        print("not loading external valfunc and vf_loss is updating!")
 
-    # # AMEND: do not update weights of value network, if loading customized external value initialization.
-    vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
+    # AMEND: do not update weights of value network, if loading customized external value initialization.
+    # vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
     # print("vf_loss:", vf_loss)
 
     total_loss = pol_surr + pol_entpen + vf_loss
@@ -224,6 +230,7 @@ def ppo_learn(env, policy,
         print("obs shape:", np.shape(ob))
 
 
+
         if save_obs:
             globals.g_iter_id += 1
             tmp_seg = {}
@@ -233,29 +240,38 @@ def ppo_learn(env, policy,
                 pickle.dump(tmp_seg, f)
 
 
-        # added by xlv for computing success percentage
+        # --- added by xlv for computing success percentage ---
         sucs = seg["suc"]
         ep_lens = seg['ep_lens']
-
         suc_counter += Counter(sucs)[True]
         ep_counter  += len(ep_lens)
+        # -----------------------------------------------------
 
-        # rewards = seg["start_rews"]
-        # for start in rewards:
-        #     rewards_map[start] += rewards[start]
-
+        vpredbefore = seg["vpred"]  # predicted value function before udpate
+        # print("vpred shape:", np.shape(vpredbefore))
 
 
         # --- collect real-time sim data and its vpred --- #
-        vpredbefore = seg["vpred"]  # predicted value function before udpate
-        print("vpred shape:", np.shape(vpredbefore))
+        #
+        if args['vf_load'] == 'no':
+            valpred_csv_name = 'ppo_valpred_itself'
+        else:
+            valpred_csv_name = 'ppo_valpred_external'
 
-        with open(os.environ['PROJ_HOME_3'] + '/tests/test_value_prediction/ppo_runs_data_original_valueFunc.csv', 'a') as f:
+        with open(args['RUN_DIR'] + '/' + valpred_csv_name + '.csv', 'a') as f:
             vpred_shaped = vpredbefore.reshape(-1,1)
             obs_vpred = np.concatenate((ob, vpred_shaped), axis=1)
-            df_obs_vpred = pd.DataFrame(obs_vpred,columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'vpred_ppo'])
+
+            if args['gym_env'] == 'PlanarQuadEnv-v0':
+                df_obs_vpred = pd.DataFrame(obs_vpred,columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name])
+            elif args['gym_env'] == 'DubinsCarEnv-v0':
+                df_obs_vpred = pd.DataFrame(obs_vpred,
+                                            columns=['x', 'y', 'theta',  'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name])
+            else:
+                raise ValueError("invalid env !!!")
             df_obs_vpred.to_csv(f, header=True)
         # ------------------------------------------------ #
+
 
         atarg = (atarg - atarg.mean()) / atarg.std() # standardized advantage function estimate
         d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)

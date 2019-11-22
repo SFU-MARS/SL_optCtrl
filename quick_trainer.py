@@ -29,6 +29,13 @@ class Trainer(object):
             elif target == 'polFunc':
                 self.input_shape = 13
                 self.model = self.build_policy_model(self.input_shape)
+        elif self.agent == 'dubinsCar':
+            if target == 'valFunc':
+                self.input_shape = 11
+                self.model = self.build_value_model(self.input_shape)
+            elif target == 'polFunc':
+                self.input_shape = 11
+                self.model = self.build_policy_model(self.input_shape)
         else:
             raise ValueError("invalid agent type")
 
@@ -38,9 +45,9 @@ class Trainer(object):
             keras.layers.Dense(64, activation=tf.nn.tanh),
             keras.layers.Dense(1)
         ])
-        # optimizer = tf.keras.optimizers.RMSprop(0.001)
-        # optimizer = tf.keras.optimizers.Adam(lr=0.001, epsilon=1e-8)
-        optimizer = tf.keras.optimizers.Adadelta()
+        optimizer = tf.keras.optimizers.RMSprop(0.001)
+        # optimizer = tf.keras.optimizers.Adam(lr=0.01, epsilon=1e-8)
+        # optimizer = tf.keras.optimizers.Adadelta()
         model.compile(loss='mean_squared_error',
                       optimizer = optimizer,
                       metrics=['mean_absolute_error', 'mean_squared_error'])
@@ -78,6 +85,15 @@ class Trainer(object):
                 dataset_path = dirpath + "/data/quad/valFunc_filled.csv"
             column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
             model_saving_path = './tf_model/quad/vf.h5'
+        elif self.agent == 'dubinsCar':
+            if not os.path.exists(dirpath + "/data/dubinsCar/valFunc_filled_cleaned.csv"):
+                raise ValueError("can not find the training file for dubins car example!!")
+            else:
+                dataset_path = dirpath + "/data/dubinsCar/valFunc_filled_cleaned.csv"
+            column_names = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+            model_saving_path = './tf_model/dubinsCar/vf.h5'
+        else:
+            raise ValueError("invalid agent!!!")
 
         raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
 
@@ -96,11 +112,12 @@ class Trainer(object):
         model.summary()
         normed_train_data = self.norm(train_dataset, stats)
 
-        EPOCHS = 5000
+        EPOCHS = 2000
         history = model.fit(
             normed_train_data, train_labels, batch_size=64,
             epochs=EPOCHS, validation_split=0.2, verbose=1,
-            callbacks=[PrintDot(), LrDecay()])
+            callbacks=[PrintDot()])
+            # callbacks=[PrintDot(), LrDecay()])
 
         keras.models.save_model(model, model_saving_path)
         hist = pd.DataFrame(history.history)
@@ -282,14 +299,14 @@ class PrintDot(keras.callbacks.Callback):
         if epoch % 100 == 0: print('')
         print('.', end='')
 
-class LrDecay(keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs):
-        lr = self.model.optimizer.lr
-        lr_with_decay = lr
-        if epoch % 200 == 0:
-            lr_with_decay = lr * 0.985
-            print("updating lr by 0.975!!!")
-        self.model.optimizer.lr = lr_with_decay
+# class LrDecay(keras.callbacks.Callback):
+#     def on_epoch_end(self, epoch, logs):
+#         lr = self.model.optimizer.lr
+#         lr_with_decay = lr
+#         if epoch % 500 == 0:
+#             lr_with_decay = lr * 0.5
+#             print("updating lr by 0.5!!!")
+#         self.model.optimizer.lr = lr_with_decay
         # print(tf.Print(iterations, [iterations]))
         # print(K.eval(lr_with_decay))
         # self.model.optimizer.lr = lr_with_decay
@@ -309,9 +326,9 @@ if __name__ == "__main__":
     """
     Train value network model
     """
-    trainer = Trainer(target="valFunc", agent='quad')
-    trainer.train_valFunc_merged()
-    # trainer.save_model_weights("./tf_model/quad/vf_merged.h5")
+    trainer = Trainer(target="valFunc", agent='dubinsCar')
+    # trainer.train_valFunc()
+    trainer.save_model_weights("./tf_model/dubinsCar/vf.h5")
 
 
 
