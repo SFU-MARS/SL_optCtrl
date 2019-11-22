@@ -204,7 +204,6 @@ class env_quadrotor_3d(object):
 
 		return 0
 
-
 	def check_overspeed(self, s):
 		# return 3 = overspeed
 		# return 0 = regular speed
@@ -331,7 +330,6 @@ class env_quadrotor_3d(object):
 					f.write(st)
 
 			f.close()
-
 
 	def combine_to_tuple(self, s, a):
 		arr = []

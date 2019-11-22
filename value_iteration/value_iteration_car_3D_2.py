@@ -25,18 +25,10 @@ class env_dubin_car_3d(object):
 
 		self.omega = (-1, 1)
 		self.actions = np.array([self.v, self.omega])
-		########### Goal Setting ########## (3.41924, 3.6939) r = 0.6
-		# r = 0.4243
-		# goal in circle
-		self.goal_x = (2.99494, 3.84354)
-		self.goal_y = (3.2696, 4.1182)
+		########### Goal Setting ##########
+		self.goal_center = (3.5, 3.5)
+		self.goal_radius = 1.0
 
-		# goal out of circle
-		# r = 0.6
-		# self.goal_x = (2.81924, 4.01924)
-		# self.goal_y = (3.0939, 4.2939)
-		self.goal_theta = self.theta
-		self.goals = np.array([self.goal_x, self.goal_y, self.goal_theta])
 
 		########### Algorithm Setting ##########
 		self.discount = 0.85
@@ -44,6 +36,7 @@ class env_dubin_car_3d(object):
 
 		# reward = [regular state, in goal, crashed, overspeed]
 		self.reward_list = np.array([0, 1000, -1000, -400], dtype = float)
+		self.beta = np.array([1, 1.8, 0.005, 0])
 
 		########## Discreteness Setting ##########
 		# 3D state
@@ -100,8 +93,8 @@ class env_dubin_car_3d(object):
 		for i in range(action_dim_num):
 			self.action_grid[i] = np.linspace(self.actions[i][0], self.actions[i][1], self.action_step_num[i])
 
-		print(self.state_grid)
-		print(self.action_grid)
+		# print(self.state_grid)
+		# print(self.action_grid)
 
 	def state_init(self):
 		self.states = np.array(np.meshgrid(self.state_grid[0],
@@ -126,7 +119,7 @@ class env_dubin_car_3d(object):
 		self.state_init()
 		self.action_init()
 
-	def value_iteration(self):
+	def value_iteration(self, mode = "original"):
 		iteration = 0
 		while True:
 			delta = 0
@@ -138,30 +131,45 @@ class env_dubin_car_3d(object):
 
 				current_reward = self.reward[i]
 
-				for i, a in enumerate(self.acts):
-					s_ = self.state_transition(s, a)
-
-					next_step_type = self.state_check(s_, self.dim)
-
-					if (next_step_type >= 2):
-						next_step_value = self.reward_list[next_step_type]
-					else:
-						sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim)
-						interpolating_function = RegularGridInterpolator((sub_states[0],
-																			sub_states[1],
-																			sub_states[2]),
-																			sub_value_matrix,
-																			bounds_error = False,
-																			fill_value = self.reward_list[2])
-						next_step_value = interpolating_function(s_)
-
-					best_value = max(best_value, current_reward + self.discount * next_step_value)
+				if (mode == "original"):
+					for i, a in enumerate(self.acts):
+						s_ = self.state_transition(s, a)
+						next_step_type = self.state_check(s_, self.dim)
+						if (next_step_type >= 2):
+							next_step_value = self.reward_list[next_step_type]
+						else:
+							sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim)
+							interpolating_function = RegularGridInterpolator((sub_states[0],
+																				sub_states[1],
+																				sub_states[2]),
+																				sub_value_matrix,
+																				bounds_error = False,
+																				fill_value = self.reward_list[2])
+							next_step_value = interpolating_function(s_)
+						best_value = max(best_value, current_reward + self.discount * next_step_value)
+				if (mode == "modified"):
+					best_value = 0
+					for i, a in enumerate(self.acts):
+						s_ = self.state_transition(s, a)
+						next_step_type = self.state_check(s_, self.dim)
+						if (next_step_type >= 2):
+							next_step_value = self.reward_list[next_step_type]
+						else:
+							sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim)
+							interpolating_function = RegularGridInterpolator((sub_states[0],
+																				sub_states[1],
+																				sub_states[2]),
+																				sub_value_matrix,
+																				bounds_error = False,
+																				fill_value = self.reward_list[2])
+							next_step_value = interpolating_function(s_)
+						best_value += current_reward + self.discount * next_step_value * self.beta[next_step_type]
+					best_value /= self.acts.shape[0]
 
 				index = tuple(self.state_to_index(s, self.dim))
 				current_delta = abs(best_value - self.value[index])
 				delta = max(delta, current_delta)
 				self.value[index] = best_value
-
 
 			self.value_output(iteration, True)
 			print("iteraion %d:" %(iteration))
@@ -226,7 +234,7 @@ class env_dubin_car_3d(object):
 		# temp = (0, 1, 2, 3) -> (regular state, in goal, crashed, overspeed)
 		temp = 0
 		# Check in goal range
-		temp = self.check_goal(s, dim)
+		temp = self.check_goal(s)
 		if (temp):
 			return temp
 
@@ -236,14 +244,13 @@ class env_dubin_car_3d(object):
 
 		return temp
 
-	def check_goal(self, s, dim):
-		for i, d in enumerate(dim):
-			if (s[i] < self.goals[d][0] or s[i] > self.goals[d][1]):
-				return 0
+	def check_goal(self, s):
+		d = math.sqrt( (s[0] - self.goal_center[0]) ** 2 + (s[1] - self.goal_center[1]) ** 2 )
+		if (d <= self.goal_radius):
+			return 1
+		return 0
 
-		return 1
-
-	def check_crash(self, s, width = 0.15):
+	def check_crash(self, s, width = 0.2):
 		# return 2 = crashed
 		# return 0 = no crash
 
@@ -297,40 +304,38 @@ class env_dubin_car_3d(object):
 		except:
 			print(save_path + " exist!")
 
+		print(data.shape)
 
 		if (mode == "direct"):
-			theta_index = 0
-			while theta_index < data.shape[-1]:
-				omega_index = 0
+			theta_index = 4
 
-				x = np.zeros(data.shape[:-1])
-				y = np.zeros(data.shape[:-1])
-				value = np.zeros(data.shape[:-1])
+			x = np.zeros(data.shape[:-1])
+			y = np.zeros(data.shape[:-1])
+			value = np.zeros(data.shape[:-1])
 
-				for i, d in np.ndenumerate(data):
-					if (i[-1] == theta_index):
-						x[i[:-1]] = self.state_grid[0][i[0]]
-						y[i[:-1]] = self.state_grid[1][i[1]]
-						value[i[:-1]] = d
+			for i, d in np.ndenumerate(data):
+				if (i[-1] == theta_index):
+					x[i[:-1]] = self.state_grid[0][i[0]]
+					y[i[:-1]] = self.state_grid[1][i[1]]
+					value[i[:-1]] = d
 
 
-				fig = plt.figure()
-				ax = fig.gca(projection='3d')
+			fig = plt.figure()
+			ax = fig.gca(projection='3d')
 
-				surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
-					   linewidth=0, antialiased=False)
-				fig.colorbar(surf, shrink=0.5, aspect=5)
+			surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+				   linewidth=0, antialiased=False)
+			fig.colorbar(surf, shrink=0.5, aspect=5)
 
-				ax.set_xlabel('x', fontsize = 15)
-				ax.set_ylabel('y', fontsize = 15)
-				ax.set_zlabel('value', fontsize = 15)
-				title = "theta: " + str(round(self.state_grid[2][theta_index], 2))
-				ax.set_title(title, fontsize = 15)
+			ax.set_xlabel('x', fontsize = 15)
+			ax.set_ylabel('y', fontsize = 15)
+			ax.set_zlabel('value', fontsize = 15)
+			title = "theta: " + str(round(self.state_grid[2][theta_index], 2))
+			ax.set_title(title, fontsize = 15)
 
-				plt.show()
-				fig.savefig(save_path + "theta_" + str(theta_index), dpi=fig.dpi)
+			plt.show()
+			# fig.savefig(save_path + "theta_" + str(theta_index), dpi=fig.dpi)
 
-				theta_index += 1
 
 		if (mode == "average"):
 			x = np.zeros(data.shape[:-1])
@@ -418,12 +423,22 @@ class env_dubin_car_3d(object):
 
 if __name__  ==  "__main__":
 	env = env_dubin_car_3d()
+	# env.add_obstacle(-0.35, 0.35, -0.35, 0.35)
+	# env.add_obstacle(3.15, 3.85, -0.85, -0.15)
+	# env.add_obstacle(1.65257, 2.35257, -1.94221, -1.24221)
+	# env.add_obstacle(1.707, 2.407, 0.645, 1.345)
+	# env.add_obstacle(-2.518, -1.818, -2.569, -1.869)
+	# env.add_obstacle(-0.35, 0.35, 3.15, 3.85)
+	# env.add_obstacle(-3.35, -2.65, 1.65, 2.35)
+
 	env.add_obstacle(-0.35, 0.35, -0.35, 0.35)
-	env.add_obstacle(3.15, 3.85, -0.85, -0.15)
-	env.add_obstacle(1.707, 2.407, 0.645, 1.345)
-	env.add_obstacle(-2.518, -1.818, -2.569, -1.869)
-	env.add_obstacle(-0.35, 0.35, 3.15, 3.85)
+	env.add_obstacle(2.65, 3.35, -1.35, -0.65)
+	env.add_obstacle(1.65, 2.35, 0.65, 1.35)
+	env.add_obstacle(-2.35, -1.65, -2.35, -1.65)
+	env.add_obstacle(-0.35, 0.35, 3.65, 4.35)
 	env.add_obstacle(-3.35, -2.65, 1.65, 2.35)
+
+
 
 	# (0, 0) l = 0.7
 	# (3.5, -0.5) l = 0.7
@@ -433,6 +448,8 @@ if __name__  ==  "__main__":
 	# (-3, 2)
 
 	env.algorithm_init()
-	env.generate_samples_interpolate(n = 20000)
-	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_13.npy", "max")
+	# env.generate_samples_interpolate(n = 20000)
+	print(env.state_grid)
+	env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_12.npy", "direct")
 	# env.value_iteration()
+	# env.value_iteration(mode = "modified")

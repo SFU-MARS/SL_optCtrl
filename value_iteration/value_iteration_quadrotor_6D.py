@@ -511,10 +511,10 @@ class env_quadrotor_6d(object):
 
 
 env = env_quadrotor_6d()
-# env.value_iteration(0)
+env.value_iteration(0)
 # env.value_iteration(1)
 
-env.algorithm_init()
+# env.algorithm_init()
 
 # env.plot_2D_result("./value_matrix/", "value_matrix_0_26.npy")
 # env.plot_2D_result("./value_matrix/", "value_matrix_1_32.npy")

@@ -8,10 +8,62 @@ from matplotlib import cm
 from scipy.interpolate import RegularGridInterpolator
 import time
 
+
 class env_dubin_car_3d(object):
+	# def __init__(self):
+	# 	########### World Setting ########## 
+	# 	self.x = (-3, 4.838)
+	# 	self.y = (-4.96, 4.45)
+	# 	self.obstacles = None
+	# 	self.cylinders = None
+
+	# 	########### Drone Setting ##########
+	# 	self.theta = (-math.pi, math.pi)
+	# 	self.ranges = np.array([self.x, self.y, self.theta])
+
+	# 	self.v = 1
+	# 	self.delta = 0.15
+
+	# 	self.omega = (-2, 2)
+	# 	self.actions = np.array([self.omega])
+	# 	########### Goal Setting ##########
+	# 	self.goal_x = (-3, -1.05)
+	# 	self.goal_y = (3.4, 4.6)
+	# 	self.goal_theta = self.theta
+	# 	self.goals = np.array([self.goal_x, self.goal_y, self.goal_theta])
+
+	# 	########### Algorithm Setting ##########
+	# 	self.discount = 0.9999
+	# 	self.threshold = 2
+
+	# 	# reward = [regular state, in goal, crashed, overspeed]
+	# 	self.reward_list = np.array([0, 2000, -1000, -200], dtype = float)
+
+	# 	########## Discreteness Setting ##########
+	# 	# 3D state
+	# 	# 1D action
+	# 	# (x, y, theta)
+	# 	# (omega)
+	# 	self.state_step_num = np.array([61, 68, 11])
+	# 	# self.state_step_num = np.array([11, 11, 11])
+	# 	# self.state_step_num = np.array([31, 31, 11])
+	# 	self.action_step_num = np.array([11])
+	# 	self.dim = np.array([0, 1, 2])
+
+	# 	########## Algorithm Declaration ##########
+	# 	self.state_grid = None
+	# 	self.action_grid = None
+
+	# 	self.value = None
+	# 	self.reward = None
+	# 	self.flag = None
+
+	# 	self.state_type = None
+	# 	self.state_reward = None
+
 	def __init__(self):
 		########### World Setting ########## 
-		self.x = (-3, 5)
+		self.x = (-5, 5)
 		self.y = (-5, 5)
 		self.obstacles = None
 		self.cylinders = None
@@ -20,19 +72,19 @@ class env_dubin_car_3d(object):
 		self.theta = (-math.pi, math.pi)
 		self.ranges = np.array([self.x, self.y, self.theta])
 
-		self.v = 1
-		self.delta = 0.1
+		self.v = (-2, 2)
+		self.delta = 0.15
 
-		self.omega = (-2, 2)
-		self.actions = np.array([self.omega])
-		########### Goal Setting ##########
-		self.goal_x = (-3, -1.05)
-		self.goal_y = (3.4, 4.6)
+		self.omega = (-1, 1)
+		self.actions = np.array([self.v, self.omega])
+		########### Goal Setting ########## (3.41924, 3.6939) r = 0.6
+		self.goal_x = (2.81924, 4.01924 + 0.6)
+		self.goal_y = (3.0939 - 0.6, 4.2939 + 0.6)
 		self.goal_theta = self.theta
 		self.goals = np.array([self.goal_x, self.goal_y, self.goal_theta])
 
 		########### Algorithm Setting ##########
-		self.discount = 0.995
+		self.discount = 0.95
 		self.threshold = 0.5
 
 		# reward = [regular state, in goal, crashed, overspeed]
@@ -43,10 +95,10 @@ class env_dubin_car_3d(object):
 		# 1D action
 		# (x, y, theta)
 		# (omega)
-		self.state_step_num = np.array([61, 81, 11])
+		self.state_step_num = np.array([21, 21, 11])
 		# self.state_step_num = np.array([11, 11, 11])
 		# self.state_step_num = np.array([31, 31, 11])
-		self.action_step_num = np.array([11])
+		self.action_step_num = np.array([11, 11])
 		self.dim = np.array([0, 1, 2])
 
 		########## Algorithm Declaration ##########
@@ -129,13 +181,14 @@ class env_dubin_car_3d(object):
 
 		# x1, x2, y1, y2
 		grid_value = self.add_board(grid_value, -2.99, -1.98, 3, 3.37674)
+		grid_value = self.add_board(grid_value, 1.5, 4.838, -5, -4)
 
 		# print("counter : ", counter)
 		# print(len(danger))
 
 		danger = np.array(danger, dtype = float)
 		scatter = plt.scatter(danger[:, 0], danger[:, 1], c="red", s=3)
-		# plt.show()
+		plt.show()
 
 		# print(np.sum(self.flag))
 
@@ -422,6 +475,29 @@ class env_dubin_car_3d(object):
 
 			plt.show()
 
+
+		if (mode == "max"):
+			x = np.zeros(data.shape[:-1])
+			y = np.zeros(data.shape[:-1])
+			value = np.full(data.shape[:-1], 0)
+
+			for i, d in np.ndenumerate(data):
+				x[i[:-1]] = self.state_grid[0][i[0]]
+				y[i[:-1]] = self.state_grid[1][i[1]]
+				value[i[:-1]] = max(value[i[:-1]], d)
+
+			fig = plt.figure()
+			ax = fig.gca(projection='3d')
+			surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+					linewidth=0, antialiased=False)
+			fig.colorbar(surf, shrink=0.5, aspect=5)
+
+			ax.set_xlabel('x', fontsize = 15)
+			ax.set_ylabel('y', fontsize = 15)
+			ax.set_zlabel('value', fontsize = 15)
+
+			plt.show()
+
 	def plot_4D_result(self, dir_path, file_name, system = 0):
 		file = dir_path + file_name
 		data = np.load(file)
@@ -535,10 +611,18 @@ class env_dubin_car_3d(object):
 if __name__  ==  "__main__":
 	env = env_dubin_car_3d()
 	env.add_circle_obstacles()
-	# env.value_iteration()
-	env.algorithm_init()
-	env.fill_table("./valFunc_car.csv", "./value_matrix_car_3D/", 10)
+	env.value_iteration()
+	# env.algorithm_init()
+	# env.fill_table("./valFunc_car.csv", "./value_matrix_car_3D/", 10)
 
+	# (0, 0) l = 0.7
+	# (3.5, -0.5) l = 0.7
+	# (2.057, 0.995)
+	# (-2.168, -2.219)
+	# (0, 3.5)
+	# (-3, 2)
+
+	# r = 0.3
 
 	# env.plot_2D_result("./value_matrix_car_3D/", "value_matrix_30.npy")
 	# env.plot_3D_result("./value_matrix_car_3D/", "value_matrix_30.npy")

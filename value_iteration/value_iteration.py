@@ -385,6 +385,10 @@ class world_env(object):
 
             # goal:  26  regualar: 2872  crashed:  810  overspeed:  5994
 
+            if (num_crash + num_overspeed == 25):
+                if (num_crash != 0):
+                    if (num_overspeed != 0):
+                        print(num_crash, " ", num_overspeed)
             print("goal: ", num_goal, " regualar:", num_regular, " crashed: ", num_crash, " overspeed: ", num_overspeed)
             print("velocity overspeed: ", velocity_over, "  omega overspeed: ", omega_over)
             print("iteration %d:" %(iteration))
@@ -810,9 +814,9 @@ if __name__ == "__main__":
     env = world_env()
     env.state_cutting()
     env.state_init()
-    env.plot_result("./value_matrix/", "value_matrix_x_26.npy")
+    # env.plot_result("./value_matrix/", "value_matrix_x_26.npy")
 
-    # env.value_iteration(False)
+    env.value_iteration(False)
     # env.value_iteration_y(False, mode = "linear")
 
     # env.value_iteration(False, mode = "linear")
@@ -852,7 +856,7 @@ if __name__ == "__main__":
 
     # state = np.array([5, 0.8, 0.7854, -3.1416], dtype = float)
     # action = np.array([17.0799, 14.4522], dtype = float)
-    # print(env.state_transition(state, action))
+    # print(env.state_transition_y(state, action))
 
     # env.state_to_index([1,1,1,1], env.dim_x)
     # print(env.grid[env.dim_x])
