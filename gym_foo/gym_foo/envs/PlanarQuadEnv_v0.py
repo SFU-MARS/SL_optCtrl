@@ -51,7 +51,7 @@ WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.)]
 class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
     def __init__(self, reward_type, set_additional_goal, **kwargs):
         # Launch the simulation with the given launchfile name
-        gazebo_env.GazeboEnv.__init__(self, "QuadrotorAirSpace_v0.launch")
+        gazebo_env.GazeboEnv.__init__(self, "Quadrotor.launch")
 
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
         self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
@@ -133,8 +133,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
             if laser_data.ranges[new_i] == float('Inf') or np.isinf(laser_data.ranges[new_i]):
-                discretized_ranges.append(float('Inf'))
-                # discretized_ranges.append(10)
+                # discretized_ranges.append(float('Inf'))
+                discretized_ranges.append(10)
             elif np.isnan(laser_data.ranges[new_i]):
                 discretized_ranges.append(float('Nan'))
                 # discretized_ranges.append(0)
@@ -416,7 +416,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             print("/gazebo/unpause_physics service call failed")
 
 
-        laser_data = rospy.wait_for_message('/scan', LaserScan, timeout=5)
+        laser_data = rospy.wait_for_message('/scan', LaserScan, timeout=20)
         # contact_data = rospy.wait_for_message('/gazebo_ros_bumper', ContactsState, timeout=50)
         # print("contact data:", contact_data)
 

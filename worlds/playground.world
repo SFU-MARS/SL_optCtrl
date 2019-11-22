@@ -68,7 +68,7 @@
       <!--<real_time_factor>10.</real_time_factor>-->
       <!--<real_time_update_rate>0.</real_time_update_rate>-->
       <max_step_size>0.01</max_step_size>
-      <real_time_factor>10.</real_time_factor>
+      <real_time_factor>10</real_time_factor>
       <real_time_update_rate>1000</real_time_update_rate>
       <!--<ode>-->
         <!--<constraints>-->
@@ -98,40 +98,47 @@
         <pose frame=''>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='cube_0'>
-          <pose frame=''>0 0  0.35 0 -0 0</pose>
+          <!--<pose frame=''>0 0  0.35 0 -0 0</pose>-->
+          <pose frame=''>0 0 0.4 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='cube_1'>
-          <pose frame=''>3.5 -0.5 0.35 0 -0 0</pose>
+          <!--<pose frame=''>3.5 -0.5 0.35 0 -0 0</pose>-->
+          <!--<pose frame=''>2.00257 -1.59221 0.35 0 -0 0</pose>-->
+          <pose frame=''>3 -1 0.4 0 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
+
         <link name='cube_2'>
-          <pose frame=''>2.057526 0.99572 0.35 0 -0 0</pose>
+          <!--<pose frame=''>2.057526 0.99572 0.35 0 -0 0</pose>-->
+          <pose frame=''>2 1 0.4 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='cube_3'>
-          <pose frame=''>-2.16844 -2.21921 0.35 0 -0 0</pose>
+          <!--<pose frame=''>-2.16844 -2.21921 0.35 0 -0 0</pose>-->
+          <pose frame=''>-2 -2 0.4 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
 
         <link name='cube_4'>
-          <pose frame=''>0 3.5 0.35 0 -0 0</pose>
+          <!--<pose frame=''>0 3.5 0.35 0 -0 0</pose>-->
+          <pose frame=''>0 4 0.4 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
 
         <link name='cube_5'>
-          <pose frame=''>-3.0 2 0.35 0 -0 0</pose>
           <!--<pose frame=''>-3.0 2 0.35 0 -0 0</pose>-->
+          <pose frame=''>-3.0 2.0 0.4 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -144,7 +151,8 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='target'>
-          <pose frame=''>3.41924 3.6939 0 0 -0 0</pose>
+          <!--<pose frame=''>3.41924 3.6939 0 0 -0 0</pose>-->
+          <pose frame=''>3.5 3.5 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -191,11 +199,13 @@
     <model name='circuit_ground'>
       <pose frame=''>0 0 0 0 -0 0</pose>
       <link name='cube_0'>
-        <pose frame=''>0 0 0.35 0 -0 0</pose>
+        <!--<pose frame=''>0 0 0.35 0 -0 0</pose>-->
+        <pose frame=''>0 0 0.4 0 -0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -216,6 +226,7 @@
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <material>
@@ -230,11 +241,14 @@
         <kinematic>0</kinematic>
       </link>
       <link name='cube_1'>
-        <pose frame=''>3.5 -0.5 0.35 0 -0 0</pose>
+        <!--<pose frame=''>3.5 -0.5 0.35 0 -0 0</pose>-->
+        <!--<pose frame=''> 2.00257 -1.59221 0.35 0 -0 0 </pose>-->
+        <pose frame=''>3 -1 0.4 0 0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -255,6 +269,7 @@
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <material>
@@ -269,11 +284,13 @@
         <kinematic>0</kinematic>
       </link>
       <link name='cube_2'>
-        <pose frame=''>2.057526 0.99572 0.35 0 -0 0</pose>
+        <!--<pose frame=''>2.057526 0.99572 0.35 0 -0 0</pose>-->
+        <pose frame=''>2 1 0.4 0 -0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -294,6 +311,7 @@
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <material>
@@ -308,11 +326,13 @@
         <kinematic>0</kinematic>
       </link>
       <link name='cube_3'>
-        <pose frame=''>-2.16844 -2.21921 0.35 0 -0 0</pose>
+        <!--<pose frame=''>-2.16844 -2.21921 0.35 0 -0 0</pose>-->
+        <pose frame=''>-2 -2 0.4 0 -0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -333,6 +353,7 @@
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <material>
@@ -348,11 +369,13 @@
       </link>
 
       <link name='cube_4'>
-        <pose frame=''>0 3.5 0.35 0 -0 0</pose>
+        <!--<pose frame=''>0 3.5 0.35 0 -0 0</pose>-->
+        <pose frame=''>0 4 0.4 0 -0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -373,6 +396,7 @@
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <material>
@@ -388,12 +412,13 @@
       </link>
 
       <link name='cube_5'>
-        <pose frame=''>-3.0 2 0.35 0 -0 0</pose>
         <!--<pose frame=''>-3.0 2 0.35 0 -0 0</pose>-->
+        <pose frame=''>-3.0 2.0 0.4 0 -0 0</pose>
         <collision name='collision'>
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -414,6 +439,7 @@
           <geometry>
             <box>
               <size>0.7 0.7 0.7</size>
+              <!--<size>0.8 0.8 0.8</size>-->
             </box>
           </geometry>
           <material>
@@ -593,7 +619,8 @@
         <kinematic>0</kinematic>
       </link>
       <link name='target'>
-        <pose frame=''>3.41924 3.6939 0 0 -0 0</pose>
+        <!--<pose frame=''>3.41924 3.6939 0 0 -0 0</pose>-->
+        <pose frame=''>3.5 3.5 0 0 -0 0</pose>
         <visual name='visual'>
           <geometry>
             <cylinder>

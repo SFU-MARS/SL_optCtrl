@@ -24,7 +24,8 @@ if __name__ == "__main__":
     import pickle
 
     with tf.device('/gpu:1'):
-        dirname = os.environ['PROJ_HOME_3'] + '/runs_log/02-Nov-2019_22-34-26PlanarQuadEnv-v0_hand_craft_ppo/model'
+        # dirname = os.environ['PROJ_HOME_3'] + '/runs_log/02-Nov-2019_22-34-26PlanarQuadEnv-v0_hand_craft_ppo/model'
+        dirname = os.environ['PROJ_HOME_3'] + '/runs_log/21-Nov-2019_02-00-17DubinsCarEnv-v0_hand_craft_ppo/model'
         num_cpu = int(os.getenv('RCALL_NUM_CPU', multiprocessing.cpu_count()))
         config = tf.ConfigProto(
             allow_soft_placement=True,
@@ -52,5 +53,5 @@ if __name__ == "__main__":
         for key, val in weights_dict.items():
             print(key, ':', val)
 
-        with open(os.environ['PROJ_HOME_3']+'/tf_model/quad/vf_from_ppo_weights.pkl', 'wb') as f:
+        with open(os.environ['PROJ_HOME_3']+'/runs_log/21-Nov-2019_02-00-17DubinsCarEnv-v0_hand_craft_ppo/vf_from_ppo_weights.pkl', 'wb') as f:
             pickle.dump(weights_dict, f)

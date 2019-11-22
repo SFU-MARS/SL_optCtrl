@@ -24,7 +24,7 @@ import tensorflow as tf
 def train(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=None, save_obs=False):
 
     if algorithm == ppo:
-        assert args['gym_env'] == "DubinsCarEnv-v0" or args['gym_env'] == "PlanarQuadEnv-v0"
+        assert args['gym_env'] in ["AckermannEnv-v0", "PlanarQuadEnv-v0", "DubinsCarEnv-v0"]
 
         # Initialize policy
         ppo.create_session()
@@ -79,7 +79,7 @@ def train(env, algorithm, args, params=None, load=False, loadpath=None, loaditer
             pi, ep_mean_length, ep_mean_reward, suc_percent = algorithm.ppo_learn(env=env, policy=pi, timesteps_per_actorbatch=timesteps_per_actorbatch,
                                                                      clip_param=clip_param, entcoeff=entcoeff, optim_epochs=optim_epochs,
                                                                      optim_stepsize=optim_stepsize, optim_batchsize=optim_batchsize,
-                                                                     gamma=gamma, lam=lam, max_iters=max_iters, schedule='constant', save_obs=save_obs)
+                                                                     gamma=gamma, lam=lam,  args=args, max_iters=max_iters, schedule='constant', save_obs=save_obs)
 
             ppo_length.extend(ep_mean_length)
             ppo_reward.extend(ep_mean_reward)
@@ -216,6 +216,7 @@ if __name__ == "__main__":
             #
             # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_icra/04-Sep-2019_08-59-16PlanarQuadEnv-v0_hand_craft_ppo/model'
             # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log/02-Nov-2019_22-34-26PlanarQuadEnv-v0_hand_craft_ppo/model'
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log/16-Nov-2019_16-10-31PlanarQuadEnv-v0_hand_craft_ppo_vf/model'
             # trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer='best', args=args)
 
         else:

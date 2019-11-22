@@ -36,6 +36,18 @@ import pickle
 
 CUR_PATH = os.path.dirname(os.path.abspath(__file__))
 
+def csv_clean(filename):
+    df = pd.read_csv(filename)
+    # row = df.iloc[[9]]
+    # print(np.isinf(row))
+    df = df.replace([np.inf, -np.inf], np.nan)
+    df = df.dropna()
+    # print("row:", row)
+
+    # df.replace({'inf', np.nan})
+    df.to_csv(os.path.splitext(filename)[0] + '_cleaned.csv')
+
+
 class Data_Generator(object):
     def __init__(self):
         rospy.init_node("data_collection", anonymous=True, log_level=rospy.INFO)
@@ -100,7 +112,7 @@ class Data_Generator(object):
         car_pose = Pose()
         car_pose.position.x = x
         car_pose.position.y = y
-        car_pose.position.z = 0.1
+        # car_pose.position.z = 0.1
 
         car_quat_x, car_quat_y, car_quat_z, car_quat_w = quaternion_from_euler(0, 0, theta)
         car_pose.orientation.x = car_quat_x
@@ -114,10 +126,10 @@ class Data_Generator(object):
         car_twist.linear.z = 0
 
         car_state = ModelState()
-        car_state.model_name = 'ackermann_vehicle'
+        car_state.model_name = 'mobile_base'
         car_state.pose = car_pose
         car_state.twist= car_twist
-        rospy.ServiceProxy('/ackermann_vehicle/gazebo/set_model_state', SetModelState)(car_state)
+        rospy.ServiceProxy('gazebo/set_model_state', SetModelState)(car_state)
         return True
 
     # def gen_data(self, num=None, data_form='valFunc', agent=None):
@@ -402,7 +414,7 @@ class Data_Generator(object):
 
 
     def gen_data(self, data_form='valFunc', agent=None):
-        assert agent in ['quad', 'car']
+        assert agent in ['quad', 'car', 'dubinsCar']
         unfilled_filename = None
         filled_filename = None
         if agent == 'quad':
@@ -583,9 +595,100 @@ class Data_Generator(object):
                     assert tmp_dict
                     writer.writerow(tmp_dict)
 
+        elif agent == 'dubinsCar':
+            unfilled_filename = os.environ['PROJ_HOME_3'] + '/data/dubinsCar/' + data_form + '.csv'
+            filled_filename = os.environ['PROJ_HOME_3'] + '/data/dubinsCar/' + data_form + '_filled' + '.csv'
+            assert os.path.exists(unfilled_filename)
+
+            with open(unfilled_filename, 'r') as csvfile1, open(filled_filename, 'w', newline='') as csvfile2:
+                reader = csv.DictReader(csvfile1)
+
+                # determine the fieldnames to be written on `filled` file
+                if data_form == 'valFunc' or data_form == 'valFunc_mpc':
+                    fieldnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+                elif data_form == 'polFunc':
+                    fieldnames = ['x', 'y', 'theta', 'vel', 'ang_vel', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+                else:
+                    raise ValueError("invalid data form!!")
+                writer = csv.DictWriter(csvfile2, fieldnames)
+                writer.writeheader()
+
+                rospy.wait_for_service('/gazebo/reset_simulation')
+                print("# do I get here??")
+                try:
+                    rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
+                except rospy.ServiceException as e:
+                    print("# Reset simulation failed!")
+
+                for row in reader:
+                    x = float(row['x'])
+                    y = float(row['y'])
+                    theta = float(row['theta'])
+                    # print("current state:", [x, y, theta])
+                    # Here since we want sensor data and sensor data is not related to delta and vel
+                    self.init_car(x, y, theta)
+
+                    sensor_data = None
+                    # --- Then take an instant unfreezing ---
+                    rospy.wait_for_service('/gazebo/unpause_physics')
+                    try:
+                        rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
+                    except rospy.ServiceException as e:
+                        print("/gazebo/unpause_physics service call failed")
+
+                    # --- Receive sensor data ---
+                    while sensor_data is None:
+                        rospy.wait_for_service("/gazebo/get_model_state")
+                        try:
+                            sensor_data = rospy.wait_for_message('/scan', LaserScan, timeout=10)
+                        except rospy.ServiceException as e:
+                            print("/gazebo/get_model_state service call failed!")
+
+                    # --- pause simulation to prepare sample ---
+                    rospy.wait_for_service('gazebo/pause_physics')
+                    try:
+                        rospy.ServiceProxy('/gazebo/pause_physics', Empty)
+                    except rospy.ServiceException as e:
+                        print("/gazebo/pause_physics service call failed")
+                    discrete_sensor_data = self.discretize_sensor(sensor_data, 8)
+
+                    if data_form == 'valFunc' or data_form == 'valFunc_mpc':
+                        value = float(row['value'])
+                        tmp_dict = {'x': x, 'y': y, 'theta': theta, 'value': value,
+                                    'd1': discrete_sensor_data[0],
+                                    'd2': discrete_sensor_data[1],
+                                    'd3': discrete_sensor_data[2],
+                                    'd4': discrete_sensor_data[3],
+                                    'd5': discrete_sensor_data[4],
+                                    'd6': discrete_sensor_data[5],
+                                    'd7': discrete_sensor_data[6],
+                                    'd8': discrete_sensor_data[7]}
+                    elif data_form == 'polFunc':
+                        vel = float(row['vel'])
+                        ang_vel = float(row['ang_vel'])
+                        tmp_dict = {'x': x, 'y': y, 'theta': theta, 'vel': vel, 'ang_vel':ang_vel,
+                                    'd1': discrete_sensor_data[0],
+                                    'd2': discrete_sensor_data[1],
+                                    'd3': discrete_sensor_data[2],
+                                    'd4': discrete_sensor_data[3],
+                                    'd5': discrete_sensor_data[4],
+                                    'd6': discrete_sensor_data[5],
+                                    'd7': discrete_sensor_data[6],
+                                    'd8': discrete_sensor_data[7]}
+                    else:
+                        raise ValueError("invalid data form!!")
+
+                    assert tmp_dict
+                    writer.writerow(tmp_dict)
+
+
 
 if __name__ == "__main__":
-    print(sys.path)
-    data_gen = Data_Generator()
-    data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
+    # print(sys.path)
+    # data_gen = Data_Generator()
+    # data_gen.gen_data(data_form='valFunc', agent='dubinsCar')
+
+    csv_clean(os.environ['PROJ_HOME_3'] + '/data/dubinsCar/valFunc_filled.csv')
+    # data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
     # data_gen.gen_data(data_form='polFunc', agent='quad')
+
