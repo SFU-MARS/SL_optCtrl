@@ -1,5 +1,6 @@
 runs_log/
 data/
-MPC/
+mpc/
 tests/
 tf_model/
+
