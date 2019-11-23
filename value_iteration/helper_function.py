@@ -11,7 +11,7 @@ class value_interpolation_function(object):
 		self.theta = (-math.pi, math.pi)
 		self.ranges = np.array([self.x, self.y, self.theta])
 		self.state_step_num = np.array([25, 25, 9])
-		self.value_file_path = "./value_matrix_car_3D_2/value_matrix_12.npy"
+		self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_matrix.npy"
 		self.fill_value = -1000
 		self.value = None
 		self.interpolating_function = None
@@ -36,6 +36,10 @@ class value_interpolation_function(object):
 																fill_value = self.fill_value)
 
 	def interpolate_value(self, v):
-		return self.interpolating_function(v)
+		return self.interpolating_function(v).astype(np.float32)
 
-
+# test = value_interpolation_function()
+#
+# test.setup()
+#
+# print(test.interpolate_value(np.zeros([10,3])))
