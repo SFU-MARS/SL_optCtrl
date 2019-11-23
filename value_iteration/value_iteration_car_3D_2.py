@@ -32,6 +32,7 @@ class env_dubin_car_3d(object):
 
 		########### Algorithm Setting ##########
 		self.discount = 0.85
+		self.negative_discount = 0.3
 		self.threshold = 0.5
 
 		# reward = [regular state, in goal, crashed, overspeed]
@@ -119,59 +120,47 @@ class env_dubin_car_3d(object):
 		self.state_init()
 		self.action_init()
 
-	def value_iteration(self, mode = "original"):
+	def value_iteration(self, mode = "positive"):
 		iteration = 0
 		while True:
 			delta = 0
 			for i, s in enumerate(self.states):
-				best_value = -1000000
+				if (mode == "positive"):
+					best_value = -1000000
+				else:
+					best_value = 1000000
+
 				state_type = self.state_check(s, self.dim)
 				if (state_type > 0):
 					continue
 
 				current_reward = self.reward[i]
 
-				if (mode == "original"):
-					for i, a in enumerate(self.acts):
-						s_ = self.state_transition(s, a)
-						next_step_type = self.state_check(s_, self.dim)
-						if (next_step_type >= 2):
-							next_step_value = self.reward_list[next_step_type]
-						else:
-							sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim)
-							interpolating_function = RegularGridInterpolator((sub_states[0],
-																				sub_states[1],
-																				sub_states[2]),
-																				sub_value_matrix,
-																				bounds_error = False,
-																				fill_value = self.reward_list[2])
-							next_step_value = interpolating_function(s_)
+				for i, a in enumerate(self.acts):
+					s_ = self.state_transition(s, a)
+					next_step_type = self.state_check(s_, self.dim)
+					if (next_step_type >= 2):
+						next_step_value = self.reward_list[next_step_type]
+					else:
+						sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim)
+						interpolating_function = RegularGridInterpolator((sub_states[0],
+																			sub_states[1],
+																			sub_states[2]),
+																			sub_value_matrix,
+																			bounds_error = False,
+																			fill_value = self.reward_list[2])
+						next_step_value = interpolating_function(s_)
+					if (mode == "positive"):
 						best_value = max(best_value, current_reward + self.discount * next_step_value)
-				if (mode == "modified"):
-					best_value = 0
-					for i, a in enumerate(self.acts):
-						s_ = self.state_transition(s, a)
-						next_step_type = self.state_check(s_, self.dim)
-						if (next_step_type >= 2):
-							next_step_value = self.reward_list[next_step_type]
-						else:
-							sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim)
-							interpolating_function = RegularGridInterpolator((sub_states[0],
-																				sub_states[1],
-																				sub_states[2]),
-																				sub_value_matrix,
-																				bounds_error = False,
-																				fill_value = self.reward_list[2])
-							next_step_value = interpolating_function(s_)
-						best_value += current_reward + self.discount * next_step_value * self.beta[next_step_type]
-					best_value /= self.acts.shape[0]
+					else:
+						best_value = min(best_value, current_reward + self.negative_discount * next_step_value)
 
 				index = tuple(self.state_to_index(s, self.dim))
 				current_delta = abs(best_value - self.value[index])
 				delta = max(delta, current_delta)
 				self.value[index] = best_value
 
-			self.value_output(iteration, True)
+			self.value_output(iteration, True, mode)
 			print("iteraion %d:" %(iteration))
 			print("delta: ", delta)
 			print("\n\n")			
@@ -203,14 +192,14 @@ class env_dubin_car_3d(object):
 
 		return self.value[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1]], sub_states
 
-	def value_output(self, iteration_number, readable_file = False):
+	def value_output(self, iteration_number, readable_file = False, mode = "positive"):
 		dir_path = "./value_matrix_car_3D_2/"
 		try:
 			os.mkdir(dir_path)
 		except:
 	   		print(dir_path + " exist!")
 
-		file_name = "value_matrix" + "_" + str(iteration_number)
+		file_name = "value_matrix" + "_" + mode + "_" + str(iteration_number)
 		print(file_name)
 
 		np.save(dir_path + file_name, self.value)
@@ -307,7 +296,7 @@ class env_dubin_car_3d(object):
 		print(data.shape)
 
 		if (mode == "direct"):
-			theta_index = 4
+			theta_index = 0
 
 			x = np.zeros(data.shape[:-1])
 			y = np.zeros(data.shape[:-1])
@@ -419,6 +408,16 @@ class env_dubin_car_3d(object):
 								'value': value})
 		dataset.to_csv("./car_3D_2_value.csv")
 
+	def matrix_accumulation(self):
+		positive_file_path = "./value_matrix_car_3D_2/value_matrix_12.npy"
+		negative_file_path = "./value_matrix_car_3D_2/value_matrix_negative_3.npy"
+		save_file_path = "./value_matrix_car_3D_2/final_matrix.npy"
+
+		positive_value = np.load(positive_file_path)
+		negative_value = np.load(negative_file_path)
+		final_value = positive_value + negative_value
+		np.save(save_file_path, final_value)
+
 
 
 if __name__  ==  "__main__":
@@ -449,7 +448,8 @@ if __name__  ==  "__main__":
 
 	env.algorithm_init()
 	# env.generate_samples_interpolate(n = 20000)
-	print(env.state_grid)
-	env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_12.npy", "direct")
+	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_negative_2.npy", "average")
+	env.plot_3D_result("./value_matrix_car_3D_2/", "final_matrix.npy", "direct")
 	# env.value_iteration()
-	# env.value_iteration(mode = "modified")
+	# env.value_iteration(mode = "negative")
+	# env.matrix_accumulation()
