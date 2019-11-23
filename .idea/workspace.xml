@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/ppo1/mlp_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/mlp_policy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/value_iteration/helper_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/value_iteration/helper_function.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,28 +15,29 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_bicycle_env.coverage" NAME="test_bicycle_env Coverage Results" MODIFIED="1568253204520" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$helper_function.coverage" NAME="helper_function Coverage Results" MODIFIED="1574473601491" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/value_iteration" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$AckermannEnv_v0.coverage" NAME="AckermannEnv_v0 Coverage Results" MODIFIED="1574035517700" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gym_foo/gym_foo/envs" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer_mod.coverage" NAME="quick_trainer_mod Coverage Results" MODIFIED="1567121173358" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$saver.coverage" NAME="saver Coverage Results" MODIFIED="1572219210093" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_vpg_off_policy" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562628146915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$main.coverage" NAME="main Coverage Results" MODIFIED="1571184472637" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/acer" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$spawn_population.coverage" NAME="spawn_population Coverage Results" MODIFIED="1567905883278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/worlds" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$PlanarQuadEnv_v0.coverage" NAME="PlanarQuadEnv_v0 Coverage Results" MODIFIED="1569726247736" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gym_foo/gym_foo/envs" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_vpg_off_policy.coverage" NAME="test_vpg_off_policy Coverage Results" MODIFIED="1572222669654" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_vpg_off_policy" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$plot_ppo_valpred.coverage" NAME="plot_ppo_valpred Coverage Results" MODIFIED="1574459539590" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_value_prediction" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$vpg.coverage" NAME="vpg Coverage Results" MODIFIED="1571348108911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/spinningup/spinup/algos/vpg" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$utils.coverage" NAME="data_gen Coverage Results" MODIFIED="1571091650154" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$quick_trainer.coverage" NAME="quick_trainer Coverage Results" MODIFIED="1574303795675" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_transition_mismatch.coverage" NAME="test_transition_mismatch Coverage Results" MODIFIED="1572563303035" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_transition_mismatch" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$data_gen.coverage" NAME="data_gen Coverage Results" MODIFIED="1574302211874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+    <SUITE FILE_PATH="coverage/SL_optControl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562626926228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$test_VPG_off_policy.coverage" NAME="test_VPG_off_policy Coverage Results" MODIFIED="1572050627600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_VPG_off_policy" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$saver.coverage" NAME="saver Coverage Results" MODIFIED="1572219210093" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_vpg_off_policy" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562628146915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$spawn_population.coverage" NAME="spawn_population Coverage Results" MODIFIED="1567905883278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/worlds" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$PlanarQuadEnv_v0.coverage" NAME="PlanarQuadEnv_v0 Coverage Results" MODIFIED="1569726247736" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gym_foo/gym_foo/envs" />
+    <SUITE FILE_PATH="coverage/SL_optCtrl$plot_ppo_valpred.coverage" NAME="plot_ppo_valpred Coverage Results" MODIFIED="1574459539590" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_value_prediction" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_value_prediction.coverage" NAME="test_value_prediction Coverage Results" MODIFIED="1574201215596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_value_prediction" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$brain.coverage" NAME="brain Coverage Results" MODIFIED="1571206260052" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/acer" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_errors.coverage" NAME="test_errors Coverage Results" MODIFIED="1571707901279" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_possible_errors" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$quick_comp_results.coverage" NAME="quick_comp_results Coverage Results" MODIFIED="1574062120125" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$data_gen.coverage" NAME="data_gen Coverage Results" MODIFIED="1574302211874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
-    <SUITE FILE_PATH="coverage/SL_optControl$PlanarQuad_brs_engine.coverage" NAME="PlanarQuad_brs_engine Coverage Results" MODIFIED="1562626926228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brs_engine" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_ACER.coverage" NAME="test_ACER Coverage Results" MODIFIED="1571191822315" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_ACER" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_weight_transfer.coverage" NAME="test_weight_transfer Coverage Results" MODIFIED="1574362369469" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_weight_transfer" />
-    <SUITE FILE_PATH="coverage/SL_optCtrl$test_VPG_off_policy.coverage" NAME="test_VPG_off_policy Coverage Results" MODIFIED="1572050627600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_VPG_off_policy" />
     <SUITE FILE_PATH="coverage/SL_optCtrl$test_behavior_cloning.coverage" NAME="test_behavior_cloning Coverage Results" MODIFIED="1570139917690" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/stable-baselines/my_tests" />
   </component>
   <component name="DatabaseView">
@@ -64,11 +68,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/run.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
-              <caret line="12" column="7" selection-start-line="12" selection-start-column="7" selection-end-line="12" selection-end-column="7" />
+            <state relative-caret-position="277">
+              <caret line="37" column="1" selection-start-line="37" selection-start-column="1" selection-end-line="37" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -89,29 +93,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="88">
-              <caret line="15" column="69" selection-start-line="15" selection-start-column="49" selection-end-line="15" selection-end-column="69" />
+            <state relative-caret-position="70">
+              <caret line="35" column="42" selection-start-line="35" selection-start-column="42" selection-end-line="35" selection-end-column="42" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/worlds/playground.world">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5703">
-              <caret line="443" column="21" selection-start-line="443" selection-start-column="21" selection-end-line="443" selection-end-column="21" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="72">
-              <caret line="4" column="9" selection-start-line="4" selection-start-column="9" selection-end-line="4" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -124,10 +110,44 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4410">
-              <caret line="260" column="42" selection-start-line="260" selection-start-column="42" selection-end-line="260" selection-end-column="42" />
+            <state>
               <folding>
                 <element signature="e#0#52#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/train_ppo.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="144">
+              <caret line="8" selection-start-line="8" selection-end-line="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="87">
+              <caret line="234" selection-start-line="234" selection-end-line="234" />
+              <folding>
+                <element signature="e#0#64#0" expanded="true" />
+                <element signature="e#6782#6855#0" />
+                <element signature="e#8880#8969#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/value_iteration/helper_function.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="393">
+              <caret line="40" column="39" selection-start-line="40" selection-start-column="39" selection-end-line="40" selection-end-column="39" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -157,7 +177,6 @@
       <find>-54.2</find>
       <find>set_model_states</find>
       <find>start_clip_grad</find>
-      <find>ob</find>
       <find>predic</find>
       <find>pred</find>
       <find>value</find>
@@ -173,6 +192,7 @@
       <find>GOAL</find>
       <find>cube_5</find>
       <find>matpl</find>
+      <find>ob</find>
       <find>_seed</find>
     </findStrings>
   </component>
@@ -183,7 +203,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/spinningup/spinup/utils/run_utils.py" />
         <option value="$PROJECT_DIR$/spinningup/spinup/algos/vpg/vpg.py" />
         <option value="$PROJECT_DIR$/acer/brain.py" />
         <option value="$PROJECT_DIR$/acer/agent.py" />
@@ -218,14 +237,12 @@
         <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" />
         <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" />
         <option value="$PROJECT_DIR$/tests/test_value_prediction/test_value_prediction.py" />
-        <option value="$PROJECT_DIR$/ppo1/mlp_policy.py" />
         <option value="$PROJECT_DIR$/data/dubinsCar/env_one/README.md" />
         <option value="$PROJECT_DIR$/data/data_gen.py" />
         <option value="$PROJECT_DIR$/quick_trainer.py" />
         <option value="$PROJECT_DIR$/train_ppo.py" />
         <option value="$PROJECT_DIR$/ppo1/ppo.py" />
         <option value="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" />
-        <option value="$PROJECT_DIR$/run.sh" />
         <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" />
         <option value="$PROJECT_DIR$/worlds/playground.world" />
         <option value="$PROJECT_DIR$/runs_log/21-Nov-2019_18-22-45DubinsCarEnv-v0_hand_craft_ppo/README.md" />
@@ -234,6 +251,9 @@
         <option value="$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/README.md" />
         <option value="$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/README.md" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/value_iteration/helper_function.py" />
+        <option value="$PROJECT_DIR$/ppo1/mlp_policy.py" />
+        <option value="$PROJECT_DIR$/run.sh" />
       </list>
     </option>
   </component>
@@ -256,6 +276,68 @@
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+              <item name="21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+              <item name="21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo" type="462c0819:PsiDirectoryNode" />
+              <item name="figure" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+              <item name="21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+              <item name="21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo" type="462c0819:PsiDirectoryNode" />
+              <item name="figure" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+              <item name="22-Nov-2019_18-49-56DubinsCarEnv-v0_hand_craft_ppo_vf" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+              <item name="22-Nov-2019_18-49-56DubinsCarEnv-v0_hand_craft_ppo_vf" type="462c0819:PsiDirectoryNode" />
+              <item name="figure" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+              <item name="22-Nov-2019_22-19-12DubinsCarEnv-v0_hand_craft_ppo_vf" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
+              <item name="22-Nov-2019_22-19-12DubinsCarEnv-v0_hand_craft_ppo_vf" type="462c0819:PsiDirectoryNode" />
+              <item name="figure" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="value_iteration" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -300,7 +382,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.plot_ppo_valpred">
+  <component name="RunManager" selected="Bash.run.sh">
     <configuration name="run.sh" type="BashConfigurationType" factoryName="Bash" temporary="true">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="bash" />
@@ -326,6 +408,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_gen.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="helper_function" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="SL_optControl" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/value_iteration" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/value_iteration/helper_function.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -378,28 +482,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test_value_prediction" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="SL_optControl" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="$PROJECT_DIR$/../miniconda3/envs/py35_no_specific/bin/python3.5" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/test_value_prediction" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/test_value_prediction/test_value_prediction.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="test_weight_transfer" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SL_optControl" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -426,17 +508,17 @@
       <item itemvalue="Bash.run.sh" />
       <item itemvalue="Python.quick_trainer" />
       <item itemvalue="Python.data_gen" />
-      <item itemvalue="Python.test_value_prediction" />
       <item itemvalue="Python.test_weight_transfer" />
       <item itemvalue="Python.plot_ppo_valpred" />
+      <item itemvalue="Python.helper_function" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.plot_ppo_valpred" />
         <item itemvalue="Bash.run.sh" />
+        <item itemvalue="Python.helper_function" />
+        <item itemvalue="Python.plot_ppo_valpred" />
         <item itemvalue="Python.test_weight_transfer" />
         <item itemvalue="Python.data_gen" />
-        <item itemvalue="Python.test_value_prediction" />
       </list>
     </recent_temporary>
   </component>
@@ -496,12 +578,12 @@
       <workItem from="1574047950244" duration="9584000" />
       <workItem from="1574115667739" duration="11486000" />
       <workItem from="1574191659655" duration="11920000" />
-      <workItem from="1574291905697" duration="46283000" />
+      <workItem from="1574291905697" duration="58585000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="616839000" />
+    <option name="totallyTimeSpent" value="629141000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -513,14 +595,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="674" y="48" width="824" height="995" extended-state="0" />
+    <frame x="-1" y="24" width="1682" height="1003" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.67866325" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.31112468" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4987805" weight="0.368899" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4987805" visible="true" weight="0.41203177" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3802497" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -529,7 +611,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32938644" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5012195" side_tool="true" weight="0.46420583" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.4238259" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.38706017" />
       <window_info anchor="bottom" id="Python Console" order="12" weight="0.3291714" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -615,11 +697,6 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py</url>
-          <line>39</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py</url>
           <line>92</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
@@ -632,35 +709,6 @@
     <SUITE FILE_PATH="coverage/SL_optCtrl$spawn_population.coverage" NAME="spawn_population Coverage Results" MODIFIED="1567491465422" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/worlds" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="52" column="42" selection-start-line="52" selection-start-column="42" selection-end-line="52" selection-end-column="42" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/launch/Ackermann.launch">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="738">
-          <caret line="41" column="65" selection-start-line="41" selection-start-column="41" selection-end-line="41" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/car/valueFunc_filled.csv">
-      <provider selected="true" editor-type-id="csv-text-editor" />
-      <provider editor-type-id="csv-table-editor">
-        <state showInfoPanel="true" fixedHeaders="false" rowLines="3" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/quad/valFunc_mpc.csv">
-      <provider selected="true" editor-type-id="csv-text-editor" />
-      <provider editor-type-id="csv-table-editor">
-        <state showInfoPanel="true" fixedHeaders="false" rowLines="3" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data/car/valFunc.csv">
       <provider selected="true" editor-type-id="csv-text-editor" />
       <provider editor-type-id="csv-table-editor">
@@ -763,27 +811,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/train_ppo.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="13">
-          <caret line="18" column="17" selection-start-line="18" selection-start-column="17" selection-end-line="18" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
           <caret line="17" selection-start-line="17" selection-end-line="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1807">
-          <caret line="218" column="47" selection-start-line="218" selection-start-column="47" selection-end-line="218" selection-end-column="47" />
-          <folding>
-            <element signature="e#0#64#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -808,16 +839,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4410">
-          <caret line="260" column="42" selection-start-line="260" selection-start-column="42" selection-end-line="260" selection-end-column="42" />
-          <folding>
-            <element signature="e#0#52#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/runs_log/20-Nov-2019_22-30-24DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00004.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
@@ -834,13 +855,6 @@
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="12" column="7" selection-start-line="12" selection-start-column="7" selection-end-line="12" selection-end-column="7" />
         </state>
       </provider>
     </entry>
@@ -864,37 +878,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/quick_trainer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1018">
-          <caret line="206" column="26" selection-start-line="206" selection-start-column="26" selection-end-line="206" selection-end-column="26" />
-          <folding>
-            <element signature="e#0#19#0" expanded="true" />
-            <element signature="e#13430#13458#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/runs_log/20-Nov-2019_16-36-16DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00004.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_02-00-17DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00003.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="88">
-          <caret line="15" column="69" selection-start-line="15" selection-start-column="49" selection-end-line="15" selection-end-column="69" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00006.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00006.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/README.md">
@@ -917,13 +907,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/worlds/playground.world">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5703">
-          <caret line="443" column="21" selection-start-line="443" selection-start-column="21" selection-end-line="443" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -938,13 +921,106 @@
     <entry file="file://$PROJECT_DIR$/helperOC/.gitignore">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stable-baselines/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-270" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/spinningup/.gitignore">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$PROJECT_DIR$/worlds/playground.world">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="4" column="9" selection-start-line="4" selection-start-column="9" selection-end-line="4" selection-end-column="9" />
+        <state relative-caret-position="5703">
+          <caret line="443" column="21" selection-start-line="443" selection-start-column="21" selection-end-line="443" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/quick_trainer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1018">
+          <caret line="206" column="26" selection-start-line="206" selection-start-column="26" selection-end-line="206" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+            <element signature="e#13430#13458#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="70">
+          <caret line="35" column="42" selection-start-line="35" selection-start-column="42" selection-end-line="35" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/baselines/common/tf_util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-324">
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#52#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train_ppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/value_iteration/helper_function.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="393">
+          <caret line="40" column="39" selection-start-line="40" selection-start-column="39" selection-end-line="40" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="87">
+          <caret line="234" selection-start-line="234" selection-end-line="234" />
+          <folding>
+            <element signature="e#0#64#0" expanded="true" />
+            <element signature="e#6782#6855#0" />
+            <element signature="e#8880#8969#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log/22-Nov-2019_18-49-56DubinsCarEnv-v0_hand_craft_ppo_vf/ppo_valpred_external.csv">
+      <provider selected="true" editor-type-id="LargeFileEditor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00006.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="277">
+          <caret line="37" column="1" selection-start-line="37" selection-start-column="1" selection-end-line="37" selection-end-column="1" />
         </state>
       </provider>
     </entry>
