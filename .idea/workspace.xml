@@ -2,32 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/data/dubinsCar/env_one/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/launch/DubinsCar.launch" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/quick_comp_results.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/urdfs/dubins_car.urdf.xacro" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/data_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_gen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/launch/QuadrotorAirSpace_v0.launch" beforeDir="false" afterPath="$PROJECT_DIR$/launch/Quadrotor.launch" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/launch/ackermann_vehicle.launch" beforeDir="false" afterPath="$PROJECT_DIR$/launch/Ackermann.launch" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/mlp_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/mlp_policy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/quick_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/quick_trainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_value_prediction/ppo_runs_data_original_valueFunc.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_value_prediction/test_value_prediction.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_value_prediction/test_value_prediction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_gen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/worlds/playground.world" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/playground.world" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -112,18 +91,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/test_weight_transfer/test_weight_transfer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="29">
-              <caret line="19" column="26" selection-start-line="19" selection-start-column="4" selection-end-line="19" selection-end-column="26" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="88">
@@ -136,32 +103,26 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00006.png">
-          <provider selected="true" editor-type-id="images" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor>
-                <caret column="20" selection-start-column="20" selection-end-column="56" />
-              </first_editor>
-              <second_editor />
+        <entry file="file://$PROJECT_DIR$/worlds/playground.world">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="5703">
+              <caret line="443" column="21" selection-start-line="443" selection-start-column="21" selection-end-line="443" selection-end-column="21" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor>
-                <caret column="56" selection-start-column="56" selection-end-column="56" />
-              </first_editor>
-              <second_editor />
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="36">
+              <caret line="2" column="4" selection-start-line="2" selection-start-column="4" selection-end-line="2" selection-end-column="4" />
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/helperOC/.gitignore">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
@@ -215,8 +176,8 @@
       <find>cube_4</find>
       <find>GOAL</find>
       <find>cube_5</find>
-      <find>_seed</find>
       <find>matpl</find>
+      <find>_seed</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -226,7 +187,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/tests/test_ACER/test_ACER.py" />
         <option value="$PROJECT_DIR$/spinningup/spinup/utils/run_utils.py" />
         <option value="$PROJECT_DIR$/spinningup/spinup/algos/vpg/vpg.py" />
         <option value="$PROJECT_DIR$/acer/brain.py" />
@@ -277,10 +237,11 @@
         <option value="$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py" />
         <option value="$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/README.md" />
         <option value="$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/README.md" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="y" value="24" />
     <option name="width" value="816" />
     <option name="height" value="993" />
@@ -298,102 +259,6 @@
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-              <item name="gym_foo" type="462c0819:PsiDirectoryNode" />
-              <item name="envs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="launch" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="ppo1" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
-              <item name="20-Nov-2019_16-36-16DubinsCarEnv-v0_hand_craft_ppo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
-              <item name="21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
-              <item name="21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo" type="462c0819:PsiDirectoryNode" />
-              <item name="figure" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="runs_log" type="462c0819:PsiDirectoryNode" />
-              <item name="21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="tests" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="tests" type="462c0819:PsiDirectoryNode" />
-              <item name="test_value_prediction" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="tests" type="462c0819:PsiDirectoryNode" />
-              <item name="test_weight_transfer" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="tf_model" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="tf_model" type="462c0819:PsiDirectoryNode" />
-              <item name="dubinsCar" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="urdfs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="worlds" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -419,11 +284,11 @@
       <recent name="$PROJECT_DIR$/runs_log/21-Nov-2019_09-15-36DubinsCarEnv-v0_hand_craft_ppo" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/runs_log/20-Nov-2019_23-48-47DubinsCarEnv-v0_hand_craft_ppo" />
       <recent name="$PROJECT_DIR$/data/dubinsCar/env_one" />
       <recent name="$PROJECT_DIR$/tests/test_VPG_off_policy" />
       <recent name="$PROJECT_DIR$/data/backup/20191014" />
-      <recent name="$PROJECT_DIR$/data/backup" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -463,7 +328,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/data_gen.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_gen.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -634,12 +499,12 @@
       <workItem from="1574047950244" duration="9584000" />
       <workItem from="1574115667739" duration="11486000" />
       <workItem from="1574191659655" duration="11920000" />
-      <workItem from="1574291905697" duration="44073000" />
+      <workItem from="1574291905697" duration="45814000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="614629000" />
+    <option name="totallyTimeSpent" value="616370000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -651,14 +516,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="24" width="1682" height="1003" extended-state="6" />
+    <frame x="-1" y="24" width="1682" height="1003" extended-state="7" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.35268947" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.32273838" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4987805" visible="true" weight="0.18728717" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4987805" weight="0.368899" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3802497" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -667,13 +532,13 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32938644" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5012195" side_tool="true" weight="0.46420583" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.38706017" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.4199773" />
       <window_info anchor="bottom" id="Python Console" order="12" weight="0.3291714" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Database" order="3" weight="0.3294621" />
-      <window_info anchor="right" id="SciView" order="4" side_tool="true" visible="true" weight="0.1301956" />
+      <window_info anchor="right" id="SciView" order="4" side_tool="true" weight="0.13080685" />
     </layout>
     <layout-to-restore>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.35268947" />
@@ -770,44 +635,6 @@
     <SUITE FILE_PATH="coverage/SL_optCtrl$spawn_population.coverage" NAME="spawn_population Coverage Results" MODIFIED="1567491465422" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/worlds" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gym_foo/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gym_foo/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor />
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gazebo_env.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="882">
-          <caret line="60" column="28" selection-start-line="60" selection-start-column="25" selection-end-line="60" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/AckermannEnv_v0.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="46" selection-start-line="45" selection-end-line="46" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/PlanarQuadEnv_v0.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
@@ -896,7 +723,7 @@
     <entry file="file://$PROJECT_DIR$/data/dubinsCar/env_one/valFunc_filled_cleaned.csv">
       <provider selected="true" editor-type-id="csv-text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/data_gen.py">
+    <entry file="file://$PROJECT_DIR$/data_gen.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="550">
           <caret line="692" column="58" selection-start-line="692" selection-start-column="58" selection-end-line="692" selection-end-column="58" />
@@ -1051,16 +878,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00006.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/worlds/playground.world">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="524">
-          <caret line="443" column="21" lean-forward="true" selection-start-line="443" selection-start-column="21" selection-end-line="443" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/runs_log/20-Nov-2019_16-36-16DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00004.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
@@ -1080,6 +897,19 @@
     <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00006.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/Kazam_screenshot_00006.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor>
+            <caret column="56" selection-start-column="56" selection-end-column="56" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_20-39-09DubinsCarEnv-v0_hand_craft_ppo/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
@@ -1090,13 +920,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/runs_log/21-Nov-2019_21-43-59DubinsCarEnv-v0_hand_craft_ppo/README.md">
+    <entry file="file://$PROJECT_DIR$/worlds/playground.world">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5703">
+          <caret line="443" column="21" selection-start-line="443" selection-start-column="21" selection-end-line="443" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gym_foo/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor>
-            <caret column="56" selection-start-column="56" selection-end-column="56" />
-          </first_editor>
+          <first_editor />
           <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/helperOC/.gitignore">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spinningup/.gitignore">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" column="4" selection-start-line="2" selection-start-column="4" selection-end-line="2" selection-end-column="4" />
         </state>
       </provider>
     </entry>
