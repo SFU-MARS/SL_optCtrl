@@ -31,12 +31,13 @@ class env_dubin_car_3d(object):
 
 
 		########### Algorithm Setting ##########
-		self.discount = 0.85
-		self.negative_discount = 0.3
+		self.discount = 0.93
+		self.negative_discount = 0.5
+		self.epsilon = 0.3
 		self.threshold = 0.5
 
 		# reward = [regular state, in goal, crashed, overspeed]
-		self.reward_list = np.array([0, 1000, -1000, -400], dtype = float)
+		self.reward_list = np.array([0, 1000, -400, -400], dtype = float)
 		self.beta = np.array([1, 1.8, 0.005, 0])
 
 		########## Discreteness Setting ##########
@@ -127,14 +128,21 @@ class env_dubin_car_3d(object):
 			for i, s in enumerate(self.states):
 				if (mode == "positive"):
 					best_value = -1000000
-				else:
+				if (mode == "negative"):
 					best_value = 1000000
+				if (mode == "average"):
+					best_value = 0
+				if (mode == "epsilon"):
+					best_value = 0
 
 				state_type = self.state_check(s, self.dim)
 				if (state_type > 0):
 					continue
 
 				current_reward = self.reward[i]
+
+				if (mode == "epsilon"):
+					qvalue = np.array([], dtype = float)
 
 				for i, a in enumerate(self.acts):
 					s_ = self.state_transition(s, a)
@@ -150,14 +158,23 @@ class env_dubin_car_3d(object):
 																			bounds_error = False,
 																			fill_value = self.reward_list[2])
 						next_step_value = interpolating_function(s_)
-					if (mode == "positive"):
+					if (mode == "positive"  or  mode == "epsilon"):
 						best_value = max(best_value, current_reward + self.discount * next_step_value)
-					else:
+						qvalue = np.append(qvalue, [[best_value]])
+					if (mode == "negative"):
 						best_value = min(best_value, current_reward + self.negative_discount * next_step_value)
+					if (mode == "average"):
+						best_value = best_value + next_step_value
 
 				index = tuple(self.state_to_index(s, self.dim))
+				if (mode == "average"):
+					best_value = best_value / self.acts.shape[0]
+				if (mode == "epsilon"):
+					best_value = (1 - self.epsilon) * best_value + self.epsilon * qvalue.sum() / self.acts.shape[0]
+
 				current_delta = abs(best_value - self.value[index])
 				delta = max(delta, current_delta)
+
 				self.value[index] = best_value
 
 			self.value_output(iteration, True, mode)
@@ -298,32 +315,35 @@ class env_dubin_car_3d(object):
 		if (mode == "direct"):
 			theta_index = 0
 
-			x = np.zeros(data.shape[:-1])
-			y = np.zeros(data.shape[:-1])
-			value = np.zeros(data.shape[:-1])
 
-			for i, d in np.ndenumerate(data):
-				if (i[-1] == theta_index):
-					x[i[:-1]] = self.state_grid[0][i[0]]
-					y[i[:-1]] = self.state_grid[1][i[1]]
-					value[i[:-1]] = d
+			while theta_index < data.shape[2]:
+				x = np.zeros(data.shape[:-1])
+				y = np.zeros(data.shape[:-1])
+				value = np.zeros(data.shape[:-1])
+
+				for i, d in np.ndenumerate(data):
+					if (i[-1] == theta_index):
+						x[i[:-1]] = self.state_grid[0][i[0]]
+						y[i[:-1]] = self.state_grid[1][i[1]]
+						value[i[:-1]] = d
 
 
-			fig = plt.figure()
-			ax = fig.gca(projection='3d')
+				fig = plt.figure()
+				ax = fig.gca(projection='3d')
 
-			surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
-				   linewidth=0, antialiased=False)
-			fig.colorbar(surf, shrink=0.5, aspect=5)
+				surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+					   linewidth=0, antialiased=False)
+				fig.colorbar(surf, shrink=0.5, aspect=5)
 
-			ax.set_xlabel('x', fontsize = 15)
-			ax.set_ylabel('y', fontsize = 15)
-			ax.set_zlabel('value', fontsize = 15)
-			title = "theta: " + str(round(self.state_grid[2][theta_index], 2))
-			ax.set_title(title, fontsize = 15)
+				ax.set_xlabel('x', fontsize = 15)
+				ax.set_ylabel('y', fontsize = 15)
+				ax.set_zlabel('value', fontsize = 15)
+				title = "theta: " + str(round(self.state_grid[2][theta_index], 2))
+				ax.set_title(title, fontsize = 15)
 
-			plt.show()
-			# fig.savefig(save_path + "theta_" + str(theta_index), dpi=fig.dpi)
+				theta_index += 1
+				plt.show()
+				# fig.savefig(save_path + "average36_" + "theta_" + str(theta_index), dpi=fig.dpi)
 
 
 		if (mode == "average"):
@@ -409,8 +429,8 @@ class env_dubin_car_3d(object):
 		dataset.to_csv("./car_3D_2_value.csv")
 
 	def matrix_accumulation(self):
-		positive_file_path = "./value_matrix_car_3D_2/value_matrix_12.npy"
-		negative_file_path = "./value_matrix_car_3D_2/value_matrix_negative_3.npy"
+		positive_file_path = "./value_matrix_car_3D_2/value_matrix_positive_13.npy"
+		negative_file_path = "./value_matrix_car_3D_2/value_matrix_negative_4.npy"
 		save_file_path = "./value_matrix_car_3D_2/final_matrix.npy"
 
 		positive_value = np.load(positive_file_path)
@@ -448,8 +468,12 @@ if __name__  ==  "__main__":
 
 	env.algorithm_init()
 	# env.generate_samples_interpolate(n = 20000)
-	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_negative_2.npy", "average")
-	env.plot_3D_result("./value_matrix_car_3D_2/", "final_matrix.npy", "direct")
+	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_negative_4.npy", "direct")
+	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_average_36.npy", "direct")
+	env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_epsilon_14.npy", "direct")
+
+	# env.plot_3D_result("./value_matrix_car_3D_2/", "final_matrix.npy", "direct")
+	# env.value_iteration(mode = "epsilon")
 	# env.value_iteration()
 	# env.value_iteration(mode = "negative")
 	# env.matrix_accumulation()
