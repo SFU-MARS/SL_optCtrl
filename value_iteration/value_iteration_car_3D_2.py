@@ -35,6 +35,7 @@ class env_dubin_car_3d(object):
 		self.negative_discount = 0.5
 		self.epsilon = 0.3
 		self.threshold = 0.5
+		self.tau = 1.5
 
 		# reward = [regular state, in goal, crashed, overspeed]
 		self.reward_list = np.array([0, 1000, -400, -400], dtype = float)
@@ -130,19 +131,17 @@ class env_dubin_car_3d(object):
 					best_value = -1000000
 				if (mode == "negative"):
 					best_value = 1000000
-				if (mode == "average"):
+				if (mode == "average"  or  mode == "epsilon"  or  mode == "boltzmann"):
 					best_value = 0
-				if (mode == "epsilon"):
-					best_value = 0
+					qvalue = np.array([], dtype = float)
+				if (mode == "boltzmann"):
+					bolt = np.array([], dtype = float)
 
 				state_type = self.state_check(s, self.dim)
 				if (state_type > 0):
 					continue
 
 				current_reward = self.reward[i]
-
-				if (mode == "epsilon"):
-					qvalue = np.array([], dtype = float)
 
 				for i, a in enumerate(self.acts):
 					s_ = self.state_transition(s, a)
@@ -158,11 +157,21 @@ class env_dubin_car_3d(object):
 																			bounds_error = False,
 																			fill_value = self.reward_list[2])
 						next_step_value = interpolating_function(s_)
-					if (mode == "positive"  or  mode == "epsilon"):
+					if (mode == "positive"):
 						best_value = max(best_value, current_reward + self.discount * next_step_value)
-						qvalue = np.append(qvalue, [[best_value]])
+
+					if (mode == "epsilon"):
+						qvalue = np.append(qvalue, [[current_reward + self.discount * next_step_value]])
+
+					if (mode == "boltzmann"):
+						temp_value = current_reward + self.discount * next_step_value
+						qvalue = np.append(qvalue, [[temp_value]])
+						# 100 is a scalar to solve math range error. The value range becomes [-4, 10]
+						bolt = np.append(bolt, [[math.exp(temp_value / 100 / self.tau)]])
+
 					if (mode == "negative"):
 						best_value = min(best_value, current_reward + self.negative_discount * next_step_value)
+
 					if (mode == "average"):
 						best_value = best_value + next_step_value
 
@@ -171,6 +180,10 @@ class env_dubin_car_3d(object):
 					best_value = best_value / self.acts.shape[0]
 				if (mode == "epsilon"):
 					best_value = (1 - self.epsilon) * best_value + self.epsilon * qvalue.sum() / self.acts.shape[0]
+				if (mode == "boltzmann"):
+					total = bolt.sum()
+					p_a = bolt / total
+					best_value = np.matmul(p_a, np.transpose(qvalue))
 
 				current_delta = abs(best_value - self.value[index])
 				delta = max(delta, current_delta)
@@ -256,7 +269,7 @@ class env_dubin_car_3d(object):
 			return 1
 		return 0
 
-	def check_crash(self, s, width = 0.2):
+	def check_crash(self, s, width = 0.4):
 		# return 2 = crashed
 		# return 0 = no crash
 
@@ -342,8 +355,8 @@ class env_dubin_car_3d(object):
 				ax.set_title(title, fontsize = 15)
 
 				theta_index += 1
-				plt.show()
-				# fig.savefig(save_path + "average36_" + "theta_" + str(theta_index), dpi=fig.dpi)
+				# plt.show()
+				fig.savefig(save_path + "epsilon_" + "theta_" + str(theta_index), dpi=fig.dpi)
 
 
 		if (mode == "average"):
@@ -471,9 +484,12 @@ if __name__  ==  "__main__":
 	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_negative_4.npy", "direct")
 	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_average_36.npy", "direct")
 	env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_epsilon_14.npy", "direct")
+	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_boltzmann_25.npy", "direct")
 
 	# env.plot_3D_result("./value_matrix_car_3D_2/", "final_matrix.npy", "direct")
 	# env.value_iteration(mode = "epsilon")
 	# env.value_iteration()
+	# env.value_iteration(mode = "boltzmann")
+
 	# env.value_iteration(mode = "negative")
 	# env.matrix_accumulation()
