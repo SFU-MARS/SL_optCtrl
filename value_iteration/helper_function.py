@@ -11,8 +11,11 @@ class value_interpolation_function(object):
 		self.theta = (-math.pi, math.pi)
 		self.ranges = np.array([self.x, self.y, self.theta])
 		self.state_step_num = np.array([25, 25, 9])
-		self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_matrix.npy"
-		self.fill_value = -1000
+		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_epsilon.npy"
+		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_boltzmann.npy"
+		self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_boltzmann_angle.npy"
+		print("using value file:", self.value_file_path)
+		self.fill_value = -400
 		self.value = None
 		self.interpolating_function = None
 

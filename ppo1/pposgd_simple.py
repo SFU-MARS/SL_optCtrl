@@ -33,10 +33,12 @@ def traj_segment_generator(pi, env, horizon, stochastic):
     news = np.zeros(horizon, 'int32')
     acs = np.array([ac for _ in range(horizon)])
     prevacs = acs.copy()
-    # define success percentage
+    # XLV: add success percentage
     suc = False
     sucs = np.zeros(horizon, 'int32')
-
+    # XLV: add event flag
+    event_flag = 'safe'
+    event_flags = [None] * horizon
     while True:
         prevac = ac
         ac, vpred = pi.act(stochastic, ob)
@@ -62,9 +64,10 @@ def traj_segment_generator(pi, env, horizon, stochastic):
                 cur_ep_ret = 0
                 cur_ep_len = 0
 
-            yield {"ob" : obs, "rew" : rews, "vpred" : vpreds, "new": news, "suc": sucs,
+            yield {"ob" : obs, "rew" : rews, "vpred" : vpreds, "new": news, "suc": sucs, "event_flag":event_flags,
                     "ac" : acs, "prevac" : prevacs, "nextvpred": vpred * (1 - new),
                     "ep_rets" : ep_rets, "ep_lens" : ep_lens}
+
                     # BI: Added this for our work.
                     #"start_rews": start_rews}
             # Be careful!!! if you change the downstream algorithm to aggregate
@@ -78,13 +81,16 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         news[i] = new
         acs[i] = ac
         prevacs[i] = prevac
-        # AMEND: added by xlv
+        # XLV: added for collect success rate
         sucs[i] = suc
+        # XLV: added for collect event type
+        event_flags[i] = event_flag
 
         # ob, rew, new, suc, _ = env.step(ac)
         # print("rew:", rew)
         ob, rew, new, info = env.step(ac)
         suc = info['suc']
+        event_flag = info['event']
         rews[i] = rew
 
         cur_ep_ret += rew

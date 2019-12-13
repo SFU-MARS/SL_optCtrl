@@ -17,7 +17,7 @@ def plot_performance(x, y,
                      xlabel=None, 
                      ylabel=None,
                      figfile=None,
-                     pickle = False):
+                     pickle=False):
     print('plot_performance', flush=True);
     # plt.rcParams["axes.edgecolor"] = "0.15"
     # plt.rcParams["axes.grid"] = True
@@ -33,6 +33,7 @@ def plot_performance(x, y,
 
     if ylabel is not None:
         ax.set_ylabel(ylabel)
+
 
     # NOTE: new code for saving performance data
     if pickle:

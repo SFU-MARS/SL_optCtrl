@@ -10,6 +10,9 @@ import pickle
 import pandas as pd
 import os, sys
 
+from utils.plotting_performance import *
+from utils.utils import *
+
 def create_session(num_cpu=None):
     U.make_session(num_cpu=num_cpu).__enter__()
 
@@ -19,26 +22,20 @@ def create_policy(name, env, vf_load=False, pol_load=False):
     ac_space = env.action_space
 
     if vf_load or pol_load:
-        print("i am using mlppolicy_mod")
+        logger.log("i am using mlppolicy_mod")
         return MlpPolicy_mod(name=name,
                      ob_space=ob_space, ac_space=ac_space,
                      hid_size=64, num_hid_layers=2, load_weights_vf=vf_load, load_weights_pol=pol_load)
     else:
-        print("i am using mlppolicy")
+        logger.log("i am using mlppolicy")
         return MlpPolicy(name=name,
                      ob_space=ob_space, ac_space=ac_space,
                      hid_size=64, num_hid_layers=2)
 
-    '''
-    print("I'M HERE, NO ANY INITIALIZATION")
-    return MlpPolicy(name=name,
-                     ob_space=ob_space, ac_space=ac_space,
-                     hid_size=64, num_hid_layers=2)
-    '''
 def initialize():
     U.initialize()
 
-
+"""
 def ppo_eval(env, policy, timesteps_per_actorbatch, max_iters=0, stochastic=False, scatter_collect=False):
     pi = policy
     seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=stochastic)
@@ -102,6 +99,7 @@ def ppo_eval(env, policy, timesteps_per_actorbatch, max_iters=0, stochastic=Fals
             dones.append(seg['new'])
 
     return pi, ep_mean_lens, ep_mean_rews, suc_counter * 1.0 / ep_counter, trajs, dones
+"""
 
 def ppo_learn(env, policy,
         timesteps_per_actorbatch,                       # timesteps per actor per update
@@ -114,6 +112,7 @@ def ppo_learn(env, policy,
         adam_epsilon=1e-5,
         schedule='constant', # annealing for stepsize parameters (epsilon and adam)
         save_obs=False):
+
     """This is a direct copy of https://github.com/openai/baselines/blob/master/baselines/ppo1/pposgd_simple.py
     The only reason I copied it here is to update the function to not create a new policy but instead update
     the current one for a few iterations.
@@ -122,7 +121,8 @@ def ppo_learn(env, policy,
     # Setup losses and stuff
     # ----------------------------------------
     pi = policy
-    oldpi = create_policy("oldpi", env) # Network for old policy
+    # oldpi = create_policy("oldpi", env) # Network for old policy
+    oldpi = create_policy("oldpi", env, vf_load=True if args['vf_load'] == "yes" else False, pol_load=True if args['pol_load'] == "yes" else False)
 
     atarg = tf.placeholder(dtype=tf.float32, shape=[None]) # Target advantage function (if applicable)
     ret = tf.placeholder(dtype=tf.float32, shape=[None]) # Empirical return
@@ -144,16 +144,14 @@ def ppo_learn(env, policy,
     surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
     pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
 
+    # warning: do not update weights of value network if loading customized external value initialization.
     if args['vf_load'] == "yes":
         vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
-        print("loading external valfunc and vf_loss is fixed!")
+        logger.log("loading external valfunc and vf_loss is fixed!")
     else:
         vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
-        print("not loading external valfunc and vf_loss is updating!")
+        logger.log("not loading external valfunc and vf_loss is updating!")
 
-    # AMEND: do not update weights of value network, if loading customized external value initialization.
-    # vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
-    # print("vf_loss:", vf_loss)
 
     total_loss = pol_surr + pol_entpen + vf_loss
     losses = [pol_surr, pol_entpen, vf_loss, meankl, meanent]
@@ -161,14 +159,13 @@ def ppo_learn(env, policy,
 
     var_list = pi.get_trainable_variables()
     lossandgrad = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list)])
-    print("lossandgrad:", lossandgrad)
+    # print("lossandgrad:", lossandgrad)
     # AMEND: added by xlv
-    lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=100.)])
+    lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=10)])
 
     adam = MpiAdam(var_list, epsilon=adam_epsilon)
 
-    assign_old_eq_new = U.function([],[], updates=[tf.assign(oldv, newv)
-        for (oldv, newv) in zipsame(oldpi.get_variables(), pi.get_variables())])
+    assign_old_eq_new = U.function([],[], updates=[tf.assign(oldv, newv) for (oldv, newv) in zipsame(oldpi.get_variables(), pi.get_variables())])
     compute_losses = U.function([ob, ac, atarg, ret, lrmult], losses)
 
     U.initialize()
@@ -178,7 +175,6 @@ def ppo_learn(env, policy,
     assign_old_eq_new()
 
     # Prepare for rollouts
-    # ----------------------------------------
     seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True)
 
     # rewards_map = defaultdict(list)
@@ -194,10 +190,12 @@ def ppo_learn(env, policy,
     ep_mean_rews = list()
     ep_mean_lens = list()
 
-    # added by xlv
-    suc_counter = 0
-    ep_counter  = 0
+    eval_success_rates = list()   # this is for saving global info for multiple evaluation results.
     start_clip_grad = False
+
+    # print("logstd variables:", [var for var in tf.global_variables() if var.name == 'pi/pol/logstd:0'])
+
+
 
     while True:
         if callback:
@@ -211,6 +209,7 @@ def ppo_learn(env, policy,
         elif max_seconds and time.time() - tstart >= max_seconds:
             break
 
+        """ Learning rate scheduler """
         if schedule == 'constant':
             cur_lrmult = 1.0
         elif schedule == 'linear':
@@ -220,17 +219,37 @@ def ppo_learn(env, policy,
         else:
             raise NotImplementedError
 
-        logger.log("********** Iteration %i ************"%iters_so_far)
+        """ policy logstd scheduler """
+        if len(eval_success_rates):
+            logstd = [var for var in tf.global_variables() if var.name == 'pi/pol/logstd:0'][0]
+            '''exponential decay'''
+            # logstd_val = -0.69 - 2.31 * eval_success_rates[-1]
+            '''polynomial decay'''
+            # logstd_val = np.log(-0.45 * eval_success_rates[-1] ** 2 + 0.5)
+            '''linear decay'''
+            logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
+            logstd_assign_op = logstd.assign(tf.constant([[logstd_val, logstd_val]], dtype=tf.float32, shape=(1,2)))
+            sess = tf.get_default_session()
+            sess.run(logstd_assign_op)
+            logger.log("current exploration logstd: %f" %(logstd_val))
+
+
+        logger.log("********** Iteration %i ************" %(iters_so_far+1)) # Current iteration index
 
         seg = seg_gen.__next__()
         add_vtarg_and_adv(seg, gamma, lam)
 
         # ob, ac, atarg, ret, td1ret = map(np.concatenate, (obs, acs, atargs, rets, td1rets))
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
-        print("obs shape:", np.shape(ob))
+        vpredbefore = seg["vpred"]  # predicted value function before udpate
+        rews = seg['rew']
+        ep_rets = seg['ep_rets']
+        event_flags = seg['event_flag']
 
+        # print("obs shape:", np.shape(ob))
+        # print("vpred shape:", np.shape(vpredbefore))
 
-
+        """ In case of saving any observation for visualization purpose  """
         if save_obs:
             globals.g_iter_id += 1
             tmp_seg = {}
@@ -239,40 +258,33 @@ def ppo_learn(env, policy,
             with open(globals.g_hm_dirpath + '/iter_' + str(globals.g_iter_id) + '.pkl', 'wb') as f:
                 pickle.dump(tmp_seg, f)
 
-
-        # --- added by xlv for computing success percentage ---
-        sucs = seg["suc"]
-        ep_lens = seg['ep_lens']
-        suc_counter += Counter(sucs)[True]
-        ep_counter  += len(ep_lens)
-        # -----------------------------------------------------
-
-        vpredbefore = seg["vpred"]  # predicted value function before udpate
-        # print("vpred shape:", np.shape(vpredbefore))
-
-
-        # --- collect real-time sim data and its vpred --- #
-        #
+        """ In case of collecting real-time sim data and its vpred for furthur debugging """
         if args['vf_load'] == 'no':
             valpred_csv_name = 'ppo_valpred_itself'
         else:
             valpred_csv_name = 'ppo_valpred_external'
-
         with open(args['RUN_DIR'] + '/' + valpred_csv_name + '.csv', 'a') as f:
-            vpred_shaped = vpredbefore.reshape(-1,1)
-            obs_vpred = np.concatenate((ob, vpred_shaped), axis=1)
+            vpred_shaped = vpredbefore.reshape(-1, 1)
+            atarg_shaped = atarg.reshape(-1,1)
+            tdlamret_shaped = tdlamret.reshape(-1,1)
+            rews_shaped = rews.reshape(-1,1)
+            event_flags_shaped = np.array(event_flags).reshape(-1,1)
+
+            log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, rews_shaped, event_flags_shaped), axis=1)
+
 
             if args['gym_env'] == 'PlanarQuadEnv-v0':
-                df_obs_vpred = pd.DataFrame(obs_vpred,columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name])
+                log_df = pd.DataFrame(log_data,
+                                            columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
             elif args['gym_env'] == 'DubinsCarEnv-v0':
-                df_obs_vpred = pd.DataFrame(obs_vpred,
-                                            columns=['x', 'y', 'theta',  'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name])
+                log_df = pd.DataFrame(log_data,
+                                            columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
             else:
                 raise ValueError("invalid env !!!")
-            df_obs_vpred.to_csv(f, header=True)
-        # ------------------------------------------------ #
+            log_df.to_csv(f, header=True)
 
 
+        """ Optimization """
         atarg = (atarg - atarg.mean()) / atarg.std() # standardized advantage function estimate
         d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)
         optim_batchsize = optim_batchsize or ob.shape[0]
@@ -280,11 +292,14 @@ def ppo_learn(env, policy,
         if hasattr(pi, "ob_rms"): pi.ob_rms.update(ob) # update running mean/std for policy
 
         assign_old_eq_new() # set old parameter values to new parameter values
+
         logger.log("Optimizing...")
         logger.log(fmt_row(13, loss_names))
         # Here we do a bunch of optimization epochs over the data
+        start_clip_grad = True # we also use clip_norm for gradient
         for _ in range(optim_epochs):
             losses = [] # list of tuples, each of which gives the loss for a minibatch
+            grads = []
             for batch in d.iterate_once(optim_batchsize):
                 if start_clip_grad:
                     *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
@@ -293,14 +308,36 @@ def ppo_learn(env, policy,
                 # print("newlosses:", newlosses)
                 # print("gradient:", g)
                 # print("type:", g.dtype)
+                # logger.log("**** max grad:%f, min grad:%f, mean grad:%f, median grad:%f ****" %(np.max(g), np.min(g), np.mean(g), np.median(g)))
+                grads.append(g)
                 if any(np.isnan(g)):
                     cur_lrmult = cur_lrmult * 0.95
-                    start_clip_grad = True
                     continue
-                adam.update(g, optim_stepsize * cur_lrmult)
+                # Amend by xlv: only update model when the kl loss is not too large
+                # print("newlosses:", newlosses)
+
                 losses.append(newlosses)
+                tmp_mean_loss = np.mean(losses, axis=0)
+                if len(eval_success_rates) and eval_success_rates[-1] > 0.8:
+                    kl_threshold = 0.005
+                else:
+                    kl_threshold = 0.015
+                if tmp_mean_loss[3] < kl_threshold:
+                    adam.update(g, optim_stepsize * cur_lrmult)
+                else:
+                    logger.log("KL loss is larger than kl_threshold %f, skip update on this minibatch !!!" %(kl_threshold))
             logger.log(fmt_row(13, np.mean(losses, axis=0)))
 
+            # print("grads:", grads)
+            # print("shape:", np.array(grads).shape)
+            grads_cur_epoch = np.array(grads).reshape(len(grads),-1)
+            grads_cur_epoch_sum = np.sum(grads_cur_epoch, axis=0)
+
+            tmp_grads_mean = np.mean(grads_cur_epoch_sum)
+            tmp_grads_min = np.min(grads_cur_epoch_sum)
+            tmp_grads_max = np.max(grads_cur_epoch_sum)
+            tmp_grads_median = np.median(grads_cur_epoch_sum)
+            logger.log("**** max grad:%f, min grad:%f, mean grad:%f, median grad:%f ****" %(tmp_grads_max, tmp_grads_min, tmp_grads_mean, tmp_grads_median))
         logger.log("Evaluating losses...")
         losses = []
         for batch in d.iterate_once(optim_batchsize):
@@ -329,14 +366,103 @@ def ppo_learn(env, policy,
         logger.record_tabular("EpisodesSoFar", episodes_so_far)
         logger.record_tabular("TimestepsSoFar", timesteps_so_far)
         logger.record_tabular("TimeElapsed", time.time() - tstart)
+
         if MPI.COMM_WORLD.Get_rank()==0:
             logger.dump_tabular()
 
-    # Taking avg of each start's rewards.
-    # for start in rewards_map:
-    #     rewards_map[start] = np.mean(rewards_map[start])
-    # return pi, rewards_map, ep_mean_lens, ep_mean_rews
 
-    # AMEND: added by xlv for success percentage
-    logger.record_tabular("success percentage", suc_counter * 1.0 / ep_counter)
-    return pi, ep_mean_lens, ep_mean_rews, suc_counter * 1.0 / ep_counter
+
+        """ Evaluation """
+        EVALUATION_FREQUENCY = 10 # 10
+        if iters_so_far % EVALUATION_FREQUENCY == 0:
+
+            eval_max_iters = 5
+            eval_iters_so_far = 0
+            eval_timesteps_per_actorbatch = timesteps_per_actorbatch
+
+            eval_lenbuffer = deque(maxlen=100)  # rolling buffer for episode lengths
+            eval_rewbuffer = deque(maxlen=100)  # rolling buffer for episode rewards
+
+            eval_episodes_so_far = 0
+            eval_timesteps_so_far = 0
+            eval_success_episodes_so_far = 0
+
+
+            # prepare eval episode generator
+            eval_seg_gen = traj_segment_generator(pi, env, eval_timesteps_per_actorbatch, stochastic=False)
+
+            logger.log("********** Start evaluating ... ************")
+            while True:
+                if eval_max_iters and eval_iters_so_far >= eval_max_iters:
+                    break
+
+                logger.log("********** Eval Iteration %i ************" %(eval_iters_so_far+1))
+
+                eval_seg = eval_seg_gen.__next__()
+
+                eval_lrlocal = (eval_seg["ep_lens"], eval_seg["ep_rets"])    # local values
+                eval_listoflrpairs = MPI.COMM_WORLD.allgather(eval_lrlocal)  # list of tuples
+                eval_lens, eval_rews = map(flatten_lists, zip(*eval_listoflrpairs))
+                eval_lenbuffer.extend(eval_lens)
+                eval_rewbuffer.extend(eval_rews)
+                logger.record_tabular("EpLenMean", np.mean(eval_lenbuffer))
+                logger.record_tabular("EpRewMean", np.mean(eval_rewbuffer))
+                logger.record_tabular("EpThisIter", len(eval_lens))
+                eval_sucs = eval_seg["suc"]
+                logger.record_tabular("EpSuccessThisIter", Counter(eval_sucs)[True])
+
+
+                eval_episodes_so_far += len(eval_lens)
+                eval_timesteps_so_far += sum(eval_lens)
+                eval_success_episodes_so_far += Counter(eval_sucs)[True]
+                logger.record_tabular("EpisodesSoFar", eval_episodes_so_far)
+                logger.record_tabular("TimestepsSoFar", eval_timesteps_so_far)
+                logger.record_tabular("EpisodesSuccessSoFar", eval_success_episodes_so_far)
+                logger.record_tabular("SuccessRateSoFar", eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
+
+                eval_iters_so_far += 1
+                if MPI.COMM_WORLD.Get_rank() == 0:
+                    logger.dump_tabular()
+            # save success rate from each evaluation into global list
+            eval_success_rates.append(eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
+
+
+
+        """ Saving model and statistics """
+        MODEL_SAVING_FREQ = 30 # 30 is enough for some learning
+        if iters_so_far % MODEL_SAVING_FREQ == 0:
+            pi.save_model(args['MODEL_DIR'], iteration=iters_so_far)
+
+            # save necessary training statistics
+            with open(args['RESULT_DIR'] + '/train_reward_' + 'iter_' + str(iters_so_far) + '.pkl', 'wb') as f_train:
+                pickle.dump(ep_mean_rews, f_train)
+
+            # save necessary evaluation statistics
+            with open(args['RESULT_DIR'] + '/eval_success_rate_' + 'iter_' + str(iters_so_far) + '.pkl', 'wb') as f_eval:
+                pickle.dump(eval_success_rates, f_eval)
+
+        """ Plotting and saving statistics """
+        PLOT_FREQUENCY = 10 # 10
+        if iters_so_far % PLOT_FREQUENCY == 0:
+            # plot training reward performance
+            train_plot_x = np.arange(len(ep_mean_rews)) + 1
+            train_plot_x = np.insert(train_plot_x, 0, 0)
+            train_plot_y = np.insert(ep_mean_rews, 0, ep_mean_rews[0])
+            plot_performance(x=train_plot_x, y=train_plot_y, ylabel=r'episode mean reward at each iteration',
+                             xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'train_reward'), title='TRAIN')
+
+
+            # plot evaluation success rate
+            eval_plot_x = (np.arange(len(eval_success_rates)) + 1) * EVALUATION_FREQUENCY
+            eval_plot_x = np.insert(eval_plot_x, 0, 0)
+            eval_plot_y = np.insert(eval_success_rates, 0, 0)
+            plot_performance(x=eval_plot_x, y = eval_plot_y,
+                             ylabel=r'eval success rate',
+                             xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'eval_success_rate'),
+                             title="EVAL")
+
+
+
+
+    return pi
+    # return pi, ep_mean_lens, ep_mean_rews, suc_counter_list

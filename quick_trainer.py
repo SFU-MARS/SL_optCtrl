@@ -45,9 +45,9 @@ class Trainer(object):
             keras.layers.Dense(64, activation=tf.nn.tanh),
             keras.layers.Dense(1)
         ])
-        optimizer = tf.keras.optimizers.RMSprop(0.001)
+        # optimizer = tf.keras.optimizers.RMSprop(0.001)
         # optimizer = tf.keras.optimizers.Adam(lr=0.01, epsilon=1e-8)
-        # optimizer = tf.keras.optimizers.Adadelta()
+        optimizer = tf.keras.optimizers.Adadelta()
         model.compile(loss='mean_squared_error',
                       optimizer = optimizer,
                       metrics=['mean_absolute_error', 'mean_squared_error'])
@@ -78,6 +78,7 @@ class Trainer(object):
                 dataset_path = dirpath + "/data/car/valFunc_filled.csv"
             column_names = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
             model_saving_path = './tf_model/car/vf.h5'
+
         elif self.agent == 'quad':
             if not os.path.exists(dirpath + "/data/quad/valFunc_filled.csv"):
                 raise ValueError("can not find the training file for quad example!!")
@@ -85,6 +86,7 @@ class Trainer(object):
                 dataset_path = dirpath + "/data/quad/valFunc_filled.csv"
             column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
             model_saving_path = './tf_model/quad/vf.h5'
+
         elif self.agent == 'dubinsCar':
             if not os.path.exists(dirpath + "/data/dubinsCar/valFunc_filled_cleaned.csv"):
                 raise ValueError("can not find the training file for dubins car example!!")
@@ -98,7 +100,6 @@ class Trainer(object):
         raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
 
         dataset = raw_dataset.copy()
-
         dataset = dataset.dropna()
         train_dataset = dataset.sample(frac=1.0, random_state=0)
 
@@ -327,7 +328,7 @@ if __name__ == "__main__":
     Train value network model
     """
     trainer = Trainer(target="valFunc", agent='dubinsCar')
-    # trainer.train_valFunc()
+    trainer.train_valFunc()
     trainer.save_model_weights("./tf_model/dubinsCar/vf.h5")
 
 
