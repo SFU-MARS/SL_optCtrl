@@ -2,21 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/results_plotter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_gen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/mlp_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/mlp_policy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/ppo_params.json" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo_params.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/pposgd_simple.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/pposgd_simple.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/quick_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/quick_trainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plotting_performance.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plotting_performance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/value_iteration/helper_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/value_iteration/helper_function.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/value_iteration/value_matrix.npy" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -68,11 +54,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/run.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="73">
-              <caret line="74" column="38" selection-start-line="74" selection-start-column="38" selection-end-line="74" selection-end-column="38" />
+            <state relative-caret-position="590">
+              <caret line="91" column="47" lean-forward="true" selection-start-line="91" selection-start-column="47" selection-end-line="91" selection-end-column="47" />
             </state>
           </provider>
         </entry>
@@ -166,6 +152,18 @@
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
                 <element signature="e#4500#4564#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/mpc/mpc_utils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="770">
+              <caret line="40" column="46" selection-start-line="40" selection-start-column="46" selection-end-line="40" selection-end-column="46" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -265,13 +263,13 @@
         <option value="$PROJECT_DIR$/train_ppo.py" />
         <option value="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" />
         <option value="$PROJECT_DIR$/value_iteration/helper_function.py" />
-        <option value="$PROJECT_DIR$/run.sh" />
         <option value="$PROJECT_DIR$/ppo1/ppo.py" />
         <option value="$PROJECT_DIR$/mpc/mpc_utils.py" />
         <option value="$PROJECT_DIR$/results_plotter.py" />
         <option value="$PROJECT_DIR$/data_gen.py" />
         <option value="$PROJECT_DIR$/quick_trainer.py" />
         <option value="$PROJECT_DIR$/ppo1/mlp_policy.py" />
+        <option value="$PROJECT_DIR$/run.sh" />
       </list>
     </option>
   </component>
@@ -403,11 +401,11 @@
       <recent name="$PROJECT_DIR$/runs_log_tests/03-Dec-2019_17-48-18DubinsCarEnv-v0_hand_craft_ppo_vf" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/mpc" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/data/dubinsCar" />
       <recent name="$PROJECT_DIR$/runs_log_tests/difficult_case/linear_decay" />
       <recent name="$PROJECT_DIR$/runs_log_tests/difficult_case/backup" />
-      <recent name="$PROJECT_DIR$/runs_log_tests/simple_case/linear_decay" />
-      <recent name="$PROJECT_DIR$/mpc/history_data" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -623,12 +621,12 @@
       <workItem from="1574977468434" duration="18324000" />
       <workItem from="1575089336479" duration="74970000" />
       <workItem from="1575423937616" duration="65723000" />
-      <workItem from="1576176101774" duration="13721000" />
+      <workItem from="1576176101774" duration="14365000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="824226000" />
+    <option name="totallyTimeSpent" value="824870000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -647,7 +645,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49694377" visible="true" weight="0.4415437" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49694377" weight="0.4415437" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3802497" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -885,16 +883,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mpc/mpc_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="770">
-          <caret line="40" column="46" selection-start-line="40" selection-start-column="46" selection-end-line="40" selection-end-column="46" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/value_iteration/helper_function.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="224">
@@ -988,8 +976,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/run.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="73">
-          <caret line="74" column="38" selection-start-line="74" selection-start-column="38" selection-end-line="74" selection-end-column="38" />
+        <state relative-caret-position="590">
+          <caret line="91" column="47" lean-forward="true" selection-start-line="91" selection-start-column="47" selection-end-line="91" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mpc/mpc_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="770">
+          <caret line="40" column="46" selection-start-line="40" selection-start-column="46" selection-end-line="40" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
