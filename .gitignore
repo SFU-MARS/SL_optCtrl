@@ -1,5 +1,7 @@
 runs_log/
-data/
+data/backup/
+data/car/
+data/quad/
 mpc/history_data/
 tests/
 tf_model/
