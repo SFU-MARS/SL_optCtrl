@@ -24,7 +24,9 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # same as the goal and start area definition in "playground.world" file
 # GOAL_STATE = np.array([3.41924, 3.6939, 0])
-GOAL_STATE = np.array([3.5, 3.5, 0])
+
+GOAL_STATE = np.array([3.5, 3.5, np.pi*11/18]) # around 110 degrees as angle
+# GOAL_STATE = np.array([3.5, 3.5, 0])
 START_STATE = np.array([-0.222404, -3.27274, 0])
 
 """
@@ -71,7 +73,7 @@ class DubinsCarEnv_v0(gazebo_env.GazeboEnv):
         self.start_state = START_STATE
         # goal tolerance definition
         self.goal_pos_tolerance = 1.0
-        self.goal_theta_tolerance = 0.75
+        self.goal_theta_tolerance = 0.75 # around 45 degrees
 
         self.control_reward_coff = 0.01
         self.collision_reward = -2*200*self.control_reward_coff*(10**2)
@@ -139,14 +141,15 @@ class DubinsCarEnv_v0(gazebo_env.GazeboEnv):
         elif self.set_additional_goal == 'angle':
             if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= self.goal_pos_tolerance \
                 and abs(theta - self.goal_state[2]) < self.goal_theta_tolerance:
-                print("in goal!!")
+
+                print("in goal with specific angle!!")
                 return True
             else:
                 return False
         elif self.set_additional_goal == 'vel':
             if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= self.goal_pos_tolerance \
                 and abs(vel - self.goal_state[3]) < 0.25:
-                print("in goal!!")
+                print("in goal with specific velocity!!")
                 return True
             else:
                 return False
@@ -346,6 +349,8 @@ class DubinsCarEnv_v0(gazebo_env.GazeboEnv):
         done = False
         suc  = False
         self.step_counter += 1
+
+        event_flag = None # {'collision', 'safe', 'goal', 'steps exceeding', 'fast rotation'}
         # print("step reward:", reward)
 
         # 1. when collision happens, done = True
@@ -353,6 +358,7 @@ class DubinsCarEnv_v0(gazebo_env.GazeboEnv):
             reward += self.collision_reward
             done = True
             self.step_counter = 0
+            event_flag = 'collision'
 
         # temporary change for ddpg only. For PPO, use things above.
         # if self._in_obst(contact_data):
@@ -366,18 +372,24 @@ class DubinsCarEnv_v0(gazebo_env.GazeboEnv):
             done = True
             suc  = True
             self.step_counter = 0
+            event_flag = 'goal'
 
         if self.step_counter >= 300:
             reward += self.collision_reward
             done = True
             self.step_counter = 0
+            event_flag = 'steps exceeding'
 
         cur_w = dynamic_data.twist.angular.z
         if cur_w > np.pi:
             done = True
             reward += self.collision_reward / 2
+            event_flag = 'fast rotation'
 
-        return np.asarray(obsrv), reward, done, {'suc':suc}
+        if event_flag is None:
+            event_flag = 'safe'
+
+        return np.asarray(obsrv), reward, done, {'suc':suc, 'event':event_flag}
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)

@@ -684,11 +684,10 @@ class Data_Generator(object):
 
 
 if __name__ == "__main__":
-    # print(sys.path)
     # data_gen = Data_Generator()
     # data_gen.gen_data(data_form='valFunc', agent='dubinsCar')
 
-    csv_clean(os.environ['PROJ_HOME_3'] + '/data/dubinsCar/valFunc_filled.csv')
+    # csv_clean(os.environ['PROJ_HOME_3'] + '/data/dubinsCar/valFunc_filled.csv')
     # data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
     # data_gen.gen_data(data_form='polFunc', agent='quad')
 
