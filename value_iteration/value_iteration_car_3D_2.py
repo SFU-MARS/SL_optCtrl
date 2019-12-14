@@ -28,6 +28,7 @@ class env_dubin_car_3d(object):
 		########### Goal Setting ##########
 		self.goal_center = (3.5, 3.5)
 		self.goal_radius = 1.0
+		self.goal_theta = (math.pi / 2, math.pi * 3 / 4)
 
 
 		########### Algorithm Setting ##########
@@ -35,7 +36,7 @@ class env_dubin_car_3d(object):
 		self.negative_discount = 0.5
 		self.epsilon = 0.3
 		self.threshold = 0.5
-		self.tau = 1.5
+		self.tau = 1
 
 		# reward = [regular state, in goal, crashed, overspeed]
 		self.reward_list = np.array([0, 1000, -400, -400], dtype = float)
@@ -43,7 +44,7 @@ class env_dubin_car_3d(object):
 
 		########## Discreteness Setting ##########
 		# 3D state
-		# 1D action
+		# 1D action 
 		# (x, y, theta)
 		# (omega)
 		# self.state_step_num = np.array([5, 5, 10])
@@ -131,7 +132,10 @@ class env_dubin_car_3d(object):
 					best_value = -1000000
 				if (mode == "negative"):
 					best_value = 1000000
-				if (mode == "average"  or  mode == "epsilon"  or  mode == "boltzmann"):
+				if (mode == "epsilon"):
+					best_value = -1000000
+					qvalue = np.array([], dtype = float)
+				if (mode == "average"  or  mode == "boltzmann"):
 					best_value = 0
 					qvalue = np.array([], dtype = float)
 				if (mode == "boltzmann"):
@@ -161,7 +165,9 @@ class env_dubin_car_3d(object):
 						best_value = max(best_value, current_reward + self.discount * next_step_value)
 
 					if (mode == "epsilon"):
-						qvalue = np.append(qvalue, [[current_reward + self.discount * next_step_value]])
+						v = current_reward + self.discount * next_step_value
+						best_value = max(best_value, v)
+						qvalue = np.append(qvalue, [[v]])
 
 					if (mode == "boltzmann"):
 						temp_value = current_reward + self.discount * next_step_value
@@ -265,11 +271,11 @@ class env_dubin_car_3d(object):
 
 	def check_goal(self, s):
 		d = math.sqrt( (s[0] - self.goal_center[0]) ** 2 + (s[1] - self.goal_center[1]) ** 2 )
-		if (d <= self.goal_radius):
+		if (d <= self.goal_radius  and  s[2] >= self.goal_theta[0]  and  s[2] <= self.goal_theta[1]):
 			return 1
 		return 0
 
-	def check_crash(self, s, width = 0.4):
+	def check_crash(self, s, width = 0.2):
 		# return 2 = crashed
 		# return 0 = no crash
 
@@ -356,7 +362,7 @@ class env_dubin_car_3d(object):
 
 				theta_index += 1
 				# plt.show()
-				fig.savefig(save_path + "epsilon_" + "theta_" + str(theta_index), dpi=fig.dpi)
+				fig.savefig(save_path + "hard_task_boltzmann_" + "theta_" + str(theta_index), dpi=fig.dpi)
 
 
 		if (mode == "average"):
@@ -421,7 +427,7 @@ class env_dubin_car_3d(object):
 		data = np.array(data, dtype = float)
 
 		dir_path = "./value_matrix_car_3D_2/"
-		file_name = "value_matrix_13.npy"
+		file_name = "value_matrix_boltzmann_30.npy"
 
 		self.value = np.load(dir_path + file_name)
 		interploating_function = RegularGridInterpolator((self.state_grid[0],
@@ -439,7 +445,7 @@ class env_dubin_car_3d(object):
 								'y': data[:, 1],
 								'theta': data[:, 2],
 								'value': value})
-		dataset.to_csv("./car_3D_2_value.csv")
+		dataset.to_csv("./car_3D_harder_task_samples_value.csv")
 
 	def matrix_accumulation(self):
 		positive_file_path = "./value_matrix_car_3D_2/value_matrix_positive_13.npy"
@@ -483,8 +489,8 @@ if __name__  ==  "__main__":
 	# env.generate_samples_interpolate(n = 20000)
 	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_negative_4.npy", "direct")
 	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_average_36.npy", "direct")
-	env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_epsilon_14.npy", "direct")
-	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_boltzmann_25.npy", "direct")
+	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_epsilon_20.npy", "direct")
+	# env.plot_3D_result("./value_matrix_car_3D_2/", "value_matrix_boltzmann_30.npy", "direct")
 
 	# env.plot_3D_result("./value_matrix_car_3D_2/", "final_matrix.npy", "direct")
 	# env.value_iteration(mode = "epsilon")
@@ -493,3 +499,5 @@ if __name__  ==  "__main__":
 
 	# env.value_iteration(mode = "negative")
 	# env.matrix_accumulation()
+
+	env.generate_samples_interpolate(n = 50000)
