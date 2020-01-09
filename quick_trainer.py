@@ -7,14 +7,18 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
 from keras import backend as K
-
+from tensorflow.python.ops import math_ops
 import numpy as np
 import pickle
 
 
+def customerized_loss(y_true, y_pred):
+    return K.mean(math_ops.square(y_pred - y_true), axis=-1)
+
 class Trainer(object):
-    def __init__(self, target='valFunc', agent='quad'):
+    def __init__(self, method='vi', target='valFunc', agent='quad'):
         self.agent = agent
+        self.method = method
         if self.agent == 'quad':
             if target == 'valFunc':
                 self.input_shape = 14
@@ -88,12 +92,20 @@ class Trainer(object):
             model_saving_path = './tf_model/quad/vf.h5'
 
         elif self.agent == 'dubinsCar':
-            if not os.path.exists(dirpath + "/data/dubinsCar/valFunc_filled_cleaned.csv"):
+            if not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv") or \
+                not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"):
                 raise ValueError("can not find the training file for dubins car example!!")
             else:
-                dataset_path = dirpath + "/data/dubinsCar/valFunc_filled_cleaned.csv"
-            column_names = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
-            model_saving_path = './tf_model/dubinsCar/vf.h5'
+                if self.method == 'vi':
+                    dataset_path = dirpath + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv"
+                    model_saving_path = './tf_model/dubinsCar/vf.h5'
+                    column_names = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+                elif self.method == 'mpc':
+                    print("we are using mpc cost data to train!")
+                    dataset_path = dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"
+                    model_saving_path = './tf_model/dubinsCar/vf_mpc.h5'
+                    column_names = ['reward', 'value', 'cost', 'status', 'x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+            # model_saving_path = './tf_model/dubinsCar/vf.h5'
         else:
             raise ValueError("invalid agent!!!")
 
@@ -104,16 +116,23 @@ class Trainer(object):
         train_dataset = dataset.sample(frac=1.0, random_state=0)
 
         stats = train_dataset.describe()
+        stats.pop("reward")
+        stats.pop("cost")
+        stats.pop("status")
         stats.pop("value")
         stats = stats.transpose()
 
+        train_dataset.pop('reward')
+        train_dataset.pop('cost')
+        train_dataset.pop('status')
         train_labels = train_dataset.pop('value')
+        # train_labels = np.log(train_labels+1)
 
         model = self.build_value_model(self.input_shape)
         model.summary()
         normed_train_data = self.norm(train_dataset, stats)
 
-        EPOCHS = 2000
+        EPOCHS = 3
         history = model.fit(
             normed_train_data, train_labels, batch_size=64,
             epochs=EPOCHS, validation_split=0.2, verbose=1,
@@ -276,6 +295,7 @@ class Trainer(object):
         model_weights_savepath = dir_path + '/' + os.path.splitext(model_path.split('/')[-1])[0] + '_weights.pkl'
 
         assert os.path.exists(model_path)
+        # model = tf.keras.models.load_model(filepath=model_path,  custom_objects={'customerized_loss': customerized_loss})
         model = tf.keras.models.load_model(filepath=model_path)
         weights = []
         print("starting saving weights for model {}".format(model_path.split('/')[-1]))
@@ -327,9 +347,9 @@ if __name__ == "__main__":
     """
     Train value network model
     """
-    trainer = Trainer(target="valFunc", agent='dubinsCar')
+    trainer = Trainer(method = 'mpc', target="valFunc", agent='dubinsCar')
     trainer.train_valFunc()
-    trainer.save_model_weights("./tf_model/dubinsCar/vf.h5")
+    trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc.h5")
 
 
 
