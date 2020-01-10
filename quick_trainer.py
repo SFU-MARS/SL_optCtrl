@@ -41,8 +41,8 @@ class Trainer(object):
 
     def build_value_model(self, input_shape):
         model = keras.Sequential([
-            keras.layers.Dense(64, activation=tf.nn.tanh, input_shape=[input_shape]),
-            keras.layers.Dense(64, activation=tf.nn.tanh),
+            keras.layers.Dense(128, activation=tf.nn.sigmoid, input_shape=[input_shape]),
+            keras.layers.Dense(128, activation=tf.nn.sigmoid),
             keras.layers.Dense(1)
         ])
         # optimizer = tf.keras.optimizers.RMSprop(0.001)
@@ -88,15 +88,17 @@ class Trainer(object):
             model_saving_path = './tf_model/quad/vf.h5'
 
         elif self.agent == 'dubinsCar':
-            if not os.path.exists(dirpath + "/data/dubinsCar/valFunc_filled_cleaned.csv"):
+            # if not os.path.exists(dirpath + "/data/dubinsCar/valFunc_filled_cleaned.csv"):
+            if not os.path.exists("./data/dubinsCar/valFunc_filled_cleaned.csv"):
                 raise ValueError("can not find the training file for dubins car example!!")
             else:
-                dataset_path = dirpath + "/data/dubinsCar/valFunc_filled_cleaned.csv"
+                dataset_path = dirpath + "./data/dubinsCar/valFunc_filled_cleaned.csv"
             column_names = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
-            model_saving_path = './tf_model/dubinsCar/vf.h5'
+            model_saving_path = './value_model/dubinsCar/vf.h5'
         else:
             raise ValueError("invalid agent!!!")
 
+        print(dataset_path)
         raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
 
         dataset = raw_dataset.copy()
