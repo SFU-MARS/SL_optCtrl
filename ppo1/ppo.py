@@ -191,6 +191,7 @@ def ppo_learn(env, policy,
     ep_mean_lens = list()
 
     eval_success_rates = list()   # this is for saving global info for multiple evaluation results.
+    eval_suc_buffer = deque(maxlen=2)
     start_clip_grad = False
 
     # print("logstd variables:", [var for var in tf.global_variables() if var.name == 'pi/pol/logstd:0'])
@@ -219,6 +220,8 @@ def ppo_learn(env, policy,
         else:
             raise NotImplementedError
 
+
+        logstd_saturate = np.log(0.5)
         """ policy logstd scheduler """
         if len(eval_success_rates):
             logstd = [var for var in tf.global_variables() if var.name == 'pi/pol/logstd:0'][0]
@@ -226,12 +229,39 @@ def ppo_learn(env, policy,
             # logstd_val = -0.69 - 2.31 * eval_success_rates[-1]
             '''polynomial decay'''
             # logstd_val = np.log(-0.45 * eval_success_rates[-1] ** 2 + 0.5)
-            '''linear decay'''
-            logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
+            '''linear decay (sometimes this is the best at first, but less stable on late period'''
+            # logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
+            '''linear decay dynamic deque (more stable but performance becomes conservative)'''
+            # logstd_val = np.log(-0.45 * np.mean(eval_suc_buffer) + 0.5)
+            '''linear decay (former) + dynamic deque (latter)'''
+            if np.any(np.array(eval_success_rates) > 0.8):
+                logstd_val = np.log(-0.45 * np.mean(eval_suc_buffer) + 0.5)
+                logger.log("now we are using latter style!!")
+                print("success rates so far:", eval_success_rates)
+            else:
+                logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
+                logger.log("now we are still in earlier stage!!")
+                print("success rates so far:", eval_success_rates)
+
             logstd_assign_op = logstd.assign(tf.constant([[logstd_val, logstd_val]], dtype=tf.float32, shape=(1,2)))
             sess = tf.get_default_session()
             sess.run(logstd_assign_op)
             logger.log("current exploration logstd: %f" %(logstd_val))
+
+            '''linear decay saturate (not so good, keep saturating perhaps is not a good idea)'''
+            # logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
+            # if logstd_val < logstd_saturate:
+            #     logstd_saturate = logstd_val
+            #     logger.log("upcoming new logstd:%f" %(logstd_val))
+            #     logger.log("updating logstd_saturate to %f !" %(logstd_saturate))
+            # else:
+            #     logger.log("upcoming new logstd:%f" % (logstd_val))
+            #     logger.log("saturating logstd_saturate as %f !" %(logstd_saturate))
+            #
+            # logstd_assign_op = logstd.assign(tf.constant([[logstd_saturate, logstd_saturate]], dtype=tf.float32, shape=(1, 2)))
+            # sess = tf.get_default_session()
+            # sess.run(logstd_assign_op)
+            # logger.log("current exploration logstd: %f" %(logstd_saturate))
 
 
         logger.log("********** Iteration %i ************" %(iters_so_far+1)) # Current iteration index
@@ -425,7 +455,7 @@ def ppo_learn(env, policy,
                     logger.dump_tabular()
             # save success rate from each evaluation into global list
             eval_success_rates.append(eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
-
+            eval_suc_buffer.append(eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
 
 
         """ Saving model and statistics """
