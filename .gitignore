@@ -1,8 +1,8 @@
-runs_log/
 data/backup/
 data/car/
 data/quad/
 mpc/history_data/
 tests/
-tf_model/
+tf_model/car/
+tf_model/quad/
 runs_log_tests/

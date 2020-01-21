@@ -6,148 +6,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_backup/valFunc_mpc.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/SL_optControl.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/SL_optControl.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/test_valFunc_mpc_filled_cleaned.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/test_valFunc_mpc_filled_cleaned_log_ytrue.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/test_valFunc_mpc_filled_cleaned_sqrt_error.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_backup/valFunc_mpc_filled.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_backup/valFunc_mpc_filled_cleaned.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned_backup.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_gen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" beforeDir="false" afterPath="$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/mlp_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/mlp_policy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/ppo_params.json" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo_params.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/pposgd_simple.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/pposgd_simple.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/quick_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/quick_trainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results_plotter.py" beforeDir="false" afterPath="$PROJECT_DIR$/results_plotter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/.travis.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/Makefile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/_static/css/modify.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/_static/openai-favicon2_32x32.ico" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/_static/openai-favicon2_32x32.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/_static/openai_icon.ico" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/algorithms/ddpg.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/algorithms/ppo.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/algorithms/sac.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/algorithms/td3.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/algorithms/trpo.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/algorithms/vpg.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/conf.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/docs_requirements.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/etc/acknowledgements.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/etc/author.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/alphago.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/bench/bench_ant.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/bench/bench_halfcheetah.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/bench/bench_hopper.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/bench/bench_swim.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/bench/bench_walker.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/ex2-1_trpo_hopper.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/ex2-2_ddpg_bug.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/knocked-over-stand-up.mp4" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/knocked_down_standup.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/logo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/ms_pacman.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/openai-favicon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/openai-favicon2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/openai-favicon2_32x32.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/recolored_logo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/rl_algorithms.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/rl_algorithms.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/rl_algorithms.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/rl_algorithms_9_12.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/rl_algorithms_9_15.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/rl_algorithms_9_15.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/rl_diagram_transparent_bg.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/spinning-up-in-rl.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/spinning-up-logo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/spinning-up-logo.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/images/spinning-up-logo2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/index.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/make.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/bench.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/exercise2_1_soln.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/exercise2_2_soln.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/exercises.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/extra_pg_proof1.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/extra_pg_proof2.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/keypapers.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/rl_intro.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/rl_intro2.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/rl_intro3.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/rl_intro4.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/spinningup/spinningup.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/user/algorithms.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/user/installation.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/user/introduction.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/user/plotting.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/user/running.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/user/saving_and_loading.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/utils/logger.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/utils/mpi.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/utils/plotter.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/docs/utils/run_utils.rst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/readme.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/readthedocs.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/setup.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ddpg/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ddpg/core.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ddpg/ddpg.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/core.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/spinningup" beforeDir="false" afterPath="$PROJECT_DIR$/spinningup" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/ppo.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/sac/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/sac/core.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/sac/sac.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/td3/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/td3/core.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/td3/td3.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/trpo/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/trpo/core.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/trpo/trpo.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/vpg/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/vpg/core.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/vpg/vpg.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/examples/bench_ppo_cartpole.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/examples/pg_math/1_simple_pg.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/examples/pg_math/2_rtg_pg.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/examples/train_mnist.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/exercises/common.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/exercises/problem_set_1/exercise1_1.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/exercises/problem_set_1/exercise1_2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/exercises/problem_set_1/exercise1_3.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/exercises/problem_set_1_solutions/exercise1_1_soln.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/exercises/problem_set_1_solutions/exercise1_2_soln.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/exercises/problem_set_2/exercise2_2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/exercises/problem_set_2/exercise2_3.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/run.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/user_config.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/logx.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/mpi_tf.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/mpi_tools.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/plot.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/run_entrypoint.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/run_utils.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/serialization_utils.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/utils/test_policy.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/spinup/version.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/test/test_ppo.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinningup/travis_setup.sh" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_ppo.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -714,12 +576,12 @@
       <workItem from="1578632141992" duration="14729000" />
       <workItem from="1578941440892" duration="38128000" />
       <workItem from="1579114453404" duration="37703000" />
-      <workItem from="1579550419036" duration="12347000" />
+      <workItem from="1579550419036" duration="12603000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1058227000" />
+    <option name="totallyTimeSpent" value="1058483000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -732,13 +594,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="24" width="1682" height="1003" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947533" visible="true" weight="0.26682988" />
       <window_info id="Structure" order="1" sideWeight="0.50052464" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.48408812" visible="true" weight="0.51877135" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48408812" weight="0.51877135" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.45532435" weight="0.3208191" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
