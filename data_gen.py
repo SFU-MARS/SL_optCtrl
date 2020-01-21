@@ -41,7 +41,8 @@ def csv_clean(filename):
     df = df.dropna()
 
     if 'mpc' in filename.split('/')[-1].split('_'):
-        invalidIndices = df[(df['status'] == 2) | (df['status'] == -1)].index
+        # invalidIndices = df[(df['status'] == 2) | (df['status'] == -1)].index
+        invalidIndices = df[df['col_trajectory_flag'] == 4].index
         df.drop(invalidIndices, inplace=True)
     df.to_csv(os.path.splitext(filename)[0] + '_cleaned.csv')
 
@@ -339,14 +340,17 @@ class Data_Generator(object):
             assert os.path.exists(unfilled_filename)
 
             if data_form == 'valFunc_mpc':
-                # cols (1,2,3) is {x, y, theta}
-                states = np.genfromtxt(unfilled_filename, delimiter=',', skip_header=True,
-                                       usecols=(1,2,3), dtype=np.float32)
+                # cols (1, 2, 3, 11, 12) => {x, y, theta, collision_future, collision_curr}
+                raw = np.genfromtxt(unfilled_filename, delimiter=',', skip_header=True,
+                                       usecols=(1, 2, 3, 11, 12), dtype=np.float32)
+                states = raw[:, :3]
+                collision_attr = raw[:, 3:]
+
                 goal_state = np.array([3.5, 3.5, np.pi*11/18])
                 goal_torlerance = np.array([1.0, 1.0, 0.75])
 
                 T = np.shape(states)[0]
-                mpc_horizon = 80
+                mpc_horizon = 110
                 discount_factor = 0.95
 
                 rews = np.zeros(T, 'float32')
@@ -354,8 +358,14 @@ class Data_Generator(object):
 
                 for i in range(mpc_horizon, T+1, mpc_horizon):
                     for j in reversed(range(i-mpc_horizon, i)):
-                        rews[j] = 1000 if self.in_goal(states[j, :], goal_state, goal_torlerance) else 0
-                        if j == i-1 or rews[j] == 1000:
+                        if self.in_goal(states[j, :], goal_state, goal_torlerance):
+                            rews[j] = 1000
+                        elif collision_attr[j, 1]:
+                            rews[j] = -400
+                        else:
+                            rews[j] = 0
+
+                        if j == i-1 or rews[j] == 1000 or rews[j] == -400:
                             vpreds[j] = rews[j]
                         else:
                             vpreds[j] = rews[j] + discount_factor * vpreds[j+1]
@@ -371,7 +381,8 @@ class Data_Generator(object):
                 if data_form == 'valFunc':
                     fieldnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
                 elif data_form == 'valFunc_mpc':
-                    fieldnames = ['reward', 'value', 'cost', 'status', 'x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+                    # all field names: x, y, theta, v, w, cost, status, start_in_obstacle, collision_in_trajectory, end_in_target, collision_in_future, collision_current, col_trajectory_flag
+                    fieldnames = ['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'reward', 'value', 'cost', 'collision_in_future', 'collision_current', 'col_trajectory_flag']
                 elif data_form == 'polFunc':
                     fieldnames = ['x', 'y', 'theta', 'vel', 'ang_vel', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
                 else:
@@ -436,9 +447,10 @@ class Data_Generator(object):
                         reward = rews[id, -1]
                         value  = vpreds[id, -1]
                         cost = float(row['cost'])
-                        status = float(row['status'])
-                        tmp_dict = {'reward':reward, 'value':value, 'cost':cost, 'status':status,
-                                    'x': x, 'y': y, 'theta': theta,
+                        collision_in_future = float(row['collision_in_future'])
+                        collision_current = float(row['collision_current'])
+                        col_trajectory_flag = float(row['col_trajectory_flag'])
+                        tmp_dict = {'x': x, 'y': y, 'theta': theta,
                                     'd1': discrete_sensor_data[0],
                                     'd2': discrete_sensor_data[1],
                                     'd3': discrete_sensor_data[2],
@@ -446,7 +458,11 @@ class Data_Generator(object):
                                     'd5': discrete_sensor_data[4],
                                     'd6': discrete_sensor_data[5],
                                     'd7': discrete_sensor_data[6],
-                                    'd8': discrete_sensor_data[7]}
+                                    'd8': discrete_sensor_data[7],
+                                    'reward': reward, 'value': value,
+                                    'cost': cost, 'collision_in_future':collision_in_future,
+                                    'collision_current':collision_current,
+                                    'col_trajectory_flag':col_trajectory_flag}
 
                     elif data_form == 'polFunc':
                         vel = float(row['vel'])

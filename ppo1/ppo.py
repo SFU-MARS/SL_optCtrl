@@ -147,21 +147,29 @@ def ppo_learn(env, policy,
     # warning: do not update weights of value network if loading customized external value initialization.
     if args['vf_load'] == "yes":
         vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
+        # XLV: In this initialization based case, add one more value NN with non-stop updating
+        vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
         logger.log("loading external valfunc and vf_loss is fixed!")
     else:
         vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
         logger.log("not loading external valfunc and vf_loss is updating!")
 
 
-    total_loss = pol_surr + pol_entpen + vf_loss
-    losses = [pol_surr, pol_entpen, vf_loss, meankl, meanent]
-    loss_names = ["pol_surr", "pol_entpen", "vf_loss", "kl", "ent"]
+    # total_loss = pol_surr + pol_entpen + vf_loss
+    # losses = [pol_surr, pol_entpen, vf_loss, meankl, meanent]
+    # loss_names = ["pol_surr", "pol_entpen", "vf_loss", "kl", "ent"]
+
+    # XLV: changed for testing value NN switch
+    total_loss = pol_surr + pol_entpen + vf_loss + vf_ghost_loss
+    losses = [pol_surr, pol_entpen, vf_loss, meankl, meanent, vf_ghost_loss]
+    loss_names = ["pol_surr", "pol_entpen", "vf_loss", "kl", "ent", "vf_ghost_loss"]
 
     var_list = pi.get_trainable_variables()
+    print("trainable variables:", var_list)
     lossandgrad = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list)])
-    # print("lossandgrad:", lossandgrad)
-    # AMEND: added by xlv
-    lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=10)])
+
+    # XLV: added for limit gradient change
+    lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
 
     adam = MpiAdam(var_list, epsilon=adam_epsilon)
 
@@ -177,7 +185,6 @@ def ppo_learn(env, policy,
     # Prepare for rollouts
     seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True)
 
-    # rewards_map = defaultdict(list)
     episodes_so_far = 0
     timesteps_so_far = 0
     iters_so_far = 0
@@ -194,8 +201,8 @@ def ppo_learn(env, policy,
     eval_suc_buffer = deque(maxlen=2)
     start_clip_grad = False
 
-    # print("logstd variables:", [var for var in tf.global_variables() if var.name == 'pi/pol/logstd:0'])
-
+    # XLV: is it time to switch value NN?
+    switch = False
 
 
     while True:
@@ -221,57 +228,73 @@ def ppo_learn(env, policy,
             raise NotImplementedError
 
 
-        logstd_saturate = np.log(0.5)
-        """ policy logstd scheduler """
-        if len(eval_success_rates):
-            logstd = [var for var in tf.global_variables() if var.name == 'pi/pol/logstd:0'][0]
-            '''exponential decay'''
-            # logstd_val = -0.69 - 2.31 * eval_success_rates[-1]
-            '''polynomial decay'''
-            # logstd_val = np.log(-0.45 * eval_success_rates[-1] ** 2 + 0.5)
-            '''linear decay (sometimes this is the best at first, but less stable on late period'''
-            # logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
-            '''linear decay dynamic deque (more stable but performance becomes conservative)'''
-            # logstd_val = np.log(-0.45 * np.mean(eval_suc_buffer) + 0.5)
-            '''linear decay (former) + dynamic deque (latter)'''
-            if np.any(np.array(eval_success_rates) > 0.8):
-                logstd_val = np.log(-0.45 * np.mean(eval_suc_buffer) + 0.5)
-                logger.log("now we are using latter style!!")
-                print("success rates so far:", eval_success_rates)
-            else:
-                logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
-                logger.log("now we are still in earlier stage!!")
-                print("success rates so far:", eval_success_rates)
-
-            logstd_assign_op = logstd.assign(tf.constant([[logstd_val, logstd_val]], dtype=tf.float32, shape=(1,2)))
-            sess = tf.get_default_session()
-            sess.run(logstd_assign_op)
-            logger.log("current exploration logstd: %f" %(logstd_val))
-
-            '''linear decay saturate (not so good, keep saturating perhaps is not a good idea)'''
-            # logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
-            # if logstd_val < logstd_saturate:
-            #     logstd_saturate = logstd_val
-            #     logger.log("upcoming new logstd:%f" %(logstd_val))
-            #     logger.log("updating logstd_saturate to %f !" %(logstd_saturate))
-            # else:
-            #     logger.log("upcoming new logstd:%f" % (logstd_val))
-            #     logger.log("saturating logstd_saturate as %f !" %(logstd_saturate))
-            #
-            # logstd_assign_op = logstd.assign(tf.constant([[logstd_saturate, logstd_saturate]], dtype=tf.float32, shape=(1, 2)))
-            # sess = tf.get_default_session()
-            # sess.run(logstd_assign_op)
-            # logger.log("current exploration logstd: %f" %(logstd_saturate))
+        # logstd_saturate = np.log(0.5)
+        # """ policy logstd scheduler """
+        # if len(eval_success_rates):
+        #     logstd = [var for var in tf.global_variables() if var.name == 'pi/pol/logstd:0'][0]
+        #     '''exponential decay'''
+        #     # logstd_val = -0.69 - 2.31 * eval_success_rates[-1]
+        #     '''polynomial decay'''
+        #     # logstd_val = np.log(-0.45 * eval_success_rates[-1] ** 2 + 0.5)
+        #     '''linear decay (sometimes this is the best at first, but less stable on late period'''
+        #     # logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
+        #     '''linear decay dynamic deque (more stable but performance becomes conservative)'''
+        #     # logstd_val = np.log(-0.45 * np.mean(eval_suc_buffer) + 0.5)
+        #     '''linear decay (former) + dynamic deque (latter)'''
+        #     if np.any(np.array(eval_success_rates) > 0.8):
+        #         logstd_val = np.log(-0.45 * np.mean(eval_suc_buffer) + 0.5)
+        #         logger.log("now we are using latter style!!")
+        #         print("success rates so far:", eval_success_rates)
+        #     else:
+        #         logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
+        #         logger.log("now we are still in earlier stage!!")
+        #         print("success rates so far:", eval_success_rates)
+        #
+        #     logstd_assign_op = logstd.assign(tf.constant([[logstd_val, logstd_val]], dtype=tf.float32, shape=(1,2)))
+        #     sess = tf.get_default_session()
+        #     sess.run(logstd_assign_op)
+        #     logger.log("current exploration logstd: %f" %(logstd_val))
+        #
+        #     '''linear decay saturate (not so good, keep saturating perhaps is not a good idea)'''
+        #     # logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
+        #     # if logstd_val < logstd_saturate:
+        #     #     logstd_saturate = logstd_val
+        #     #     logger.log("upcoming new logstd:%f" %(logstd_val))
+        #     #     logger.log("updating logstd_saturate to %f !" %(logstd_saturate))
+        #     # else:
+        #     #     logger.log("upcoming new logstd:%f" % (logstd_val))
+        #     #     logger.log("saturating logstd_saturate as %f !" %(logstd_saturate))
+        #     #
+        #     # logstd_assign_op = logstd.assign(tf.constant([[logstd_saturate, logstd_saturate]], dtype=tf.float32, shape=(1, 2)))
+        #     # sess = tf.get_default_session()
+        #     # sess.run(logstd_assign_op)
+        #     # logger.log("current exploration logstd: %f" %(logstd_saturate))
 
 
         logger.log("********** Iteration %i ************" %(iters_so_far+1)) # Current iteration index
 
-        seg = seg_gen.__next__()
-        add_vtarg_and_adv(seg, gamma, lam)
+        # kernels = [v for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES) if v.name.endswith('kernel:0')]
+        # sess = tf.get_default_session()
+        # kernel0 = [sess.run(kernels[0])]
 
-        # ob, ac, atarg, ret, td1ret = map(np.concatenate, (obs, acs, atargs, rets, td1rets))
+        seg = seg_gen.__next__()
+        # if len(eval_success_rates) and eval_success_rates[-1] >= 0.6:
+        #     switch = True
+        if np.mean(rewbuffer) >= 200:
+            switch = True
+
+        if switch:
+            logger.log("switch to standard value function with non-stop updating!")
+            add_vtarg_and_adv_ghost(seg, gamma, lam)
+        else:
+            add_vtarg_and_adv(seg, gamma, lam)
+
+
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
-        vpredbefore = seg["vpred"]  # predicted value function before udpate
+        if switch:
+            vpredbefore = seg["vpred_ghost"]  # predicted value function before udpate
+        else:
+            vpredbefore = seg["vpred"]
         rews = seg['rew']
         ep_rets = seg['ep_rets']
         event_flags = seg['event_flag']
@@ -279,39 +302,39 @@ def ppo_learn(env, policy,
         # print("obs shape:", np.shape(ob))
         # print("vpred shape:", np.shape(vpredbefore))
 
-        """ In case of saving any observation for visualization purpose  """
-        if save_obs:
-            globals.g_iter_id += 1
-            tmp_seg = {}
-            tmp_seg["ob"] = seg["ob"]
-            tmp_seg["new"] = seg["new"]
-            with open(globals.g_hm_dirpath + '/iter_' + str(globals.g_iter_id) + '.pkl', 'wb') as f:
-                pickle.dump(tmp_seg, f)
-
-        """ In case of collecting real-time sim data and its vpred for furthur debugging """
-        if args['vf_load'] == 'no':
-            valpred_csv_name = 'ppo_valpred_itself'
-        else:
-            valpred_csv_name = 'ppo_valpred_external'
-        with open(args['RUN_DIR'] + '/' + valpred_csv_name + '.csv', 'a') as f:
-            vpred_shaped = vpredbefore.reshape(-1, 1)
-            atarg_shaped = atarg.reshape(-1,1)
-            tdlamret_shaped = tdlamret.reshape(-1,1)
-            rews_shaped = rews.reshape(-1,1)
-            event_flags_shaped = np.array(event_flags).reshape(-1,1)
-
-            log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, rews_shaped, event_flags_shaped), axis=1)
-
-
-            if args['gym_env'] == 'PlanarQuadEnv-v0':
-                log_df = pd.DataFrame(log_data,
-                                            columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
-            elif args['gym_env'] == 'DubinsCarEnv-v0':
-                log_df = pd.DataFrame(log_data,
-                                            columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
-            else:
-                raise ValueError("invalid env !!!")
-            log_df.to_csv(f, header=True)
+        # """ In case of saving any observation for visualization purpose  """
+        # if save_obs:
+        #     globals.g_iter_id += 1
+        #     tmp_seg = {}
+        #     tmp_seg["ob"] = seg["ob"]
+        #     tmp_seg["new"] = seg["new"]
+        #     with open(globals.g_hm_dirpath + '/iter_' + str(globals.g_iter_id) + '.pkl', 'wb') as f:
+        #         pickle.dump(tmp_seg, f)
+        #
+        # """ In case of collecting real-time sim data and its vpred for furthur debugging """
+        # if args['vf_load'] == 'no':
+        #     valpred_csv_name = 'ppo_valpred_itself'
+        # else:
+        #     valpred_csv_name = 'ppo_valpred_external'
+        # with open(args['RUN_DIR'] + '/' + valpred_csv_name + '.csv', 'a') as f:
+        #     vpred_shaped = vpredbefore.reshape(-1, 1)
+        #     atarg_shaped = atarg.reshape(-1,1)
+        #     tdlamret_shaped = tdlamret.reshape(-1,1)
+        #     rews_shaped = rews.reshape(-1,1)
+        #     event_flags_shaped = np.array(event_flags).reshape(-1,1)
+        #
+        #     log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, rews_shaped, event_flags_shaped), axis=1)
+        #
+        #
+        #     if args['gym_env'] == 'PlanarQuadEnv-v0':
+        #         log_df = pd.DataFrame(log_data,
+        #                                     columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
+        #     elif args['gym_env'] == 'DubinsCarEnv-v0':
+        #         log_df = pd.DataFrame(log_data,
+        #                                     columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
+        #     else:
+        #         raise ValueError("invalid env !!!")
+        #     log_df.to_csv(f, header=True)
 
 
         """ Optimization """
@@ -319,55 +342,45 @@ def ppo_learn(env, policy,
         d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)
         optim_batchsize = optim_batchsize or ob.shape[0]
 
+        # update pi.ob_rms based on the most recent ob
         if hasattr(pi, "ob_rms"): pi.ob_rms.update(ob) # update running mean/std for policy
 
         assign_old_eq_new() # set old parameter values to new parameter values
 
         logger.log("Optimizing...")
         logger.log(fmt_row(13, loss_names))
+
         # Here we do a bunch of optimization epochs over the data
         start_clip_grad = True # we also use clip_norm for gradient
+        kl_threshold = 0.015 # kl update limit
         for _ in range(optim_epochs):
-            losses = [] # list of tuples, each of which gives the loss for a minibatch
-            grads = []
+            losses = [] # list of sublists, each of which gives the loss based on a set of samples with size "optim_batchsize"
+            grads = [] # list of sublists, each of which gives the gradients w.r.t all variables based on a set of samples with size "optim_batchsize"
             for batch in d.iterate_once(optim_batchsize):
                 if start_clip_grad:
                     *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                 else:
                     *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
-                # print("newlosses:", newlosses)
-                # print("gradient:", g)
-                # print("type:", g.dtype)
-                # logger.log("**** max grad:%f, min grad:%f, mean grad:%f, median grad:%f ****" %(np.max(g), np.min(g), np.mean(g), np.median(g)))
-                grads.append(g)
                 if any(np.isnan(g)):
-                    cur_lrmult = cur_lrmult * 0.95
-                    continue
-                # Amend by xlv: only update model when the kl loss is not too large
-                # print("newlosses:", newlosses)
-
-                losses.append(newlosses)
-                tmp_mean_loss = np.mean(losses, axis=0)
-                if len(eval_success_rates) and eval_success_rates[-1] > 0.8:
-                    kl_threshold = 0.005
-                else:
-                    kl_threshold = 0.015
-                if tmp_mean_loss[3] < kl_threshold:
+                    logger.log("there are nan in gradients, skip further updating!")
+                    break
+                if newlosses[3] < kl_threshold:
                     adam.update(g, optim_stepsize * cur_lrmult)
+                    # logger.log("KL loss is %f" %(newlosses[3]))
                 else:
-                    logger.log("KL loss is larger than kl_threshold %f, skip update on this minibatch !!!" %(kl_threshold))
-            logger.log(fmt_row(13, np.mean(losses, axis=0)))
+                    logger.log("KL loss is %f larger than kl_threshold %f, early stop further updating!" %(newlosses[3], kl_threshold))
+                    break # break only jump out of the inner loop
+                grads.append(g)
+                losses.append(newlosses)
+            # logger.log(fmt_row(13, np.mean(losses, axis=0)))
 
-            # print("grads:", grads)
-            # print("shape:", np.array(grads).shape)
-            grads_cur_epoch = np.array(grads).reshape(len(grads),-1)
-            grads_cur_epoch_sum = np.sum(grads_cur_epoch, axis=0)
+            grads_shape = np.array(grads).shape
+            grad_norm_checking = np.less_equal(np.array(grads), np.ones(grads_shape) * 0.6)
+            if np.all(grad_norm_checking):
+                logger.log("gradient norm checking passed! all gradients are clipped to less than 0.5!")
+            else:
+                logger.log("gradient norm checking failed!")
 
-            tmp_grads_mean = np.mean(grads_cur_epoch_sum)
-            tmp_grads_min = np.min(grads_cur_epoch_sum)
-            tmp_grads_max = np.max(grads_cur_epoch_sum)
-            tmp_grads_median = np.median(grads_cur_epoch_sum)
-            logger.log("**** max grad:%f, min grad:%f, mean grad:%f, median grad:%f ****" %(tmp_grads_max, tmp_grads_min, tmp_grads_mean, tmp_grads_median))
         logger.log("Evaluating losses...")
         losses = []
         for batch in d.iterate_once(optim_batchsize):
@@ -377,6 +390,7 @@ def ppo_learn(env, policy,
         logger.log(fmt_row(13, meanlosses))
         for (lossval, name) in zipsame(meanlosses, loss_names):
             logger.record_tabular("loss_"+name, lossval)
+
         logger.record_tabular("ev_tdlam_before", explained_variance(vpredbefore, tdlamret))
         lrlocal = (seg["ep_lens"], seg["ep_rets"]) # local values
         listoflrpairs = MPI.COMM_WORLD.allgather(lrlocal) # list of tuples
@@ -416,7 +430,6 @@ def ppo_learn(env, policy,
             eval_episodes_so_far = 0
             eval_timesteps_so_far = 0
             eval_success_episodes_so_far = 0
-
 
             # prepare eval episode generator
             eval_seg_gen = traj_segment_generator(pi, env, eval_timesteps_per_actorbatch, stochastic=False)

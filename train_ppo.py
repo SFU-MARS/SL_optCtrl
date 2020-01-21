@@ -247,13 +247,13 @@ if __name__ == "__main__":
     with tf.device('/gpu:1'):
         # ----- path setting ------
         parser = argparse.ArgumentParser()
-        parser.add_argument("--gym_env", help="which gym environment to use.", type=str, default='PlanarQuadEnv-v0')
+        parser.add_argument("--gym_env", help="which gym environment to use.", type=str, default='DubinsCarEnv-v0')
         parser.add_argument("--reward_type", help="which type of reward to use.", type=str, default='hand_craft')
         parser.add_argument("--algo", help="which type of algorithm to use.", type=str, default='ppo')
         parser.add_argument("--set_additional_goal", type=str, default="angle")
-        parser.add_argument("--vf_load", type=str, default="no")
+        parser.add_argument("--vf_load", type=str, default="yes")
         parser.add_argument("--pol_load", type=str, default="no")
-        parser.add_argument("--vf_type", type=str, default="")
+        parser.add_argument("--vf_type", type=str, default="boltzmann")
         args = parser.parse_args()
         args = vars(args)
 

@@ -39,16 +39,12 @@ def traj_segment_generator(pi, env, horizon, stochastic):
     # XLV: add event flag
     event_flag = 'safe'
     event_flags = [None] * horizon
+    # XLV: add vpred_ghost
+    vpreds_ghost = np.zeros(horizon, 'float32')
     while True:
         prevac = ac
-        ac, vpred = pi.act(stochastic, ob)
-
-        # print("ob:", ob)
-        # print("ac:", ac)
-        # print("vpred:", vpred)
-        # print("pi:", tf.trainable_variables())
-        # print("pi vars:", pi.print_model_details())
-
+        # ac, vpred = pi.act(stochastic, ob)
+        ac, vpred, vpred_ghost = pi.act(stochastic, ob)
 
         # Slight weirdness here because we need value function at time T
         # before returning segment [0, T-1] so we get the correct
@@ -64,9 +60,13 @@ def traj_segment_generator(pi, env, horizon, stochastic):
                 cur_ep_ret = 0
                 cur_ep_len = 0
 
-            yield {"ob" : obs, "rew" : rews, "vpred" : vpreds, "new": news, "suc": sucs, "event_flag":event_flags,
-                    "ac" : acs, "prevac" : prevacs, "nextvpred": vpred * (1 - new),
-                    "ep_rets" : ep_rets, "ep_lens" : ep_lens}
+            # yield {"ob" : obs, "rew" : rews, "vpred" : vpreds, "new": news, "suc": sucs, "event_flag":event_flags,
+            #         "ac" : acs, "prevac" : prevacs, "nextvpred": vpred * (1 - new),
+            #         "ep_rets" : ep_rets, "ep_lens" : ep_lens}
+
+            yield {"ob": obs, "rew": rews, "vpred": vpreds, "vpred_ghost":vpreds_ghost, "new": news, "suc": sucs, "event_flag": event_flags,
+                   "ac": acs, "prevac": prevacs, "nextvpred": vpred * (1 - new), "nextvpred_ghost": vpred_ghost * (1 - new),
+                   "ep_rets": ep_rets, "ep_lens": ep_lens}
 
                     # BI: Added this for our work.
                     #"start_rews": start_rews}
@@ -85,9 +85,9 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         sucs[i] = suc
         # XLV: added for collect event type
         event_flags[i] = event_flag
+        # XLV: added for maintain vpred_ghost
+        vpreds_ghost[i] = vpred_ghost
 
-        # ob, rew, new, suc, _ = env.step(ac)
-        # print("rew:", rew)
         ob, rew, new, info = env.step(ac)
         suc = info['suc']
         event_flag = info['event']
@@ -99,13 +99,9 @@ def traj_segment_generator(pi, env, horizon, stochastic):
             ep_rets.append(cur_ep_ret)
             ep_lens.append(cur_ep_len)
 
-            # Added these for our work.
-            # start_rews[start.tostring()].append(cur_ep_ret)
-
             cur_ep_ret = 0
             cur_ep_len = 0
-            # Added these for our work.
-            # start, ob = env.reset(ret_state_and_ob=True)
+
             ob = env.reset()
 
         t += 1
@@ -125,6 +121,22 @@ def add_vtarg_and_adv(seg, gamma, lam):
         delta = rew[t] + gamma * vpred[t+1] * nonterminal - vpred[t]
         gaelam[t] = lastgaelam = delta + gamma * lam * nonterminal * lastgaelam
     seg["tdlamret"] = seg["adv"] + seg["vpred"]
+
+def add_vtarg_and_adv_ghost(seg, gamma, lam):
+    """
+    Compute target value using TD(lambda) estimator, and advantage with GAE(lambda)
+    """
+    new = np.append(seg["new"], 0) # last element is only used for last vtarg, but we already zeroed it if last new = 1
+    vpred_ghost = np.append(seg["vpred_ghost"], seg["nextvpred_ghost"])
+    T = len(seg["rew"])
+    seg["adv"] = gaelam = np.empty(T, 'float32')
+    rew = seg["rew"]
+    lastgaelam = 0
+    for t in reversed(range(T)):
+        nonterminal = 1-new[t+1]
+        delta = rew[t] + gamma * vpred_ghost[t+1] * nonterminal - vpred_ghost[t]
+        gaelam[t] = lastgaelam = delta + gamma * lam * nonterminal * lastgaelam
+    seg["tdlamret"] = seg["adv"] + seg["vpred_ghost"]
 
 def learn(env, policy_fn,
         timesteps_per_actorbatch, # timesteps per actor per update

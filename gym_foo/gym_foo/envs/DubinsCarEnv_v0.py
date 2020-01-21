@@ -248,7 +248,7 @@ class DubinsCarEnv_v0(gazebo_env.GazeboEnv):
         if sum(np.isnan(action)) > 0:
             raise ValueError("Passed in nan to step! Action: " + str(action))
 
-        # action = np.clip(action, -2, 2)
+        action = np.clip(action, -2, 2)
 
         # [-2, 2] --> [-0.8, 2]
         linear_vel = -0.8 + (2 - (-0.8)) * (action[0] - (-2)) / (2 - (-2))
