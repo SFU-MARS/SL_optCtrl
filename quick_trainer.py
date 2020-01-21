@@ -45,8 +45,8 @@ class Trainer(object):
 
     def build_value_model(self, input_shape):
         model = keras.Sequential([
-            keras.layers.Dense(128, activation=tf.nn.sigmoid, input_shape=[input_shape]),
-            keras.layers.Dense(128, activation=tf.nn.sigmoid),
+            keras.layers.Dense(64, activation=tf.nn.tanh, input_shape=[input_shape]),
+            keras.layers.Dense(64, activation=tf.nn.tanh),
             keras.layers.Dense(1)
         ])
         # optimizer = tf.keras.optimizers.RMSprop(0.001)
@@ -103,8 +103,8 @@ class Trainer(object):
                 elif self.method == 'mpc':
                     print("we are using mpc cost data to train!")
                     dataset_path = dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"
-                    model_saving_path = './tf_model/dubinsCar/vf_mpc.h5'
-                    column_names = ['reward', 'value', 'cost', 'status', 'x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+                    model_saving_path = './tf_model/dubinsCar/vf_mpc_new.h5'
+                    column_names = ['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'reward','value','cost','collision_in_future','collision_current','col_trajectory_flag']
             # model_saving_path = './tf_model/dubinsCar/vf.h5'
         else:
             raise ValueError("invalid agent!!!")
@@ -118,14 +118,18 @@ class Trainer(object):
 
         stats = train_dataset.describe()
         stats.pop("reward")
-        stats.pop("cost")
-        stats.pop("status")
         stats.pop("value")
+        stats.pop("cost")
+        stats.pop("collision_in_future")
+        stats.pop("collision_current")
+        stats.pop("col_trajectory_flag")
         stats = stats.transpose()
 
         train_dataset.pop('reward')
         train_dataset.pop('cost')
-        train_dataset.pop('status')
+        train_dataset.pop('collision_in_future')
+        train_dataset.pop('collision_current')
+        train_dataset.pop('col_trajectory_flag')
         train_labels = train_dataset.pop('value')
         # train_labels = np.log(train_labels+1)
 
@@ -133,7 +137,7 @@ class Trainer(object):
         model.summary()
         normed_train_data = self.norm(train_dataset, stats)
 
-        EPOCHS = 3
+        EPOCHS = 3000
         history = model.fit(
             normed_train_data, train_labels, batch_size=64,
             epochs=EPOCHS, validation_split=0.2, verbose=1,
@@ -350,120 +354,5 @@ if __name__ == "__main__":
     """
     trainer = Trainer(method = 'mpc', target="valFunc", agent='dubinsCar')
     trainer.train_valFunc()
-    trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc.h5")
-
-
-
-# if __name__ == "__main__":
-#
-#     dirpath = os.path.dirname(__file__)
-#     dataset_path = None
-#     if not os.path.exists(dirpath + "/data/valueFunc_train_linear_filled.csv"):
-#         raise ValueError("can not find the training file!!")
-#     else:
-#         dataset_path = dirpath + "/data/valueFunc_train_filled.csv"
-#     column_names = ['x', 'vx', 'z', 'vz','phi','w','value','d1','d2','d3','d4','d5','d6','d7', 'd8']
-#     raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
-#                               skipinitialspace=True, skiprows=1)
-#
-#     dataset = raw_dataset.copy()
-#     print(dataset.tail())
-#
-#     print(dataset.isna().sum())
-#
-#     dataset = dataset.dropna()
-#
-#     train_dataset = dataset.sample(frac=1.0, random_state=0)
-#
-#
-#     train_stats = train_dataset.describe()
-#     train_stats.pop("value")
-#     train_stats = train_stats.transpose()
-#
-#     train_labels = train_dataset.pop('value')
-#
-#     model = build_model(train_dataset)
-#     model.summary()
-#     normed_train_data = norm(train_dataset, train_stats)
-#
-#
-#     EPOCHS = 2500
-#
-#     history = model.fit(
-#         normed_train_data, train_labels,
-#         epochs=EPOCHS, validation_split=0.2, verbose=1,
-#         callbacks=[PrintDot()])
-#
-#     keras.models.save_model(model, './tf_model/vf.h5')
-#     hist = pd.DataFrame(history.history)
-#     hist['epoch'] = history.epoch
-#     hist.tail()
-#
-#     plot_history(history)
-
-# if __name__ == "__main__":
-#
-#     dirpath = os.path.dirname(__file__)
-#     dataset_path = None
-#     if not os.path.exists(dirpath + "/auto-mpg.data"):
-#         dataset_path = keras.utils.get_file(dirpath + "/auto-mpg.data", "http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data")
-#         print("dataset_path:", dataset_path)
-#     else:
-#         dataset_path = dirpath + "/auto-mpg.data"
-#     column_names = ['MPG','Cylinders','Displacement','Horsepower','Weight', 'Acceleration', 'Model Year', 'Origin']
-#     raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values = "?", comment='\t', sep=" ", skipinitialspace=True)
-#
-#     dataset = raw_dataset.copy()
-#     print(dataset.tail())
-#
-#     print(dataset.isna().sum())
-#
-#     dataset = dataset.dropna()
-#     origin  = dataset.pop('Origin')
-#
-#     dataset['USA'] = (origin == 1)*1.0
-#     dataset['Europe'] = (origin == 2)*1.0
-#     dataset['Japan'] = (origin == 3)*1.0
-#     print(dataset.tail())
-#
-#     train_dataset = dataset.sample(frac=0.8, random_state=0)
-#     test_dataset  = dataset.drop(train_dataset.index)
-#
-#     train_stats = train_dataset.describe()
-#     train_stats.pop("MPG")
-#     train_stats = train_stats.transpose()
-#
-#     print("train_stats:", train_stats)
-#
-#     train_labels = train_dataset.pop('MPG')
-#     test_labels = test_dataset.pop('MPG')
-#
-#
-#
-#
-#
-#     model = build_model(train_dataset)
-#     model.summary()
-#     normed_train_data = norm(train_dataset, train_stats)
-#     normed_test_data  = norm(test_dataset, train_stats)
-#
-#
-#     # sns.pairplot(train_dataset[["MPG", "Cylinders", "Displacement", "Weight"]], diag_kind="kde")
-#     #
-#     # plt.show()
-#
-#
-#
-#     EPOCHS = 1000
-#
-#     history = model.fit(
-#         normed_train_data, train_labels,
-#         epochs=EPOCHS, validation_split=0.2, verbose=0,
-#         callbacks=[PrintDot()])
-#
-#     hist = pd.DataFrame(history.history)
-#     hist['epoch'] = history.epoch
-#     hist.tail()
-#
-#     plot_history(history)
+    # trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc.h5")
 

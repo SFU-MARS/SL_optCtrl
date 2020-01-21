@@ -130,12 +130,21 @@ class MlpPolicy_mod(object):
         ob = U.get_placeholder(name="ob", dtype=tf.float32, shape=[sequence_length] + list(ob_space.shape))
 
         print("ob:", ob)
-        # print(ob.e)
 
         with tf.variable_scope("obfilter"):
             self.ob_rms = RunningMeanStd(shape=ob_space.shape)
 
         with tf.variable_scope('vf'):
+            # In any case, maintain another standard value network
+            obz_ghost = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
+            last_out_ghost = obz_ghost
+            for i in range(num_hid_layers):
+                last_out_ghost = tf.nn.tanh(tf.layers.dense(last_out_ghost, hid_size, name="fc_ghost_%i" % (i + 1),
+                                                      kernel_initializer=U.normc_initializer(1.0)))
+                # print("hid size:", hid_size)
+            self.vpred_ghost = tf.layers.dense(last_out_ghost, 1, name='final_ghost', kernel_initializer=U.normc_initializer(1.0))[:, 0]
+
+            # If not load external vf weights
             if not load_weights_vf:
                 obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
                 last_out = obz
@@ -144,6 +153,7 @@ class MlpPolicy_mod(object):
                                                           kernel_initializer=U.normc_initializer(1.0)))
                     print("hid size:", hid_size)
                 self.vpred = tf.layers.dense(last_out, 1, name='final', kernel_initializer=U.normc_initializer(1.0))[:, 0]
+            # If load external vf weights
             else:
                 """
                     Loading value computed by PPO itself as initialization, it's like re-using the pre-trained value function.
@@ -178,54 +188,54 @@ class MlpPolicy_mod(object):
                 """
                     Loading external value computed by value iteration as initialization.
                 """
-                # with open(os.environ['PROJ_HOME_3'] + "/tf_model/dubinsCar/vf_weights.pkl", 'rb') as f:
-                #     weights = pickle.load(f)
-                #     # print("shape of weights:", np.array(weights).shape)
-                #     # print("weights:", weights)
-                #     print("loading external value weights!")
-                #
-                #     # --- prepare stats for proper normalization --- #
-                #     print("preparing stats mean and std for normalization ...")
-                #     val_filled_path = os.environ['PROJ_HOME_3'] + "/data/dubinsCar/valFunc_filled_cleaned.csv"
-                #     assert os.path.exists(val_filled_path)
-                #     colnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7','d8']
-                #     val_filled = pd.read_csv(val_filled_path, names=colnames, na_values="?", comment='\t', sep=",",
-                #                              skipinitialspace=True, skiprows=1)
-                #
-                #     stats_source = val_filled.copy()
-                #     stats_source.dropna()
-                #     stats_source.pop('value')
-                #     stats = stats_source.describe()
-                #     stats = stats.transpose()
-                #
-                #     # obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
-                #     obz = tf.clip_by_value((ob - np.array(stats['mean'])) / np.array(stats['std']), -5.0, 5.0)
-                #     # ----------------------------------------------- #
-                #
-                #
-                #     out_1 = tf.layers.dense(inputs=obz,
-                #                               units=64,
-                #                               name="fc1",
-                #                               kernel_initializer=tf.constant_initializer(weights[0][0]),
-                #                               bias_initializer=tf.constant_initializer(weights[0][1]),
-                #                               use_bias=True,
-                #                               activation=tf.nn.tanh)
-                #
-                #     out_2 = tf.layers.dense(inputs=out_1,
-                #                               units=64,
-                #                               name="fc2",
-                #                               kernel_initializer=tf.constant_initializer(weights[1][0]),
-                #                               bias_initializer=tf.constant_initializer(weights[1][1]),
-                #                               use_bias=True,
-                #                               activation=tf.nn.tanh)
-                #
-                #     self.vpred = tf.layers.dense(inputs=out_2,
-                #                             units=1,
-                #                             name="final",
-                #                             kernel_initializer=tf.constant_initializer(weights[2][0]),
-                #                             bias_initializer=tf.constant_initializer(weights[2][1]),
-                #                             use_bias=True)[:,0]
-                #     # self.vpred = tf.Print(self.vpred, [self.vpred], "xubo print vpred: ")
+                with open(os.environ['PROJ_HOME_3'] + "/tf_model/dubinsCar/vf_weights.pkl", 'rb') as f:
+                    weights = pickle.load(f)
+                    # print("shape of weights:", np.array(weights).shape)
+                    # print("weights:", weights)
+                    print("loading external value weights!")
+
+                    # --- prepare stats for proper normalization --- #
+                    print("preparing stats mean and std for normalization ...")
+                    val_filled_path = os.environ['PROJ_HOME_3'] + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv"
+                    assert os.path.exists(val_filled_path)
+                    colnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7','d8']
+                    val_filled = pd.read_csv(val_filled_path, names=colnames, na_values="?", comment='\t', sep=",",
+                                             skipinitialspace=True, skiprows=1)
+
+                    stats_source = val_filled.copy()
+                    stats_source.dropna()
+                    stats_source.pop('value')
+                    stats = stats_source.describe()
+                    stats = stats.transpose()
+
+                    # obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
+                    obz = tf.clip_by_value((ob - np.array(stats['mean'])) / np.array(stats['std']), -5.0, 5.0)
+                    # ----------------------------------------------- #
+
+
+                    out_1 = tf.layers.dense(inputs=obz,
+                                              units=64,
+                                              name="fc1",
+                                              kernel_initializer=tf.constant_initializer(weights[0][0]),
+                                              bias_initializer=tf.constant_initializer(weights[0][1]),
+                                              use_bias=True,
+                                              activation=tf.nn.tanh)
+
+                    out_2 = tf.layers.dense(inputs=out_1,
+                                              units=64,
+                                              name="fc2",
+                                              kernel_initializer=tf.constant_initializer(weights[1][0]),
+                                              bias_initializer=tf.constant_initializer(weights[1][1]),
+                                              use_bias=True,
+                                              activation=tf.nn.tanh)
+
+                    self.vpred = tf.layers.dense(inputs=out_2,
+                                            units=1,
+                                            name="final",
+                                            kernel_initializer=tf.constant_initializer(weights[2][0]),
+                                            bias_initializer=tf.constant_initializer(weights[2][1]),
+                                            use_bias=True)[:,0]
+                    # self.vpred = tf.Print(self.vpred, [self.vpred], "xubo print vpred: ")
 
 
                 """
@@ -250,55 +260,63 @@ class MlpPolicy_mod(object):
                 """
                     Loading external value computed by mpc cost as initialization.
                 """
-                with open(os.environ['PROJ_HOME_3'] + "/tf_model/dubinsCar/vf_mpc_weights.pkl", 'rb') as f:
-                    weights = pickle.load(f)
-                    # print("shape of weights:", np.array(weights).shape)
-                    # print("weights:", weights)
-                    print("We are loading external value weights trained by mpc cost!")
-
-                    # --- prepare stats for proper normalization --- #
-                    print("preparing stats mean and std for normalization ...")
-                    val_filled_path = os.environ['PROJ_HOME_3'] + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"
-                    assert os.path.exists(val_filled_path)
-                    colnames = ['reward', 'value', 'cost', 'status', 'x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
-                    val_filled = pd.read_csv(val_filled_path, names=colnames, na_values="?", comment='\t', sep=",",
-                                             skipinitialspace=True, skiprows=1)
-
-                    stats_source = val_filled.copy()
-                    stats_source.dropna()
-                    stats = stats_source.describe()
-                    stats.pop("reward")
-                    stats.pop("cost")
-                    stats.pop("status")
-                    stats.pop("value")
-                    stats = stats.transpose()
-
-                    # obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
-                    obz = tf.clip_by_value((ob - np.array(stats['mean'])) / np.array(stats['std']), -5.0, 5.0)
-                    # ----------------------------------------------- #
-
-                    out_1 = tf.layers.dense(inputs=obz,
-                                            units=64,
-                                            name="fc1",
-                                            kernel_initializer=tf.constant_initializer(weights[0][0]),
-                                            bias_initializer=tf.constant_initializer(weights[0][1]),
-                                            use_bias=True,
-                                            activation=tf.nn.tanh)
-
-                    out_2 = tf.layers.dense(inputs=out_1,
-                                            units=64,
-                                            name="fc2",
-                                            kernel_initializer=tf.constant_initializer(weights[1][0]),
-                                            bias_initializer=tf.constant_initializer(weights[1][1]),
-                                            use_bias=True,
-                                            activation=tf.nn.tanh)
-
-                    self.vpred = tf.layers.dense(inputs=out_2,
-                                                 units=1,
-                                                 name="final",
-                                                 kernel_initializer=tf.constant_initializer(weights[2][0]),
-                                                 bias_initializer=tf.constant_initializer(weights[2][1]),
-                                                 use_bias=True)[:, 0]
+                # with open(os.environ['PROJ_HOME_3'] + "/tf_model/dubinsCar/vf_mpc_weights.pkl", 'rb') as f:
+                #     weights = pickle.load(f)
+                #     # print("shape of weights:", np.array(weights).shape)
+                #     # print("weights:", weights)
+                #     print("We are loading external value weights trained by mpc cost!")
+                #
+                #     # --- prepare stats for proper normalization --- #
+                #     print("preparing stats mean and std for normalization ...")
+                #     val_filled_path = os.environ['PROJ_HOME_3'] + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"
+                #     assert os.path.exists(val_filled_path)
+                #     colnames = ['reward', 'value', 'cost', 'status', 'x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+                #     val_filled = pd.read_csv(val_filled_path, names=colnames, na_values="?", comment='\t', sep=",",
+                #                              skipinitialspace=True, skiprows=1)
+                #
+                #     stats_source = val_filled.copy()
+                #     stats_source.dropna()
+                #     stats = stats_source.describe()
+                #     stats.pop("reward")
+                #     stats.pop("cost")
+                #     stats.pop("status")
+                #     stats.pop("value")
+                #     stats = stats.transpose()
+                #
+                #     # obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
+                #     obz = tf.clip_by_value((ob - np.array(stats['mean'])) / np.array(stats['std']), -5.0, 5.0)
+                #     # ----------------------------------------------- #
+                #
+                #     out_1 = tf.layers.dense(inputs=obz,
+                #                             units=64,
+                #                             name="fc1",
+                #                             kernel_initializer=tf.constant_initializer(weights[0][0]),
+                #                             bias_initializer=tf.constant_initializer(weights[0][1]),
+                #                             use_bias=True,
+                #                             activation=tf.nn.tanh)
+                #
+                #     out_2 = tf.layers.dense(inputs=out_1,
+                #                             units=64,
+                #                             name="fc2",
+                #                             kernel_initializer=tf.constant_initializer(weights[1][0]),
+                #                             bias_initializer=tf.constant_initializer(weights[1][1]),
+                #                             use_bias=True,
+                #                             activation=tf.nn.tanh)
+                #
+                #     out_3 = tf.layers.dense(inputs=out_2,
+                #                             units=64,
+                #                             name="fc3",
+                #                             kernel_initializer=tf.constant_initializer(weights[2][0]),
+                #                             bias_initializer=tf.constant_initializer(weights[2][1]),
+                #                             use_bias=True,
+                #                             activation=tf.nn.tanh)
+                #
+                #     self.vpred = tf.layers.dense(inputs=out_3,
+                #                                  units=1,
+                #                                  name="final",
+                #                                  kernel_initializer=tf.constant_initializer(weights[3][0]),
+                #                                  bias_initializer=tf.constant_initializer(weights[3][1]),
+                #                                  use_bias=True)[:, 0]
 
 
         with tf.variable_scope('pol'):
@@ -313,19 +331,20 @@ class MlpPolicy_mod(object):
                     # logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0]//2], initializer=tf.constant_initializer([-0.69, -1.6]))
                     mean = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name='final',
                                            kernel_initializer=U.normc_initializer(0.01))
-                    logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
-                                             initializer=tf.constant_initializer([-0.69]), trainable=False)
+                    # logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
+                    #                          initializer=tf.constant_initializer([-0.69]), trainable=True)
 
-                    # logstd = tf.Print(logstd, [logstd], "xlv finds logstd:")
+                    logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
+                                            initializer=tf.constant_initializer([-1.609]), trainable=True)
+                    print("we are using std=0.2")
                     pdparam = tf.concat([mean, mean * 0.0 + logstd], axis=1)
                 else:
                     mean = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name='final',
                                            kernel_initializer=U.normc_initializer(0.01))
-                    # logstd = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name="logstd",
-                    #                          kernel_initializer=U.normc_initializer(0.405))
                     logstd = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name="logstd",
-                                             kernel_initializer=U.normc_initializer(0.01))
-                    logstd = tf.Print(logstd, [logstd], "xlv finds logstd:")
+                                             kernel_initializer=tf.constant_initializer([-0.69]))
+
+                    # logstd = tf.Print(logstd, [logstd], "xlv finds logstd:")
                     pdparam = tf.concat([mean, mean * 0.0 + logstd], axis=1)
             else:
                 with open(os.environ['PROJ_HOME_3'] + "/tf_model/quad/pf_weights.pkl", 'rb') as f:
@@ -333,7 +352,6 @@ class MlpPolicy_mod(object):
                     print("shape of weights:", np.array(weights).shape)
                     print("weights:", weights)
                     print("loading external pol weights")
-                    # print("load old but good weights to test")
 
                     out_1 = tf.layers.dense(inputs=obz,
                                             units=64,
@@ -371,11 +389,16 @@ class MlpPolicy_mod(object):
 
         stochastic = tf.placeholder(dtype=tf.bool, shape=())
         ac = U.switch(stochastic, self.pd.sample(), self.pd.mode())
-        self._act = U.function([stochastic, ob], [ac, self.vpred])
+        # self._act = U.function([stochastic, ob], [ac, self.vpred])
+        self._act = U.function([stochastic, ob], [ac, self.vpred, self.vpred_ghost])
+
+    # def act(self, stochastic, ob):
+    #     ac1, vpred1 = self._act(stochastic, ob[None])
+    #     return ac1[0], vpred1[0]
 
     def act(self, stochastic, ob):
-        ac1, vpred1 = self._act(stochastic, ob[None])
-        return ac1[0], vpred1[0]
+        ac1, vpred1, vpred_ghost1 = self._act(stochastic, ob[None])
+        return ac1[0], vpred1[0], vpred_ghost1[0]
 
     def get_variables(self):
         return tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, self.scope)
