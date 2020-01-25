@@ -6,33 +6,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="60a04850-e657-489f-8b91-cd0a43f80fff" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_no_soft_constraints/valFunc_mpc.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_no_soft_constraints/valFunc_mpc_filled.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_no_soft_constraints/valFunc_mpc_filled_cleaned.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_soft_constraints/valFunc_mpc_filled_cleaned_soft.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_soft_constraints/valFunc_mpc_filled_soft.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_soft_constraints/valFunc_mpc_soft.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tf_model/dubinsCar/backup/vf_mpc_new.h5" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tf_model/dubinsCar/backup/vf_mpc_new_weights.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_soft.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_backup/valFunc_mpc.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_backup/valFunc_mpc_filled.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_backup/valFunc_mpc_filled_cleaned.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled_soft.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned_soft.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ppo1/mlp_policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/mlp_policy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ppo1/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ppo1/ppo_params.json" beforeDir="false" afterPath="$PROJECT_DIR$/ppo1/ppo_params.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/quick_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/quick_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spinningup" beforeDir="false" afterPath="$PROJECT_DIR$/spinningup" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/spinningup/spinup/algos/ppo/ppo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tf_model/dubinsCar/vf_mpc.h5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tf_model/dubinsCar/vf_mpc_weights.pkl" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" beforeDir="false" afterPath="$PROJECT_DIR$/toolboxls/Kernel/Helper/PostTimestep/postTimestepTTR.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_ppo.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -101,6 +82,18 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/baselines/common/tf_util.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="819">
+              <caret line="210" column="25" selection-start-line="210" selection-start-column="18" selection-end-line="210" selection-end-column="35" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="189">
@@ -115,25 +108,25 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="293" column="37" selection-start-line="293" selection-start-column="37" selection-end-line="293" selection-end-column="37" />
+            <state relative-caret-position="-66">
+              <caret line="199" column="48" selection-start-line="199" selection-start-column="48" selection-end-line="199" selection-end-column="48" />
               <folding>
                 <element signature="e#0#64#0" expanded="true" />
                 <element signature="e#375#5148#0" />
                 <element signature="e#7514#7587#0" />
-                <element signature="e#9829#9918#0" />
                 <element signature="e#12972#13081#0" />
+                <element signature="e#14354#14447#0" />
                 <element signature="e#17953#22244#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="226">
-              <caret line="291" column="42" lean-forward="true" selection-start-line="291" selection-start-column="42" selection-end-line="291" selection-end-column="42" />
+            <state relative-caret-position="3129">
+              <caret line="424" column="130" selection-start-line="424" selection-start-column="130" selection-end-line="424" selection-end-column="130" />
               <folding>
                 <element signature="e#0#52#0" expanded="true" />
                 <element signature="e#1081#3363#1" />
@@ -166,18 +159,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/gym_foo/gym_foo/envs/DubinsCarEnv_v0.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="123">
-              <caret line="32" column="21" selection-start-line="32" selection-start-column="21" selection-end-line="32" selection-end-column="21" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/quick_trainer.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="684">
@@ -195,9 +176,16 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/run.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="686">
-              <caret line="36" column="57" selection-start-line="36" selection-start-column="57" selection-end-line="36" selection-end-column="57" />
+            <state relative-caret-position="286">
+              <caret line="36" column="47" selection-start-line="36" selection-start-column="47" selection-end-line="36" selection-end-column="47" />
             </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/runs_log_tests/25-Jan-2020_03-20-55DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_switch/log.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-74007" />
           </provider>
         </entry>
       </file>
@@ -212,8 +200,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Iteration 120</find>
-      <find>Iteration 130</find>
       <find>Iteration 150</find>
       <find>now we are still in earlier stage</find>
       <find>vf_type</find>
@@ -242,6 +228,8 @@
       <find>tdlamret</find>
       <find>vf_loss</find>
       <find>lrmult</find>
+      <find>clip_param</find>
+      <find>lossandgrad_clip</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -299,9 +287,9 @@
         <option value="$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py" />
         <option value="$PROJECT_DIR$/tests/test_mpc_value_visualization/test_mpc_value_visualization" />
         <option value="$PROJECT_DIR$/quick_trainer.py" />
-        <option value="$PROJECT_DIR$/ppo1/mlp_policy.py" />
-        <option value="$PROJECT_DIR$/run.sh" />
         <option value="$PROJECT_DIR$/ppo1/ppo.py" />
+        <option value="$PROJECT_DIR$/run.sh" />
+        <option value="$PROJECT_DIR$/ppo1/mlp_policy.py" />
       </list>
     </option>
   </component>
@@ -328,32 +316,6 @@
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="dubinsCar" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="dubinsCar" type="462c0819:PsiDirectoryNode" />
-              <item name="env_difficult" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="dubinsCar" type="462c0819:PsiDirectoryNode" />
-              <item name="env_difficult" type="462c0819:PsiDirectoryNode" />
-              <item name="valFunc_mpc_soft_constraints" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
               <item name="launch" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -370,6 +332,19 @@
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
               <item name="runs_log_tests" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log_tests" type="462c0819:PsiDirectoryNode" />
+              <item name="25-Jan-2020_12-37-32DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_switch" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="runs_log_tests" type="462c0819:PsiDirectoryNode" />
+              <item name="25-Jan-2020_12-37-32DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_switch" type="462c0819:PsiDirectoryNode" />
+              <item name="figure" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
@@ -398,6 +373,11 @@
               <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
               <item name="tf_model" type="462c0819:PsiDirectoryNode" />
               <item name="dubinsCar" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SL_optCtrl" type="462c0819:PsiDirectoryNode" />
+              <item name="value_iteration" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="SL_optCtrl" type="b2602c69:ProjectViewProjectNode" />
@@ -658,12 +638,12 @@
       <workItem from="1578632141992" duration="14729000" />
       <workItem from="1578941440892" duration="38128000" />
       <workItem from="1579114453404" duration="37703000" />
-      <workItem from="1579550419036" duration="66369000" />
+      <workItem from="1579550419036" duration="74470000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1112249000" />
+    <option name="totallyTimeSpent" value="1120350000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -676,14 +656,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="24" width="1682" height="1003" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49947533" visible="true" weight="0.2858017" />
       <window_info id="Structure" order="1" sideWeight="0.50052464" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.40697673" visible="true" weight="0.3572241" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.40697673" visible="true" weight="0.29579067" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.6052632" weight="0.49374288" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -785,7 +764,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ppo1/ppo.py</url>
-          <line>370</line>
+          <line>385</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -819,14 +798,6 @@
     <SUITE FILE_PATH="coverage/SL_optCtrl$spawn_population.coverage" NAME="spawn_population Coverage Results" MODIFIED="1567491465422" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/worlds" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../miniconda3/envs/py36_habitat/lib/python3.6/site-packages/tensorflow-1.13.1-py3.6-linux-x86_64.egg/tensorflow/python/framework/dtypes.py" />
-    <entry file="file://$PROJECT_DIR$/spinningup/spinup/utils/logx.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="40">
-          <caret line="285" column="8" selection-start-line="285" selection-start-column="8" selection-end-line="285" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/spinningup/spinup/algos/ppo/core.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-38">
@@ -872,16 +843,6 @@
     <entry file="file://$PROJECT_DIR$/runs_log_tests/14-Jan-2020_20-01-41DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/log.txt" />
     <entry file="file://$PROJECT_DIR$/runs_log_tests/14-Jan-2020_21-25-52DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/log.txt" />
     <entry file="file://$PROJECT_DIR$/runs_log_tests/15-Jan-2020_00-30-10DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/log.txt" />
-    <entry file="file://$PROJECT_DIR$/baselines/common/tf_util.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1890">
-          <caret line="96" selection-start-line="96" selection-end-line="101" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned_backup.csv">
       <provider selected="true" editor-type-id="csv-text-editor" />
     </entry>
@@ -1085,34 +1046,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="72" column="8" selection-start-line="72" selection-start-column="8" selection-end-line="72" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/runs_log_tests/grad_norm_0.5_kl_0.015_std_0.5_fixed_value_mpc_no_softconstraints/22-Jan-2020_16-12-39DubinsCarEnv-v0_hand_craft_ppo_vf_mpc/log.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-63" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="293" column="37" selection-start-line="293" selection-start-column="37" selection-end-line="293" selection-end-column="37" />
-          <folding>
-            <element signature="e#0#64#0" expanded="true" />
-            <element signature="e#375#5148#0" />
-            <element signature="e#7514#7587#0" />
-            <element signature="e#9829#9918#0" />
-            <element signature="e#12972#13081#0" />
-            <element signature="e#17953#22244#0" />
-          </folding>
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/quick_trainer.py">
@@ -1125,13 +1061,6 @@
             <element signature="e#6485#9422#0" />
             <element signature="e#9468#11655#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="686">
-          <caret line="36" column="57" selection-start-line="36" selection-start-column="57" selection-end-line="36" selection-end-column="57" />
         </state>
       </provider>
     </entry>
@@ -1153,16 +1082,73 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/value_iteration/helper_function.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="41" column="62" selection-start-line="41" selection-start-column="45" selection-end-line="41" selection-end-column="64" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_value_prediction/plot_ppo_valpred.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="72" column="8" selection-start-line="72" selection-start-column="8" selection-end-line="72" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/baselines/common/tf_util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="819">
+          <caret line="210" column="25" selection-start-line="210" selection-start-column="18" selection-end-line="210" selection-end-column="35" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ppo1/ppo.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="226">
-          <caret line="291" column="42" lean-forward="true" selection-start-line="291" selection-start-column="42" selection-end-line="291" selection-end-column="42" />
+        <state relative-caret-position="3129">
+          <caret line="424" column="130" selection-start-line="424" selection-start-column="130" selection-end-line="424" selection-end-column="130" />
           <folding>
             <element signature="e#0#52#0" expanded="true" />
             <element signature="e#1081#3363#1" />
             <element signature="e#8953#8984#0" />
           </folding>
         </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ppo1/mlp_policy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-66">
+          <caret line="199" column="48" selection-start-line="199" selection-start-column="48" selection-end-line="199" selection-end-column="48" />
+          <folding>
+            <element signature="e#0#64#0" expanded="true" />
+            <element signature="e#375#5148#0" />
+            <element signature="e#7514#7587#0" />
+            <element signature="e#12972#13081#0" />
+            <element signature="e#14354#14447#0" />
+            <element signature="e#17953#22244#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="36" column="47" selection-start-line="36" selection-start-column="47" selection-end-line="36" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runs_log_tests/25-Jan-2020_03-20-55DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_switch/log.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-74007" />
       </provider>
     </entry>
   </component>
