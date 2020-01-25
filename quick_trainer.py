@@ -75,6 +75,8 @@ class Trainer(object):
     def train_valFunc(self):
         dirpath = os.path.dirname(__file__)
         dataset_path = None
+        column_names = None
+        model_saving_path = None
         if self.agent == 'car':
             if not os.path.exists(dirpath + "/data/car/valFunc_filled.csv"):
                 raise ValueError("can not find the training file for car example!!")
@@ -93,7 +95,7 @@ class Trainer(object):
 
         elif self.agent == 'dubinsCar':
             if not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv") or \
-                not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"):
+                    not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"):
                 raise ValueError("can not find the training file for dubins car example!!")
             else:
                 if self.method == 'vi':
@@ -101,11 +103,16 @@ class Trainer(object):
                     model_saving_path = './tf_model/dubinsCar/vf.h5'
                     column_names = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
                 elif self.method == 'mpc':
-                    print("we are using mpc cost data to train!")
-                    dataset_path = dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"
-                    model_saving_path = './tf_model/dubinsCar/vf_mpc_new.h5'
+                    # print("we are using mpc cost data to train!")
+                    # dataset_path = dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"
+                    # model_saving_path = './tf_model/dubinsCar/vf_mpc.h5'
+                    # column_names = ['reward', 'value', 'cost', 'status', 'x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4',
+                    #                 'd5', 'd6', 'd7', 'd8']
+
+                    print("we are using mpc cost data (with soft constaints) to train!")
+                    dataset_path = dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned_soft.csv"
+                    model_saving_path = './tf_model/dubinsCar/vf_mpc_soft.h5'
                     column_names = ['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'reward','value','cost','collision_in_future','collision_current','col_trajectory_flag']
-            # model_saving_path = './tf_model/dubinsCar/vf.h5'
         else:
             raise ValueError("invalid agent!!!")
 
@@ -123,6 +130,11 @@ class Trainer(object):
         stats.pop("collision_in_future")
         stats.pop("collision_current")
         stats.pop("col_trajectory_flag")
+
+        # stats.pop("reward")
+        # stats.pop("value")
+        # stats.pop("cost")
+        # stats.pop("status")
         stats = stats.transpose()
 
         train_dataset.pop('reward')
@@ -130,14 +142,17 @@ class Trainer(object):
         train_dataset.pop('collision_in_future')
         train_dataset.pop('collision_current')
         train_dataset.pop('col_trajectory_flag')
+
+        # train_dataset.pop('reward')
+        # train_dataset.pop('cost')
+        # train_dataset.pop('status')
         train_labels = train_dataset.pop('value')
-        # train_labels = np.log(train_labels+1)
 
         model = self.build_value_model(self.input_shape)
         model.summary()
         normed_train_data = self.norm(train_dataset, stats)
 
-        EPOCHS = 3000
+        EPOCHS = 2000
         history = model.fit(
             normed_train_data, train_labels, batch_size=64,
             epochs=EPOCHS, validation_split=0.2, verbose=1,
@@ -296,7 +311,6 @@ class Trainer(object):
 
     def save_model_weights(self, model_path):
         dir_path = os.path.dirname(model_path)
-        # print(dir_path)
         model_weights_savepath = dir_path + '/' + os.path.splitext(model_path.split('/')[-1])[0] + '_weights.pkl'
 
         assert os.path.exists(model_path)
@@ -352,7 +366,7 @@ if __name__ == "__main__":
     """
     Train value network model
     """
-    trainer = Trainer(method = 'mpc', target="valFunc", agent='dubinsCar')
+    trainer = Trainer(method='mpc', target="valFunc", agent='dubinsCar')
     trainer.train_valFunc()
-    # trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc.h5")
+    trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc_soft.h5")
 

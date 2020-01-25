@@ -146,12 +146,21 @@ def ppo_learn(env, policy,
 
     # warning: do not update weights of value network if loading customized external value initialization.
     if args['vf_load'] == "yes":
-        vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
+        if args['vf_switch'] == "yes":
+            # vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
+
+            thresh_rew = tf.placeholder(name='vf_switch_cond', dtype=tf.float32, shape=[])
+            vf_loss = tf.cond(thresh_rew >= 200, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
+                              lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
+        elif args['vf_switch'] == "no":
+            vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
+
         # XLV: In this initialization based case, add one more value NN with non-stop updating
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
         logger.log("loading external valfunc and vf_loss is fixed!")
     else:
         vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
+        vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
         logger.log("not loading external valfunc and vf_loss is updating!")
 
 
@@ -278,16 +287,19 @@ def ppo_learn(env, policy,
         # kernel0 = [sess.run(kernels[0])]
 
         seg = seg_gen.__next__()
-        # if len(eval_success_rates) and eval_success_rates[-1] >= 0.6:
-        #     switch = True
-        if np.mean(rewbuffer) >= 200:
-            switch = True
 
-        if switch:
-            logger.log("switch to standard value function with non-stop updating!")
-            add_vtarg_and_adv_ghost(seg, gamma, lam)
-        else:
-            add_vtarg_and_adv(seg, gamma, lam)
+        thresh_rew = np.mean(rewbuffer).astype(np.float32)
+        add_vtarg_and_adv(seg, gamma, lam)
+
+        # if np.mean(rewbuffer) >= 200 and args['vf_switch'] == "yes":
+        #     switch = True
+        #
+        # if switch:
+        #     logger.log("switch to standard value function with non-stop updating!")
+        #     add_vtarg_and_adv_ghost(seg, gamma, lam)
+        # else:
+        #     logger.log("Still use fixed value function")
+        #     add_vtarg_and_adv(seg, gamma, lam)
 
 
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
@@ -311,30 +323,30 @@ def ppo_learn(env, policy,
         #     with open(globals.g_hm_dirpath + '/iter_' + str(globals.g_iter_id) + '.pkl', 'wb') as f:
         #         pickle.dump(tmp_seg, f)
         #
-        # """ In case of collecting real-time sim data and its vpred for furthur debugging """
-        # if args['vf_load'] == 'no':
-        #     valpred_csv_name = 'ppo_valpred_itself'
-        # else:
-        #     valpred_csv_name = 'ppo_valpred_external'
-        # with open(args['RUN_DIR'] + '/' + valpred_csv_name + '.csv', 'a') as f:
-        #     vpred_shaped = vpredbefore.reshape(-1, 1)
-        #     atarg_shaped = atarg.reshape(-1,1)
-        #     tdlamret_shaped = tdlamret.reshape(-1,1)
-        #     rews_shaped = rews.reshape(-1,1)
-        #     event_flags_shaped = np.array(event_flags).reshape(-1,1)
-        #
-        #     log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, rews_shaped, event_flags_shaped), axis=1)
-        #
-        #
-        #     if args['gym_env'] == 'PlanarQuadEnv-v0':
-        #         log_df = pd.DataFrame(log_data,
-        #                                     columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
-        #     elif args['gym_env'] == 'DubinsCarEnv-v0':
-        #         log_df = pd.DataFrame(log_data,
-        #                                     columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
-        #     else:
-        #         raise ValueError("invalid env !!!")
-        #     log_df.to_csv(f, header=True)
+        """ In case of collecting real-time sim data and its vpred for furthur debugging """
+        if args['vf_load'] == 'no':
+            valpred_csv_name = 'ppo_valpred_itself'
+        else:
+            valpred_csv_name = 'ppo_valpred_external'
+        with open(args['RUN_DIR'] + '/' + valpred_csv_name + '.csv', 'a') as f:
+            vpred_shaped = vpredbefore.reshape(-1, 1)
+            atarg_shaped = atarg.reshape(-1,1)
+            tdlamret_shaped = tdlamret.reshape(-1,1)
+            rews_shaped = rews.reshape(-1,1)
+            event_flags_shaped = np.array(event_flags).reshape(-1,1)
+
+            log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, rews_shaped, event_flags_shaped), axis=1)
+
+
+            if args['gym_env'] == 'PlanarQuadEnv-v0':
+                log_df = pd.DataFrame(log_data,
+                                            columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
+            elif args['gym_env'] == 'DubinsCarEnv-v0':
+                log_df = pd.DataFrame(log_data,
+                                            columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
+            else:
+                raise ValueError("invalid env !!!")
+            log_df.to_csv(f, header=True)
 
 
         """ Optimization """

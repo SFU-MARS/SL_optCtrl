@@ -253,7 +253,8 @@ if __name__ == "__main__":
         parser.add_argument("--set_additional_goal", type=str, default="angle")
         parser.add_argument("--vf_load", type=str, default="yes")
         parser.add_argument("--pol_load", type=str, default="no")
-        parser.add_argument("--vf_type", type=str, default="boltzmann")
+        parser.add_argument("--vf_type", type=str, default="mpc")
+        parser.add_argument("--vf_switch", type=str, default="no")
         args = parser.parse_args()
         args = vars(args)
 
@@ -267,6 +268,9 @@ if __name__ == "__main__":
                 RUN_DIR = RUN_DIR + '_' + args['vf_type']
             if args['pol_load'] == "yes":
                 RUN_DIR = RUN_DIR + '_' + 'pol'
+
+            if args['vf_switch'] == "yes":
+                RUN_DIR = RUN_DIR + '_' + 'switch'
 
             MODEL_DIR = os.path.join(RUN_DIR, 'model')
             FIGURE_DIR = os.path.join(RUN_DIR, 'figure')
