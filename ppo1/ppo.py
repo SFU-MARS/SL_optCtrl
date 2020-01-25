@@ -13,9 +13,10 @@ import os, sys
 from utils.plotting_performance import *
 from utils.utils import *
 
+
+
 def create_session(num_cpu=None):
     U.make_session(num_cpu=num_cpu).__enter__()
-
 
 def create_policy(name, env, vf_load=False, pol_load=False):
     ob_space = env.observation_space
@@ -144,12 +145,16 @@ def ppo_learn(env, policy,
     surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
     pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
 
+    # Default we do not use single value NN
+    thresh_rew = tf.placeholder(name='thresh_rew', dtype=tf.float32, shape=[])
+    one_valnn = False
+
     # warning: do not update weights of value network if loading customized external value initialization.
     if args['vf_load'] == "yes":
         if args['vf_switch'] == "yes":
             # vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
 
-            thresh_rew = tf.placeholder(name='vf_switch_cond', dtype=tf.float32, shape=[])
+            one_valnn = True
             vf_loss = tf.cond(thresh_rew >= 200, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
                               lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
         elif args['vf_switch'] == "no":
@@ -175,15 +180,26 @@ def ppo_learn(env, policy,
 
     var_list = pi.get_trainable_variables()
     print("trainable variables:", var_list)
-    lossandgrad = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list)])
+
+    if one_valnn:
+        lossandgrad = U.function([ob, ac, atarg, ret, lrmult, thresh_rew], losses + [U.flatgrad(total_loss, var_list)])
+    else:
+        lossandgrad = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list)])
+
 
     # XLV: added for limit gradient change
-    lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
+    if one_valnn:
+        lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult, thresh_rew], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
+    else:
+        lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
 
     adam = MpiAdam(var_list, epsilon=adam_epsilon)
 
     assign_old_eq_new = U.function([],[], updates=[tf.assign(oldv, newv) for (oldv, newv) in zipsame(oldpi.get_variables(), pi.get_variables())])
-    compute_losses = U.function([ob, ac, atarg, ret, lrmult], losses)
+    if one_valnn:
+        compute_losses = U.function([ob, ac, atarg, ret, lrmult, thresh_rew], losses)
+    else:
+        compute_losses = U.function([ob, ac, atarg, ret, lrmult], losses)
 
     U.initialize()
     adam.sync()
@@ -288,7 +304,6 @@ def ppo_learn(env, policy,
 
         seg = seg_gen.__next__()
 
-        thresh_rew = np.mean(rewbuffer).astype(np.float32)
         add_vtarg_and_adv(seg, gamma, lam)
 
         # if np.mean(rewbuffer) >= 200 and args['vf_switch'] == "yes":
@@ -370,9 +385,17 @@ def ppo_learn(env, policy,
             grads = [] # list of sublists, each of which gives the gradients w.r.t all variables based on a set of samples with size "optim_batchsize"
             for batch in d.iterate_once(optim_batchsize):
                 if start_clip_grad:
-                    *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+                    if not one_valnn:
+                        *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+                    else:
+                        *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
+                                                         cur_lrmult, np.mean(rewbuffer))
                 else:
-                    *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+                    if not one_valnn:
+                        *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+                    else:
+                        *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
+                                                    cur_lrmult, np.mean(rewbuffer))
                 if any(np.isnan(g)):
                     logger.log("there are nan in gradients, skip further updating!")
                     break
@@ -396,7 +419,10 @@ def ppo_learn(env, policy,
         logger.log("Evaluating losses...")
         losses = []
         for batch in d.iterate_once(optim_batchsize):
-            newlosses = compute_losses(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+            if not one_valnn:
+                newlosses = compute_losses(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+            else:
+                newlosses = compute_losses(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult, np.mean(rewbuffer))
             losses.append(newlosses)
         meanlosses,_,_ = mpi_moments(losses, axis=0)
         logger.log(fmt_row(13, meanlosses))
