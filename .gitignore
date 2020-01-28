@@ -9,3 +9,4 @@ runs_log_tests/
 gym_foo/gym_foo/envs/__pycache__/*.pyc
 ppo1/__pycache__/*.pyc
 .idea/workspace.xml
+*.pyc

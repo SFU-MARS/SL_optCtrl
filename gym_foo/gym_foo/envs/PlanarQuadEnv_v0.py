@@ -429,7 +429,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         done = False
         suc = False
         self.step_counter += 1
-
+        event_flag = None  # {'collision', 'safe', 'goal', 'steps exceeding', 'highly tilt'}
 
         obsrv = self.get_obsrv(laser_data, dynamic_data)
         # --- special solution for nan/inf observation (especially in case of any invalid sensor readings) --- #
@@ -489,6 +489,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             reward += self.collision_reward
             done = True
             self.step_counter = 0
+            event_flag = 'collision'
+
         """
         if self._in_obst(contact_data):
             reward += self.collision_reward
@@ -502,6 +504,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             done = True
             suc = True
             self.step_counter = 0
+            event_flag = 'goal'
             # print("in goal")
 
         # if abs(obsrv[4] - self.goal_state[4]) < 0.40:
@@ -511,18 +514,23 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             reward += self.collision_reward * 2
             done = True
             self.step_counter = 0
+            event_flag = 'highly tilt'
             # print("tilt too much")
         # maximum episode length allowed
         if self.step_counter >= 100:
             done = True
             self.step_counter = 0
+            event_flag = 'steps exceeding'
             # print('exceed max length')
+
+        if event_flag is None:
+            event_flag = 'safe'
 
         if high_dim_ac_form:
             # for PPO2 Vectorized Env
             return np.asarray(obsrv), np.asarray([reward]), np.asarray([done]), [{'suc':suc}]
         else:
-            return np.asarray(obsrv), reward, done, {'suc':suc}
+            return np.asarray(obsrv), reward, done, {'suc':suc, 'event':event_flag}
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
