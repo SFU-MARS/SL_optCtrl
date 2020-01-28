@@ -22,16 +22,20 @@ def create_policy(name, env, vf_load=False, pol_load=False):
     ob_space = env.observation_space
     ac_space = env.action_space
 
-    if vf_load or pol_load:
-        logger.log("i am using mlppolicy_mod")
-        return MlpPolicy_mod(name=name,
-                     ob_space=ob_space, ac_space=ac_space,
-                     hid_size=64, num_hid_layers=2, load_weights_vf=vf_load, load_weights_pol=pol_load)
-    else:
-        logger.log("i am using mlppolicy")
-        return MlpPolicy(name=name,
-                     ob_space=ob_space, ac_space=ac_space,
-                     hid_size=64, num_hid_layers=2)
+    logger.log("i am using mlppolicy_mod")
+    logger.log("vf_load is %r, pol_load is %r" % (vf_load, pol_load))
+    return MlpPolicy_mod(name=name,ob_space=ob_space, ac_space=ac_space,
+                        hid_size=64, num_hid_layers=2, load_weights_vf=vf_load, load_weights_pol=pol_load)
+    # if vf_load or pol_load:
+    #     logger.log("i am using mlppolicy_mod")
+    #     return MlpPolicy_mod(name=name,
+    #                  ob_space=ob_space, ac_space=ac_space,
+    #                  hid_size=64, num_hid_layers=2, load_weights_vf=vf_load, load_weights_pol=pol_load)
+    # else:
+    #     logger.log("i am using mlppolicy")
+    #     return MlpPolicy(name=name,
+    #                  ob_space=ob_space, ac_space=ac_space,
+    #                  hid_size=64, num_hid_layers=2)
 
 def initialize():
     U.initialize()
