@@ -6,7 +6,7 @@ import gazebo_env
 from utils import *
 
 from utils.utils import *
-
+import baselines.logger as logger
 from gazebo_msgs.msg import ModelState
 from geometry_msgs.msg import Twist, Pose, Pose2D
 from sensor_msgs.msg import LaserScan
@@ -27,8 +27,8 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 GOAL_STATE = np.array([3.5, 3.5, np.pi*11/18]) # around 110 degrees as angle
 # GOAL_STATE = np.array([3.5, 3.5, 0])
+# GOAL_STATE = np.array([3.5, 3.5, np.pi*3/4])
 START_STATE = np.array([-0.222404, -3.27274, 0])
-
 """
 dubins' car 3d model:
 x_dot = v * cos(theta)
@@ -132,24 +132,27 @@ class DubinsCarEnv_v0(gazebo_env.GazeboEnv):
         y = state[1]
         theta = state[2]
 
+        vel = 0 # not used any more
+
         if self.set_additional_goal == 'None':
             if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= self.goal_pos_tolerance:
-                print("in goal!!")
+                logger.log("in goal!!")
                 return True
             else:
                 return False
         elif self.set_additional_goal == 'angle':
             if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= self.goal_pos_tolerance \
                 and abs(theta - self.goal_state[2]) < self.goal_theta_tolerance:
-
-                print("in goal with specific angle!!")
+                logger.log("in goal with specific angle!!")
+                logger.log("theta:%f" %theta)
+                logger.log("goal theta range from %f to %f" %((GOAL_STATE[2]-self.goal_theta_tolerance), (GOAL_STATE[2]+self.goal_theta_tolerance)))
                 return True
             else:
                 return False
         elif self.set_additional_goal == 'vel':
             if np.sqrt((x - self.goal_state[0]) ** 2 + (y - self.goal_state[1]) ** 2) <= self.goal_pos_tolerance \
                 and abs(vel - self.goal_state[3]) < 0.25:
-                print("in goal with specific velocity!!")
+                logger.log("in goal with specific velocity!!")
                 return True
             else:
                 return False

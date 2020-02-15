@@ -31,18 +31,33 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 # need to be compatitable with model.sdf and world.sdf for custom setting
 
 # notice: it's not the gazebo pose state, not --> x,y,z,pitch,roll,yaw !!
-GOAL_STATE = np.array([4.0, 0., 9., 0., 0.75, 0.])
+# GOAL_STATE = np.array([4.0, 0., 9., 0., 0.75, 0.])
+# GOAL_STATE = np.array([4.0, 0, 9.0, 0, -np.pi/6, 0])
+# GOAL_STATE = np.array([4.0, 0, 9.0, 0, 0, 0])
+GOAL_STATE = np.array([4.0, 0, 9.0, 0, -np.pi/8, 0])
 
-# START_STATE = np.array([3.18232, 0., 3., 0., 0., 0.])
-# START_STATE = np.array([-1.5, -3.33973, 2.5, 0., 0., 0.])
-START_STATE = np.array([3.5, 0, 2.5, 0, 0, 0])
+START_STATE = np.array([3.75, 0, 2, 0, 0, 0])
+# START_STATE = np.array([3.5, 0, 2.5, 0, 0, 0])
+# START_STATE = np.array([-2.5, 0, 2.5, 0, 0, 0])
+# START_STATE = np.array([0, 0, 2, 0, 0, 0])
+
 
 # obstacles position groundtruth
-# OBSTACLES_POS = [(-1.5, 3), (3, 6), (-2, 7)]
 # (xpos, zpos, xsize, zsize)
-OBSTACLES_POS = [(-2, 5, 1.5, 1.5),
-                 (0, 8.5, 1.5, 1.0),
-                 (3.5, 5, 3, 1.5)]
+# air_space_201910
+# OBSTACLES_POS = [(-2, 5, 1.5, 1.5),
+#                  (0, 8.5, 1.5, 1.0),
+#                  (3.5, 5, 3, 1.5)]
+# air_space_202002
+# OBSTACLES_POS = [(-3.5, 6, 3/2, 1/2),
+#                  (0, 9, 1.5/2, 2/2),
+#                  (3.5, 6, 3/2, 1/2),
+#                  (-1, 4, 3/2, 0.5/2)]
+# air_space_202002_Francis
+OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
+                 (1, 8.5, 1.5/2, 1.0/2),
+                 (3.5, 5, 3/2, 1.5/2),
+                 (0, 1, 0.5/2, 2/2)]
 
 # wall 0,1,2,3
 WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.)]
@@ -78,10 +93,10 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.goal_state = GOAL_STATE
 
         # state space and action space (MlpPolicy needs these params for input)
-        high_state = np.array([5., 2., 10., 2., np.pi, np.pi / 3])
-        low_state = np.array([-5., -2., 0., -2., -np.pi, -np.pi / 3])
+        high_state = np.array([5., 2., 10., 2., np.pi, np.pi/3])
+        low_state = np.array([-5., -2., 0., -2., -np.pi, -np.pi/3])
 
-        high_obsrv = np.array([5., 2., 10., 2., np.pi, np.pi / 3] + [5*2] * self.num_lasers)
+        high_obsrv = np.array([5., 2., 10., 2., np.pi, np.pi/3] + [5*2] * self.num_lasers)
         low_obsrv = np.array([-5., -2., 0., -2., -np.pi, -np.pi/3] + [0] * self.num_lasers)
 
         # controls are two thrusts
@@ -99,10 +114,10 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.action_dim = 2
 
         self.goal_pos_tolerance = 1.0
-        # self.goal_pos_tolerance = 0.5
         self.goal_vel_limit = 0.25
-        self.goal_phi_limit = np.pi / 6.
-
+        self.goal_phi_limit = np.pi/8
+        # self.goal_phi_limit = np.pi/6.0
+        # self.goal_phi_limit = np.pi/9.0
 
         self.pre_obsrv = None
         self.reward_type = reward_type
@@ -154,29 +169,55 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             return False
     """
 
-    def _in_obst(self, laser_data, dynamic_data):
-         laser_min_range = 0.6
-         # collision_min_range = 0.8
-         tmp_x = dynamic_data.pose.position.x
-         tmp_y = dynamic_data.pose.position.y
-         tmp_z = dynamic_data.pose.position.z
+    # def _in_obst(self, laser_data, dynamic_data):
+    #      laser_min_range = 0.6
+    #      # collision_min_range = 0.8
+    #      tmp_x = dynamic_data.pose.position.x
+    #      tmp_y = dynamic_data.pose.position.y
+    #      tmp_z = dynamic_data.pose.position.z
+    #
+    #      if tmp_z <= laser_min_range:
+    #          # print("tmp_z:", tmp_z)
+    #          return True
+    #      if Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[0][0], OBSTACLES_POS[0][1])) < 0.5*np.sqrt((OBSTACLES_POS[0][2])**2 + (OBSTACLES_POS[0][3])**2) + 0.5 \
+    #         or Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[1][0], OBSTACLES_POS[1][1])) < 0.5*np.sqrt((OBSTACLES_POS[1][2])**2 + (OBSTACLES_POS[1][3])**2) + 0.5 \
+    #         or Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[2][0], OBSTACLES_POS[2][1])) < 0.5*np.sqrt((OBSTACLES_POS[2][2])**2 + (OBSTACLES_POS[2][3])**2) + 0.5 \
+    #         or np.abs(tmp_x - WALLS_POS[0][0]) < laser_min_range \
+    #         or np.abs(tmp_x - WALLS_POS[1][0]) < laser_min_range \
+    #         or np.abs(tmp_z - WALLS_POS[2][1]) < laser_min_range:
+    #          return True
+    #
+    #      # check the obstacle by sensor reflecting data
+    #      # for idx, item in enumerate(laser_data.ranges):
+    #      #     if laser_min_range > laser_data.ranges[idx] > 0:
+    #      #         return True
+    #      return False
 
-         if tmp_z <= laser_min_range:
-             # print("tmp_z:", tmp_z)
-             return True
-         if Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[0][0], OBSTACLES_POS[0][1])) < 0.5*np.sqrt((OBSTACLES_POS[0][2])**2 + (OBSTACLES_POS[0][3])**2) + 0.5 \
-            or Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[1][0], OBSTACLES_POS[1][1])) < 0.5*np.sqrt((OBSTACLES_POS[1][2])**2 + (OBSTACLES_POS[1][3])**2) + 0.5 \
-            or Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[2][0], OBSTACLES_POS[2][1])) < 0.5*np.sqrt((OBSTACLES_POS[2][2])**2 + (OBSTACLES_POS[2][3])**2) + 0.5 \
-            or np.abs(tmp_x - WALLS_POS[0][0]) < laser_min_range \
+    def _in_obst(self, laser_data, dynamic_data):
+        laser_min_range = 0.6
+        # collision_min_range = 0.8
+        tmp_x = dynamic_data.pose.position.x
+        tmp_y = dynamic_data.pose.position.y
+        tmp_z = dynamic_data.pose.position.z
+
+        if tmp_z <= laser_min_range:
+            return True
+
+        quad_r = 0.55
+        for i, obs in enumerate(OBSTACLES_POS):
+            if tmp_x >= obs[0] - obs[2] - quad_r and \
+                tmp_x <= obs[0] + obs[2] + quad_r and \
+                tmp_z >= obs[1] - obs[3] - quad_r and \
+                tmp_z <= obs[1] + obs[3] + quad_r:
+                return True
+
+        if np.abs(tmp_x - WALLS_POS[0][0]) < laser_min_range \
             or np.abs(tmp_x - WALLS_POS[1][0]) < laser_min_range \
             or np.abs(tmp_z - WALLS_POS[2][1]) < laser_min_range:
-             return True
+            return True
 
-         # check the obstacle by sensor reflecting data
-         # for idx, item in enumerate(laser_data.ranges):
-         #     if laser_min_range > laser_data.ranges[idx] > 0:
-         #         return True
-         return False
+        return False
+
 
 
     def _in_goal(self, state):
@@ -203,16 +244,16 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         elif self.set_additional_goal == 'angle':
             # angle region from 0.4 to 0.3. increase difficulty
             if np.sqrt((x - self.goal_state[0]) ** 2 + (z - self.goal_state[2]) ** 2) <= self.goal_pos_tolerance \
-                    and (abs(phi - self.goal_state[4]) < 0.30):
-                print("in goal!!")
+                    and (abs(phi - self.goal_state[4]) <= self.goal_phi_limit): # 0.30 before
+                print("in goal with special angle!!")
                 return True
             else:
                 return False
 
         elif self.set_additional_goal == 'vel':
             if np.sqrt((x - self.goal_state[0]) ** 2 + (z - self.goal_state[2]) ** 2) <= self.goal_pos_tolerance \
-                    and abs(vx - self.goal_state[1]) < self.goal_vel_limit and abs(vz - self.goal_state[3]) < self.goal_vel_limit:
-                print("in goal!!")
+                    and abs(vx - self.goal_state[1]) <= self.goal_vel_limit and abs(vz - self.goal_state[3]) <= self.goal_vel_limit:
+                print("in goal with special velocity!!")
                 return True
             else:
                 return False
@@ -240,7 +281,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             else:
                 return False
         else:
-            raise ValueErrror('None additional goal does not have half_goal!!')
+            raise ValueError('None additional goal does not have half_goal!!')
 
     def get_obsrv(self, laser_data, dynamic_data):
 
@@ -536,15 +577,15 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-if __name__ == "__main__":
-    quadEnv = PlanarQuadEnv_v0()
-    quadEnv.reward_type = "hand_craft"
-    quadEnv.set_additional_goal = 'None'
-    quadEnv.customized_reset = [-1.1254724508, -0.0746026367, 2.2481865046, 0.0826751712,  0.0529436985, 0]
-    obs = quadEnv.reset()
-    res = quadEnv.step([5.0006609471, 10.4238665043])
-    print("reset obs:", obs)
-    print("next obs:", res[0])
+# if __name__ == "__main__":
+#     quadEnv = PlanarQuadEnv_v0()
+#     quadEnv.reward_type = "hand_craft"
+#     quadEnv.set_additional_goal = 'None'
+#     quadEnv.customized_reset = [-1.1254724508, -0.0746026367, 2.2481865046, 0.0826751712,  0.0529436985, 0]
+#     obs = quadEnv.reset()
+#     res = quadEnv.step([5.0006609471, 10.4238665043])
+#     print("reset obs:", obs)
+#     print("next obs:", res[0])
 
 
 

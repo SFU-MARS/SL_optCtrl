@@ -82,16 +82,17 @@ class Trainer(object):
                 raise ValueError("can not find the training file for car example!!")
             else:
                 dataset_path = dirpath + "/data/car/valFunc_filled.csv"
-            column_names = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
-            model_saving_path = './tf_model/car/vf.h5'
+                column_names = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+                model_saving_path = './tf_model/car/vf.h5'
 
         elif self.agent == 'quad':
-            if not os.path.exists(dirpath + "/data/quad/valFunc_filled.csv"):
+            if not os.path.exists(dirpath + "/data/quad/valFunc_mpc_filled_cleaned.csv"):
                 raise ValueError("can not find the training file for quad example!!")
             else:
-                dataset_path = dirpath + "/data/quad/valFunc_filled.csv"
-            column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
-            model_saving_path = './tf_model/quad/vf.h5'
+                dataset_path = dirpath + "/data/quad/valFunc_mpc_filled_cleaned.csv"
+                column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
+                                'reward', 'value', 'cost', 'collision_in_future', 'collision_current', 'col_trajectory_flag']
+                model_saving_path = './tf_model/quad/vf_mpc.h5'
 
         elif self.agent == 'dubinsCar':
             if not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv") or \
@@ -164,7 +165,7 @@ class Trainer(object):
         hist['epoch'] = history.epoch
         hist.tail()
 
-        self.plot_history(history)
+        # self.plot_history(history)
 
 
     def train_polFunc(self, less_data=False):
@@ -230,7 +231,7 @@ class Trainer(object):
         hist['epoch'] = history.epoch
         hist.tail()
 
-        self.plot_history(history)
+        # self.plot_history(history)
 
     def train_valFunc_merged(self):
         dirpath = os.path.dirname(__file__)
@@ -366,7 +367,11 @@ if __name__ == "__main__":
     """
     Train value network model
     """
-    trainer = Trainer(method='mpc', target="valFunc", agent='dubinsCar')
+    # trainer = Trainer(method='mpc', target="valFunc", agent='dubinsCar')
+    # trainer.train_valFunc()
+    # trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc_soft.h5")
+
+    trainer = Trainer(method='mpc', target="valFunc", agent='quad')
     trainer.train_valFunc()
-    trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc_soft.h5")
+    trainer.save_model_weights("./tf_model/quad/vf_mpc.h5")
 

@@ -18,14 +18,14 @@ from utils.utils import *
 def create_session(num_cpu=None):
     U.make_session(num_cpu=num_cpu).__enter__()
 
-def create_policy(name, env, vf_load=False, pol_load=False):
+def create_policy(name, env, args, vf_load=False, pol_load=False):
     ob_space = env.observation_space
     ac_space = env.action_space
 
     logger.log("i am using mlppolicy_mod")
     logger.log("vf_load is %r, pol_load is %r" % (vf_load, pol_load))
-    return MlpPolicy_mod(name=name,ob_space=ob_space, ac_space=ac_space,
-                        hid_size=64, num_hid_layers=2, load_weights_vf=vf_load, load_weights_pol=pol_load)
+    return MlpPolicy_mod(name=name,ob_space=ob_space, ac_space=ac_space, hid_size=64, num_hid_layers=2,
+                         args=args, load_weights_vf=vf_load, load_weights_pol=pol_load)
     # if vf_load or pol_load:
     #     logger.log("i am using mlppolicy_mod")
     #     return MlpPolicy_mod(name=name,
@@ -40,14 +40,15 @@ def create_policy(name, env, vf_load=False, pol_load=False):
 def initialize():
     U.initialize()
 
-"""
-def ppo_eval(env, policy, timesteps_per_actorbatch, max_iters=0, stochastic=False, scatter_collect=False):
+
+def ppo_eval(env, policy, timesteps_per_actorbatch, max_iters, stochastic=False, scatter_collect=False):
     pi = policy
     seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=stochastic)
+    iters_so_far = 0
+
 
     episodes_so_far = 0
     timesteps_so_far = 0
-    iters_so_far = 0
     tstart = time.time()
     lenbuffer = deque(maxlen=100)  # rolling buffer for episode lengths
     rewbuffer = deque(maxlen=100)  # rolling buffer for episode rewards
@@ -61,6 +62,7 @@ def ppo_eval(env, policy, timesteps_per_actorbatch, max_iters=0, stochastic=Fals
 
     trajs = []
     dones = []
+
     while True:
         if max_iters and iters_so_far >= max_iters:
             break
@@ -103,8 +105,8 @@ def ppo_eval(env, policy, timesteps_per_actorbatch, max_iters=0, stochastic=Fals
             trajs.append(seg['ob'])
             dones.append(seg['new'])
 
-    return pi, ep_mean_lens, ep_mean_rews, suc_counter * 1.0 / ep_counter, trajs, dones
-"""
+    return pi
+
 
 def ppo_learn(env, policy,
         timesteps_per_actorbatch,                       # timesteps per actor per update
@@ -127,7 +129,7 @@ def ppo_learn(env, policy,
     # ----------------------------------------
     pi = policy
     # oldpi = create_policy("oldpi", env) # Network for old policy
-    oldpi = create_policy("oldpi", env, vf_load=True if args['vf_load'] == "yes" else False, pol_load=True if args['pol_load'] == "yes" else False)
+    oldpi = create_policy("oldpi", env, args=args, vf_load=True if args['vf_load'] == "yes" else False, pol_load=True if args['pol_load'] == "yes" else False)
 
     atarg = tf.placeholder(dtype=tf.float32, shape=[None]) # Target advantage function (if applicable)
     ret = tf.placeholder(dtype=tf.float32, shape=[None]) # Empirical return
@@ -150,7 +152,7 @@ def ppo_learn(env, policy,
     pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
 
     # Default we do not use single value NN
-    thresh_rew = tf.placeholder(name='thresh_rew', dtype=tf.float32, shape=[])
+    criteron = tf.placeholder(name='criteron', dtype=tf.bool, shape=[])
     one_valnn = False
 
     # warning: do not update weights of value network if loading customized external value initialization.
@@ -159,14 +161,15 @@ def ppo_learn(env, policy,
             # vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
 
             one_valnn = True
-            vf_loss = tf.cond(thresh_rew >= 200, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
+            vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
                               lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
+            logger.log("loading external valfunc and vf_loss is updated based on certain criteron!")
         elif args['vf_switch'] == "no":
             vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
-
-        # XLV: In this initialization based case, add one more value NN with non-stop updating
+            logger.log("loading external valfunc and vf_loss is fixed!")
+        # XLV: alway add one more value NN with non-stop updating
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
-        logger.log("loading external valfunc and vf_loss is fixed!")
+
     else:
         vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
@@ -186,14 +189,14 @@ def ppo_learn(env, policy,
     print("trainable variables:", var_list)
 
     if one_valnn:
-        lossandgrad = U.function([ob, ac, atarg, ret, lrmult, thresh_rew], losses + [U.flatgrad(total_loss, var_list)])
+        lossandgrad = U.function([ob, ac, atarg, ret, lrmult, criteron], losses + [U.flatgrad(total_loss, var_list)])
     else:
         lossandgrad = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list)])
 
 
     # XLV: added for limit gradient change
     if one_valnn:
-        lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult, thresh_rew], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
+        lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult, criteron], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
     else:
         lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
 
@@ -201,7 +204,7 @@ def ppo_learn(env, policy,
 
     assign_old_eq_new = U.function([],[], updates=[tf.assign(oldv, newv) for (oldv, newv) in zipsame(oldpi.get_variables(), pi.get_variables())])
     if one_valnn:
-        compute_losses = U.function([ob, ac, atarg, ret, lrmult, thresh_rew], losses)
+        compute_losses = U.function([ob, ac, atarg, ret, lrmult, criteron], losses)
     else:
         compute_losses = U.function([ob, ac, atarg, ret, lrmult], losses)
 
@@ -217,6 +220,8 @@ def ppo_learn(env, policy,
     episodes_so_far = 0
     timesteps_so_far = 0
     iters_so_far = 0
+
+    ep_suc_so_far = 0 # success episodes num so far during training
     tstart = time.time()
     lenbuffer = deque(maxlen=100) # rolling buffer for episode lengths
     rewbuffer = deque(maxlen=100) # rolling buffer for episode rewards
@@ -231,8 +236,8 @@ def ppo_learn(env, policy,
     start_clip_grad = False
 
     # XLV: is it time to switch value NN?
-    switch = False
-
+    # switch = False
+    val_update_criteron = False
 
     while True:
         if callback:
@@ -299,39 +304,72 @@ def ppo_learn(env, policy,
         #     # sess.run(logstd_assign_op)
         #     # logger.log("current exploration logstd: %f" %(logstd_saturate))
 
-
-        logger.log("********** Iteration %i ************" %(iters_so_far+1)) # Current iteration index
-
         # kernels = [v for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES) if v.name.endswith('kernel:0')]
         # sess = tf.get_default_session()
         # kernel0 = [sess.run(kernels[0])]
 
-        seg = seg_gen.__next__()
 
+        logger.log("********** Iteration %i ************" %(iters_so_far+1)) # Current iteration index
+
+        seg = seg_gen.__next__()
         add_vtarg_and_adv(seg, gamma, lam)
 
         # if np.mean(rewbuffer) >= 200 and args['vf_switch'] == "yes":
         #     switch = True
         #
         # if switch:
-        #     logger.log("switch to standard value function with non-stop updating!")
+        #     logger.log("Switch to standard value function with non-stop updating!")
         #     add_vtarg_and_adv_ghost(seg, gamma, lam)
         # else:
         #     logger.log("Still use fixed value function")
         #     add_vtarg_and_adv(seg, gamma, lam)
 
-
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
-        if switch:
-            vpredbefore = seg["vpred_ghost"]  # predicted value function before udpate
-        else:
-            vpredbefore = seg["vpred"]
         rews = seg['rew']
         ep_rets = seg['ep_rets']
         event_flags = seg['event_flag']
+        train_sucs = seg['suc']
+        mc_rets = seg['mcreturn']
+
+        vpredbefore = seg['vpred']
+        # if switch:
+        #     vpredbefore = seg["vpred_ghost"]  # predicted value function before udpate
+        # else:
+        #     vpredbefore = seg["vpred"]
 
         # print("obs shape:", np.shape(ob))
         # print("vpred shape:", np.shape(vpredbefore))
+
+        logger.log("Sum of mc return over this iteration: %f" % np.sum(mc_rets))
+        logger.log("Sum of td return over this iteration: %f" % np.sum(tdlamret))
+        logger.log("Difference of mc return and td return: %f" % (np.sum(mc_rets) - np.sum(tdlamret)))
+
+
+        # if episodes_so_far > 0:
+        #     rand = np.random.uniform()
+        #     if rand <= ep_suc_so_far/episodes_so_far:
+        #         val_update_criteron = True
+        #         logger.log("random number: %f" %rand)
+        #         logger.log("this iter we update value function")
+        #     else:
+        #         val_update_criteron = False
+        #         logger.log("this iter we do not update value function")
+
+        # if np.mean(rewbuffer) >= 200:
+        #     val_update_criteron = True
+        #     logger.log("this iter we update value function")
+        # else:
+        #     val_update_criteron = False
+        #     logger.log("this iter we do not update value function")
+
+        if np.sum(mc_rets) < np.sum(tdlamret):
+            val_update_criteron = False
+            logger.log("this iter we do not update value function")
+        else:
+            val_update_criteron = True
+            logger.log("this iter we update value function")
+
+
 
         # """ In case of saving any observation for visualization purpose  """
         # if save_obs:
@@ -341,7 +379,8 @@ def ppo_learn(env, policy,
         #     tmp_seg["new"] = seg["new"]
         #     with open(globals.g_hm_dirpath + '/iter_' + str(globals.g_iter_id) + '.pkl', 'wb') as f:
         #         pickle.dump(tmp_seg, f)
-        #
+
+
         """ In case of collecting real-time sim data and its vpred for furthur debugging """
         if args['vf_load'] == 'no':
             valpred_csv_name = 'ppo_valpred_itself'
@@ -355,7 +394,6 @@ def ppo_learn(env, policy,
             event_flags_shaped = np.array(event_flags).reshape(-1,1)
 
             log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, rews_shaped, event_flags_shaped), axis=1)
-
 
             if args['gym_env'] == 'PlanarQuadEnv-v0':
                 log_df = pd.DataFrame(log_data,
@@ -385,21 +423,21 @@ def ppo_learn(env, policy,
         start_clip_grad = True # we also use clip_norm for gradient
         kl_threshold = 0.015 # kl update limit
         for _ in range(optim_epochs):
-            losses = [] # list of sublists, each of which gives the loss based on a set of samples with size "optim_batchsize"
-            grads = [] # list of sublists, each of which gives the gradients w.r.t all variables based on a set of samples with size "optim_batchsize"
+            losses = []  # list of sublists, each of which gives the loss based on a set of samples with size "optim_batchsize"
+            grads = []   # list of sublists, each of which gives the gradients w.r.t all variables based on a set of samples with size "optim_batchsize"
             for batch in d.iterate_once(optim_batchsize):
                 if start_clip_grad:
                     if not one_valnn:
                         *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                     else:
                         *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
-                                                         cur_lrmult, np.mean(rewbuffer))
+                                                         cur_lrmult, val_update_criteron)
                 else:
                     if not one_valnn:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                     else:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
-                                                    cur_lrmult, np.mean(rewbuffer))
+                                                    cur_lrmult, val_update_criteron)
                 if any(np.isnan(g)):
                     logger.log("there are nan in gradients, skip further updating!")
                     break
@@ -426,7 +464,7 @@ def ppo_learn(env, policy,
             if not one_valnn:
                 newlosses = compute_losses(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
             else:
-                newlosses = compute_losses(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult, np.mean(rewbuffer))
+                newlosses = compute_losses(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult, val_update_criteron)
             losses.append(newlosses)
         meanlosses,_,_ = mpi_moments(losses, axis=0)
         logger.log(fmt_row(13, meanlosses))
@@ -446,10 +484,15 @@ def ppo_learn(env, policy,
         logger.record_tabular("EpLenMean", np.mean(lenbuffer))
         logger.record_tabular("EpRewMean", np.mean(rewbuffer))
         logger.record_tabular("EpThisIter", len(lens))
+        logger.record_tabular("EpSuccessThisIter", Counter(train_sucs)[True])
+        logger.record_tabular("SucRateThisIter", Counter(train_sucs)[True] / len(lens))
         episodes_so_far += len(lens)
         timesteps_so_far += sum(lens)
         iters_so_far += 1
+        ep_suc_so_far += Counter(train_sucs)[True]
         logger.record_tabular("EpisodesSoFar", episodes_so_far)
+        logger.record_tabular("EpSuccessSoFar", ep_suc_so_far)
+        logger.record_tabular("SucRateSoFar", ep_suc_so_far/episodes_so_far)
         logger.record_tabular("TimestepsSoFar", timesteps_so_far)
         logger.record_tabular("TimeElapsed", time.time() - tstart)
 
@@ -459,7 +502,7 @@ def ppo_learn(env, policy,
 
 
         """ Evaluation """
-        EVALUATION_FREQUENCY = 10 # 10
+        EVALUATION_FREQUENCY = 10  # 10
         if iters_so_far % EVALUATION_FREQUENCY == 0:
 
             eval_max_iters = 5

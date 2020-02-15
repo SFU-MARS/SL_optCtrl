@@ -207,7 +207,7 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
 
     # Initialize policy
     ppo.create_session()
-    init_policy = ppo.create_policy('pi', env, vf_load=True if args['vf_load'] == "yes" else False, pol_load=True if args['pol_load'] == "yes" else False)
+    init_policy = ppo.create_policy('pi', env, args=args, vf_load=True if args['vf_load'] == "yes" else False, pol_load=True if args['pol_load'] == "yes" else False)
     ppo.initialize()
 
     # load trained policy
@@ -235,11 +235,13 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
         lam = d.get('lam')
         max_iters = num_ppo_iters
 
-    pi = algorithm.ppo_learn(env=env, policy=pi, timesteps_per_actorbatch=timesteps_per_actorbatch,
-                             clip_param=clip_param, entcoeff=entcoeff, optim_epochs=optim_epochs,
-                             optim_stepsize=optim_stepsize, optim_batchsize=optim_batchsize,
-                             gamma=gamma, lam=lam,  args=args, max_iters=max_iters, schedule='constant', save_obs=save_obs)
-
+    if not load:
+        pi = algorithm.ppo_learn(env=env, policy=pi, timesteps_per_actorbatch=timesteps_per_actorbatch,
+                                 clip_param=clip_param, entcoeff=entcoeff, optim_epochs=optim_epochs,
+                                 optim_stepsize=optim_stepsize, optim_batchsize=optim_batchsize,
+                                 gamma=gamma, lam=lam,  args=args, max_iters=max_iters, schedule='constant', save_obs=save_obs)
+    else:
+        pi = algorithm.ppo_eval(env=env, policy=pi, timesteps_per_actorbatch=timesteps_per_actorbatch,max_iters=5)
     env.close()
     return pi
 
@@ -253,7 +255,7 @@ if __name__ == "__main__":
         parser.add_argument("--set_additional_goal", type=str, default="angle")
         parser.add_argument("--vf_load", type=str, default="yes")
         parser.add_argument("--pol_load", type=str, default="no")
-        parser.add_argument("--vf_type", type=str, default="mpc")
+        parser.add_argument("--vf_type", type=str, default="boltzmann")
         parser.add_argument("--vf_switch", type=str, default="no")
         args = parser.parse_args()
         args = vars(args)
@@ -306,14 +308,16 @@ if __name__ == "__main__":
             maybe_mkdir(args['RESULT_DIR'])
             ppo_params_json = os.environ['PROJ_HOME_3']+'/ppo1/ppo_params.json'
 
-            # Start to train the policy
+            # Start to train the policy from scratch
             trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, args=args)
             trained_policy.save_model(args['MODEL_DIR'])
-            #
-            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_icra/04-Sep-2019_08-59-16PlanarQuadEnv-v0_hand_craft_ppo/model'
-            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log/02-Nov-2019_22-34-26PlanarQuadEnv-v0_hand_craft_ppo/model'
-            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log/16-Nov-2019_16-10-31PlanarQuadEnv-v0_hand_craft_ppo_vf/model'
-            # trained_policy = train(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer='best', args=args)
+
+            # Load pre-trained model for evaluation
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/grad_norm_0.5_kl_0.015_std_0.5_baseline/27-Jan-2020_01-44-06DubinsCarEnv-v0_hand_craft_ppo/model'
+            # LOAD_DIR =  os.environ['PROJ_HOME_3'] + '/runs_log_tests/grad_norm_0.5_kl_0.015_std_0.5_fixed_value_vi/23-Jan-2020_00-13-24DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/model'
+
+
+            # eval_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=180, args=args)
 
         else:
             raise ValueError("arg algorithm is invalid!")

@@ -40,10 +40,10 @@ def csv_clean(filename):
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df.dropna()
 
-    if 'mpc' in filename.split('/')[-1].split('_'):
-        # invalidIndices = df[(df['status'] == 2) | (df['status'] == -1)].index
-        invalidIndices = df[df['col_trajectory_flag'] == 4].index
-        df.drop(invalidIndices, inplace=True)
+    # if 'mpc' in filename.split('/')[-1].split('_'):
+    #     # invalidIndices = df[(df['status'] == 2) | (df['status'] == -1)].index
+    #     invalidIndices = df[df['col_trajectory_flag'] == 4].index
+    #     df.drop(invalidIndices, inplace=True)
     df.to_csv(os.path.splitext(filename)[0] + '_cleaned.csv')
 
 
@@ -57,15 +57,17 @@ class Data_Generator(object):
                 return True
         else:
                 return False
+
     def in_goal(self, state, goal_state, goal_torlerance):
         assert len(goal_state) == len(goal_torlerance)
-        # {x, y, theta} or {x, z, phi}
+        # {x, y, theta}(dubins' car) or {x, z, phi}(quad)
         if len(goal_state) == 3:
             goal_pos_tolerance = (goal_torlerance[0] + goal_torlerance[1]) / 2
             goal_theta_tolerance = goal_torlerance[2]
 
-            if np.sqrt((state[0] - goal_state[0]) ** 2 + (state[1] - goal_state[1]) ** 2) <= goal_pos_tolerance \
-                    and abs(state[2] - goal_state[2]) < goal_theta_tolerance:
+            if (np.sqrt((state[0] - goal_state[0]) ** 2 + (state[1] - goal_state[1]) ** 2) <= goal_pos_tolerance
+                or (np.abs(state[0] - goal_state[0]) <= goal_pos_tolerance and np.abs(state[1] - goal_state[1]) <= goal_pos_tolerance)) \
+                and abs(state[2] - goal_state[2]) < goal_theta_tolerance:
                 print("in goal with specific angle!!")
                 return True
             else:
@@ -161,18 +163,61 @@ class Data_Generator(object):
             filled_filename   = os.environ['PROJ_HOME_3'] + '/data/quad/' + data_form + '_filled' + '.csv'
             assert os.path.exists(unfilled_filename)
 
+            rews   = None  # only useful when data_form=='valFunc_mpc'
+            vpreds = None  # only useful when data_form=='valFunc_mpc'
+
+            """ Specify the associated reward and value from Seth's original mpc data, only when data_form=='valFunc_mpc """
+            if data_form == 'valFunc_mpc':
+                # cols (1, 2, 3, 4, 5, 6, 13, 14) => {x, vx, z, vz, phi, w, collision_future, collision_curr}
+                raw = np.genfromtxt(unfilled_filename, delimiter=',', skip_header=True,
+                                    usecols=(1, 2, 3, 4, 5, 6, 13, 14), dtype=np.float32)
+                states = raw[:, :6]
+                collision_attr = raw[:, 6:]
+
+                goal_state = np.array([4.0, 9.0, -np.pi/8]) # this is for {x, z, phi}
+                goal_torlerance = np.array([1.0+0.1, 1.0+0.1, np.pi/8+0.1])
+
+                T = np.shape(states)[0]
+                mpc_horizon = 140
+                discount_factor = 0.90
+
+                rews = np.zeros(T, 'float32')
+                vpreds = np.zeros(T, 'float32')
+
+                for i in range(mpc_horizon, T + 1, mpc_horizon):
+                    for j in reversed(range(i - mpc_horizon, i)):
+                        cur_state = states[j, [0,2,4]]
+                        if self.in_goal(cur_state, goal_state, goal_torlerance):
+                            rews[j] = 1000
+                        elif collision_attr[j, 1]:
+                            rews[j] = -400
+                        else:
+                            rews[j] = 0
+
+                        if j == i - 1 or rews[j] == 1000 or rews[j] == -400:
+                            vpreds[j] = rews[j]
+                        else:
+                            vpreds[j] = rews[j] + discount_factor * vpreds[j + 1]
+                rews = rews.reshape(-1, 1)
+                vpreds = vpreds.reshape(-1, 1)
+
+            """ Read unfilled file and choose what we want and write as filled file """
             with open(unfilled_filename, 'r') as csvfile1, open(filled_filename, 'w', newline='') as csvfile2:
                 reader = csv.DictReader(csvfile1)
-                if data_form == 'valFunc' or data_form == 'valFunc_mpc':
-                    fieldnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7','d8']
+                reader = list(reader)
+
+                """ Prepare fieldnames to write """
+                if data_form == 'valFunc_mpc':
+                    fieldnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
+                                  'reward', 'value', 'cost', 'collision_in_future', 'collision_current', 'col_trajectory_flag']
                 elif data_form == 'polFunc':
                     fieldnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'a1', 'a2', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
                 else:
                     raise ValueError("invalid data form!!")
-
                 writer = csv.DictWriter(csvfile2, fieldnames)
                 writer.writeheader()
 
+                """ Run simulator to collect lidar sensor readings """
                 rospy.wait_for_service('/gazebo/reset_simulation')
                 print("# do I get here??")
                 try:
@@ -180,7 +225,8 @@ class Data_Generator(object):
                 except rospy.ServiceException as e:
                     print("# Reset simulation failed!")
 
-                for row in reader:
+                for id in range(len(reader)):
+                    row = reader[id]
                     x  = float(row['x'])
                     vx = float(row['vx'])
                     z  = float(row['z'])
@@ -214,9 +260,15 @@ class Data_Generator(object):
                     # --- ignore any invalid sensor readings --- #
                     if np.isnan(discrete_sensor_data).any() or np.isinf(discrete_sensor_data).any():
                         continue
-                    if data_form == 'valFunc' or data_form == 'valFunc_mpc':
-                        value = float(row['value'])
-                        tmp_dict = {'x': x, 'vx': vx, 'z': z, 'vz': vz, 'phi': phi, 'w': w, 'value':value,
+
+                    if data_form == 'valFunc_mpc':
+                        reward = rews[id, -1]
+                        value = vpreds[id, -1]
+                        cost = float(row['cost'])
+                        collision_in_future = float(row['collision_in_future'])
+                        collision_current = float(row['collision_current'])
+                        col_trajectory_flag = float(row['col_trajectory_flag'])
+                        tmp_dict = {'x': x, 'vx': vx, 'z': z, 'vz': vz, 'phi': phi, 'w': w,
                                     'd1': discrete_sensor_data[0],
                                     'd2': discrete_sensor_data[1],
                                     'd3': discrete_sensor_data[2],
@@ -224,7 +276,11 @@ class Data_Generator(object):
                                     'd5': discrete_sensor_data[4],
                                     'd6': discrete_sensor_data[5],
                                     'd7': discrete_sensor_data[6],
-                                    'd8': discrete_sensor_data[7]}
+                                    'd8': discrete_sensor_data[7],
+                                    'reward': reward, 'value': value,
+                                    'cost': cost, 'collision_in_future': collision_in_future,
+                                    'collision_current': collision_current,
+                                    'col_trajectory_flag': col_trajectory_flag}
                         # print("tmp_dict:", tmp_dict)
                         assert tmp_dict
                     elif data_form == 'polFunc':
@@ -339,7 +395,14 @@ class Data_Generator(object):
             filled_filename = os.environ['PROJ_HOME_3'] + '/data/dubinsCar/env_difficult/' + data_form + '_filled' + '.csv'
             assert os.path.exists(unfilled_filename)
 
+            rews   = None  # only useful when data_form=='valFunc_mpc'
+            vpreds = None  # only useful when data_form=='valFunc_mpc'
+
             if data_form == 'valFunc_mpc':
+                # now the data reading is using fieldnames with more info (including a lot of new flags)
+                # reasons are for mpc with soft-constraints, we use more flags but finally proved not good for initialization.
+                # the old valFunc_mpc data with hard constraints do not follow current fieldnames (flags)
+
                 # cols (1, 2, 3, 11, 12) => {x, y, theta, collision_future, collision_curr}
                 raw = np.genfromtxt(unfilled_filename, delimiter=',', skip_header=True,
                                        usecols=(1, 2, 3, 11, 12), dtype=np.float32)
@@ -373,11 +436,11 @@ class Data_Generator(object):
                 vpreds = vpreds.reshape(-1,1)
 
             with open(unfilled_filename, 'r') as csvfile1, open(filled_filename, 'w', newline='') as csvfile2:
-                # read the original file
+                """ Read the original unfilled file """
                 reader = csv.DictReader(csvfile1)
                 reader = list(reader)
 
-                # determine the fieldnames to be written on `filled` file
+                """ Determine the fieldnames to be written on `filled` file """
                 if data_form == 'valFunc':
                     fieldnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
                 elif data_form == 'valFunc_mpc':
@@ -390,7 +453,7 @@ class Data_Generator(object):
                 writer = csv.DictWriter(csvfile2, fieldnames)
                 writer.writeheader()
 
-                # prepare to collect simulated info (laser readings)
+                """ Run simulator to collect simulated info (laser readings) """
                 rospy.wait_for_service('/gazebo/reset_simulation')
                 print("# do I get here??")
                 try:
@@ -485,14 +548,6 @@ class Data_Generator(object):
 
 
 if __name__ == "__main__":
-    # data_gen = Data_Generator()
-    # data_gen.gen_data(data_form='valFunc', agent='dubinsCar')
-
-    # csv_clean(os.environ['PROJ_HOME_3'] + '/data/dubinsCar/valFunc_filled.csv')
-    # data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
-    # data_gen.gen_data(data_form='polFunc', agent='quad')
-
-    # data_gen = Data_Generator()
-    # data_gen.gen_data(data_form='valFunc_mpc', agent='dubinsCar')
-    csv_clean(os.environ['PROJ_HOME_3'] + '/data/dubinsCar/env_difficult/valFunc_mpc_filled.csv')
-
+    data_gen = Data_Generator()
+    data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
+    csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_mpc_filled.csv'))
