@@ -4,50 +4,40 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-# case_type = 'difficult_case'
-# exploration_type = 'linear_decay'
 
-# case_type = 'simple_case'
-# exploration_type = 'exponential_decay'
 
-# case_type = 'difficult_case'
-# exploration_type = 'best_decay_mpc_nn'
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_fixed_value_vi')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_fixed_value_mpc_no_softconstraints')
+# basedir4 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_fixed_value_mpc_softconstraints')
+# basedir5 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_switch_value_single_valNN')
+# basedir6 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_switch_value_double_valNN')
+# basedir7 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_switch_value_mpc_single_valNN')
+#
+# basedir_list = [basedir1, basedir2, basedir3, basedir4, basedir5, basedir6, basedir7]
+# showdir = [basedir1, basedir2, basedir3]
+# cues_list = ['baseline',
+#             'VI & fixed',
+#             'MPC & fixed',
+#             'MPC with soft constraints & fixed',
+#             'VI with single valNN & update',
+#             'VI with double valNNs & update',
+#             'MPC with single valNN & update']
 
-# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'difficult_case', 'mpc', 'best_decay_mpc_nn')
-# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'difficult_case', 'baseline')
-# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'difficult_case', 'vi', 'linear_decay_former_dynamic_deque_latter_nn')
 
-basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_baseline')
-basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_fixed_value_vi')
-basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_fixed_value_mpc_no_softconstraints')
-basedir4 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_fixed_value_mpc_softconstraints')
-basedir5 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_switch_value_single_valNN')
-basedir6 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_switch_value_double_valNN')
-basedir7 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'grad_norm_0.5_kl_0.015_std_0.5_switch_value_mpc_single_valNN')
-
-basedir_list = [basedir1, basedir2, basedir3, basedir4, basedir5, basedir6, basedir7]
-cues_list = ['baseline',
-            'VI & fixed',
-            'MPC with no soft constraints & fixed',
-            'MPC with soft constraints & fixed',
-            'VI with single valNN & update',
-            'VI with double valNNs & update',
-            'MPC with single valNN & update']
+basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_tests', 'baseline')
+basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_tests', 'fixed_mpc')
+basedir_list = [basedir1, basedir2]
+showdir = basedir_list
+cues_list=['baseline', 'mpc_fixed']
 
 folder_cue_dict = {}
 for based_dir in basedir_list:
-    folders = [os.path.join(based_dir, d) for d in os.listdir(based_dir)]
-    cues = [cues_list[basedir_list.index(based_dir)]] * len(folders)
-    folder_cue_dict.update(dict(zip(folders, cues)))
+    if based_dir in showdir:
+        folders = [os.path.join(based_dir, d) for d in os.listdir(based_dir)]
+        cues = [cues_list[basedir_list.index(based_dir)]] * len(folders)
+        folder_cue_dict.update(dict(zip(folders, cues)))
 
-
-# folders1 = [os.path.join(basedir1, d) for d in os.listdir(basedir1)]
-# folders2 = [os.path.join(basedir2, d) for d in os.listdir(basedir2)]
-# folders3 = [os.path.join(basedir3, d) for d in os.listdir(basedir3)]
-# folders4 = [os.path.join(basedir4, d) for d in os.listdir(basedir4)]
-# folders5 = [os.path.join(basedir5, d) for d in os.listdir(basedir5)]
-# folders6 = [os.path.join(basedir6, d) for d in os.listdir(basedir6)]
-# folders = folders1 + folders2 + folders3 + folders4 + folders5 + folders6
 
 rewards = []
 iterations = []

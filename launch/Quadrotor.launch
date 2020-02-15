@@ -16,17 +16,9 @@
 
   <param name="robot_description" command="$(find xacro)/xacro.py --inorder $(env PROJ_HOME_3)/urdfs/quadrotor.urdf.xacro"/>
 
-  <!--<node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -2.18232 -y -3.33973 -z 3 -model quadrotor"-->
-  <!--output="screen">-->
-  <!--</node>-->
 
-  <!--FOR TEST NEW WORLD. CHANGE BACK IF NECESSARY-->
-  <node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 3.5 -y -3.33973 -z 2.5 -model quadrotor"
+  <node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 3.75 -y -3.33973 -z 2.0 -model quadrotor"
   output="screen">
   </node>
-
-  <!--<node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -1.5 -y -3.33973 -z 2.5 -model quadrotor"-->
-  <!--output="screen">-->
-  <!--</node>-->
 
 </launch>

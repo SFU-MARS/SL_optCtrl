@@ -116,11 +116,17 @@ def add_vtarg_and_adv(seg, gamma, lam):
     seg["adv"] = gaelam = np.empty(T, 'float32')
     rew = seg["rew"]
     lastgaelam = 0
+    # AMEND: added by xlv for computing Mento-Carlo Return
+    G = np.append(seg["rew"], 0)
     for t in reversed(range(T)):
         nonterminal = 1-new[t+1]
         delta = rew[t] + gamma * vpred[t+1] * nonterminal - vpred[t]
         gaelam[t] = lastgaelam = delta + gamma * lam * nonterminal * lastgaelam
+        # AMEND: update each timestep of G
+        G[t] = rew[t] + gamma * G[t+1] * nonterminal
     seg["tdlamret"] = seg["adv"] + seg["vpred"]
+    # AMEND: return G except the last element
+    seg["mcreturn"] = G[:-1]
 
 def add_vtarg_and_adv_ghost(seg, gamma, lam):
     """
