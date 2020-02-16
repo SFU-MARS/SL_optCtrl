@@ -147,6 +147,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
+            print("new_i:", new_i)
             if laser_data.ranges[new_i] == float('Inf') or np.isinf(laser_data.ranges[new_i]):
                 # discretized_ranges.append(float('Inf'))
                 discretized_ranges.append(10)
@@ -156,7 +157,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             else:
                 discretized_ranges.append(laser_data.ranges[new_i])
                 # discretized_ranges.append(int(laser_data.ranges[new_i]))
-
+        print(discretized_ranges)
+        # print(laser_data.ranges)
         return discretized_ranges
 
     """
