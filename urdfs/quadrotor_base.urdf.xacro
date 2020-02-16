@@ -28,7 +28,8 @@
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
                     <!--<box size=".8 .8 .25" />-->
-                    <box size=".8 .8 .6" />
+                    <!--<box size=".8 .8 .6" />-->
+                    <box size=".8 .8 .4" />
                     <!--<mesh>-->
                         <!--<uri>model://quadrotor/meshes/quadrotor_base.dae</uri>-->
                     <!--</mesh>-->
