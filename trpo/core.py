@@ -316,6 +316,7 @@ def mlp_actor_critic_vinit(x, a, stochastic, vinit=None, env=None, hidden_sizes=
                                      kernel_initializer=tf.constant_initializer(weights[2][0]),
                                      bias_initializer=tf.constant_initializer(weights[2][1]),
                                      use_bias=True)[:, 0]
+
         else:
             raise ValueError("Please check if your vf_type is valid!")
 
