@@ -25,11 +25,24 @@ import numpy as np
 #             'MPC with single valNN & update']
 
 
-basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_tests', 'baseline')
-basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_tests', 'fixed_mpc')
-basedir_list = [basedir1, basedir2]
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_mpcdmin_0.3', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_mpcdmin_0.3', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_mpcdmin_0.3', 'mpc_switch')
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_limited_start_area', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_limited_start_area', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_limited_start_area', 'mpc_switch')
+
+
+
+basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'baseline')
+basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_fixed')
+basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_switch')
+
+
+basedir_list = [basedir1, basedir2, basedir3]
 showdir = basedir_list
-cues_list=['baseline', 'mpc_fixed']
+cues_list=['baseline', 'mpc_fixed', 'mpc_switch']
 
 folder_cue_dict = {}
 for based_dir in basedir_list:
@@ -67,5 +80,5 @@ print(df)
 
 ax = sns.lineplot(x="iterations", y="rewards", hue='hues', data=df)
 
-plt.savefig("/home/xlv/Desktop/comparison_2.png")
+plt.savefig("/home/xlv/Desktop/comparison.png")
 plt.show()

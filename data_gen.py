@@ -35,16 +35,47 @@ from gym_foo.gym_foo.envs.DubinsCarEnv_v0 import DubinsCarEnv_v0
 
 CUR_PATH = os.path.dirname(os.path.abspath(__file__))
 
-def csv_clean(filename):
+def csv_clean(filename, horizon, use_feasible=False, truncate=False):
     df = pd.read_csv(filename)
+
+    # only use feasible trajectories
+    if use_feasible and filename == os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_mpc_filled.csv':
+        invalidIndices = df[df['col_trajectory_flag'] == 3].index
+        df.drop(invalidIndices, inplace=True)
+
+    # if truncation is required
+    if truncate and filename == os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_mpc_filled.csv':
+        df_truncate = pd.DataFrame(columns=df.columns)
+        T = len(df.index)
+        for i in range(0, T+1-horizon, horizon):
+            for j in range(i, i+horizon):
+                tmp = df.iloc[[j]]
+                df_truncate = df_truncate.append(tmp)
+                # print(tmp['value'].item())
+                if tmp['value'].item() in [1000, -400]:
+                    # print("value is 1000 or 400")
+                    break
+        df = df_truncate
+
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df.dropna()
 
-    # if 'mpc' in filename.split('/')[-1].split('_'):
-    #     # invalidIndices = df[(df['status'] == 2) | (df['status'] == -1)].index
-    #     invalidIndices = df[df['col_trajectory_flag'] == 4].index
-    #     df.drop(invalidIndices, inplace=True)
-    df.to_csv(os.path.splitext(filename)[0] + '_cleaned.csv')
+    name_to_save = os.path.splitext(filename)[0] + '_cleaned'
+    if use_feasible:
+        name_to_save += '_feasible'
+    if truncate:
+        name_to_save += '_truncated'
+    df_truncate.to_csv(name_to_save + '.csv')
+
+def special_func_combine(filename1, filename2):
+
+    df1 = pd.read_csv(filename1)
+    df2 = pd.read_csv(filename2)
+    result = pd.concat([df1, df2], sort=False)
+    result.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_cleaned.csv')
+
+
+
 
 
 class Data_Generator(object):
@@ -168,14 +199,25 @@ class Data_Generator(object):
 
             """ Specify the associated reward and value from Seth's original mpc data, only when data_form=='valFunc_mpc """
             if data_form == 'valFunc_mpc':
-                # cols (1, 2, 3, 4, 5, 6, 13, 14) => {x, vx, z, vz, phi, w, collision_future, collision_curr}
+                # cols (1, 2, 3, 4, 5, 6, 13, 14, 15) => {x, vx, z, vz, phi, w, collision_future, collision_curr, col_trajectory_flag}
                 raw = np.genfromtxt(unfilled_filename, delimiter=',', skip_header=True,
-                                    usecols=(1, 2, 3, 4, 5, 6, 13, 14), dtype=np.float32)
+                                    usecols=(1, 2, 3, 4, 5, 6, 13, 14, 15), dtype=np.float32)
+
+
                 states = raw[:, :6]
                 collision_attr = raw[:, 6:]
 
-                goal_state = np.array([4.0, 9.0, -np.pi/8]) # this is for {x, z, phi}
-                goal_torlerance = np.array([1.0+0.1, 1.0+0.1, np.pi/8+0.1])
+                # For quad env: air_space_202002 (more difficult one)
+                # goal_state = np.array([4.0, 9.0, 0])  # this is for {x, z, phi}
+                # goal_torlerance = np.array([1.0, 1.0, np.pi/6])
+
+                # For quad env: air_space_202002_Francis (a easier one, target angle to the left)
+                goal_state = np.array([4.0, 9.0, -np.pi/8])
+                goal_torlerance = np.array([1.0, 1.0, np.pi/8])
+
+                # For quad env: air_space_202002_Francis (a easier one, target angle to the right)
+                # goal_state = np.array([4.0, 9.0, 0.75])
+                # goal_torlerance = np.array([1.0, 1.0, 0.3])
 
                 T = np.shape(states)[0]
                 mpc_horizon = 140
@@ -548,6 +590,13 @@ class Data_Generator(object):
 
 
 if __name__ == "__main__":
-    data_gen = Data_Generator()
-    data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
-    csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_mpc_filled.csv'))
+    # data_gen = Data_Generator()
+    # data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_mpc_filled.csv'), use_feasible=True)
+
+    special_func_combine(filename1=os.environ['PROJ_HOME_3']+'/data/quad/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_truncated.csv',
+                         filename2=os.environ['PROJ_HOME_3']+'/data/quad/test_samps_800_N140_warmstart_small_region/valFunc_mpc_filled_cleaned_truncated.csv')
+
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_mpc_filled.csv'), horizon=140, use_feasible=False, truncate=True)
+
+

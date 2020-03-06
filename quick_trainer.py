@@ -164,8 +164,9 @@ class Trainer(object):
         hist = pd.DataFrame(history.history)
         hist['epoch'] = history.epoch
         hist.tail()
+        hist.to_csv(os.path.join(os.environ['PROJ_HOME_3'], 'tf_model', 'quad', 'value_SL_history.csv'))
 
-        # self.plot_history(history)
+        self.plot_history(history)
 
 
     def train_polFunc(self, less_data=False):

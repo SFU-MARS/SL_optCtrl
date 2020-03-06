@@ -13,6 +13,8 @@ from spinup.utils.mpi_tools import mpi_fork, mpi_avg, proc_id, mpi_statistics_sc
 
 from utils.plotting_performance import *
 
+import baselines.logger as base_logger
+
 EPS = 1e-8
 
 class GAEBuffer:
@@ -30,6 +32,8 @@ class GAEBuffer:
         self.ret_buf = np.zeros(size, dtype=np.float32)
         self.val_buf = np.zeros(size, dtype=np.float32)
         self.logp_buf = np.zeros(size, dtype=np.float32)
+        # AMEND BY XLV
+        self.tdlamret_buf = np.zeros(size, dtype=np.float32)
         self.info_bufs = {k: np.zeros([size] + list(v), dtype=np.float32) for k,v in info_shapes.items()}
         self.sorted_info_keys = core.keys_as_sorted_list(self.info_bufs)
         self.gamma, self.lam = gamma, lam
@@ -75,6 +79,9 @@ class GAEBuffer:
         
         # the next line computes rewards-to-go, to be targets for the value function
         self.ret_buf[path_slice] = core.discount_cumsum(rews, self.gamma)[:-1]
+
+        # the next line computes tdlamret, to be an comparison with self.ret_buf to determine if update value network
+        self.tdlamret_buf = self.adv_buf + self.val_buf  # same as the code at pposgd_simple.py
         
         self.path_start_idx = self.ptr
 
@@ -90,7 +97,7 @@ class GAEBuffer:
         adv_mean, adv_std = mpi_statistics_scalar(self.adv_buf)
         self.adv_buf = (self.adv_buf - adv_mean) / adv_std
         return [self.obs_buf, self.act_buf, self.adv_buf, self.ret_buf, 
-                self.logp_buf] + core.values_as_sorted_list(self.info_bufs)
+                self.logp_buf, self.tdlamret_buf] + core.values_as_sorted_list(self.info_bufs)
 
 """
 
@@ -101,8 +108,8 @@ Trust Region Policy Optimization
 """
 def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0, 
          steps_per_epoch=4000, epochs=50, gamma=0.99, delta=0.01, vf_lr=1e-3,
-         train_v_iters=80, damping_coeff=0.1, cg_iters=10, backtrack_iters=10, 
-         backtrack_coeff=0.8, lam=0.97, max_ep_len=1000, logger_kwargs=dict(), 
+         train_v_iters=80, damping_coeff=0.1, cg_iters=10, backtrack_iters=10,
+         backtrack_coeff=0.8, lam=0.97, max_ep_len=1000, logger_kwargs=dict(),
          save_freq=10, algo='trpo', main_kwargs=dict()):
     """
 
@@ -222,13 +229,16 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     adv_ph, ret_ph, logp_old_ph = core.placeholders(None, None, None)
     
     # AMEND: added by xlv
+    tdlamret_ph = core.placeholder(None)
     stochastic = tf.placeholder(dtype=tf.bool, shape=())
 
     # Main outputs from computation graph, plus placeholders for old pdist (for KL)
     pi, logp, logp_pi, info, info_phs, d_kl, v = actor_critic(x_ph, a_ph, stochastic, **ac_kwargs)
 
     # Need all placeholders in *this* order later (to zip with data from buffer)
-    all_phs = [x_ph, a_ph, adv_ph, ret_ph, logp_old_ph] + core.values_as_sorted_list(info_phs)
+    # all_phs = [x_ph, a_ph, adv_ph, ret_ph, logp_old_ph] + core.values_as_sorted_list(info_phs)
+    # AMEND: added by xlv
+    all_phs = [x_ph, a_ph, adv_ph, ret_ph, logp_old_ph, tdlamret_ph] + core.values_as_sorted_list(info_phs)
 
     # Every step, get: action, value, logprob, & info for pdist (for computing kl div)
     get_action_ops = [pi, v, logp_pi] + core.values_as_sorted_list(info)
@@ -240,7 +250,7 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
 
     # Count variables
     var_counts = tuple(core.count_vars(scope) for scope in ['pi', 'v'])
-    logger.log('\nNumber of parameters: \t pi: %d, \t v: %d\n'%var_counts)
+    base_logger.log('\nNumber of parameters: \t pi: %d, \t v: %d\n'%var_counts)
 
     # TRPO losses
     ratio = tf.exp(logp - logp_old_ph)          # pi(a|s) / pi_old(a|s)
@@ -258,16 +268,17 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
             v_update = True
             v_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(v - ret_ph)),
                               lambda: tf.reduce_mean(tf.square(v - v)))
-            logger.log("loading external valfunc and vf_loss is updated based on certain criteron!")
+            base_logger.log("loading external valfunc and vf_loss is updated based on certain criteron!")
         elif main_kwargs['vf_switch'] == "no":
             v_loss = tf.reduce_mean(tf.square(v - v))
-            logger.log("loading external valfunc and vf_loss is fixed!")
+            base_logger.log("loading external valfunc and vf_loss is fixed!")
     else:
         v_loss = tf.reduce_mean(tf.square(v - ret_ph))
-        logger.log("not loading external valfunc and vf_loss is updating!")
+        base_logger.log("not loading external valfunc and vf_loss is updating!")
 
+    # AMEND: added by xlv
     if v_update:
-        all_phs = [x_ph, a_ph, adv_ph, ret_ph, logp_old_ph] + core.values_as_sorted_list(info_phs) + [criteron]
+        all_phs = [x_ph, a_ph, adv_ph, ret_ph, logp_old_ph, tdlamret_ph] + core.values_as_sorted_list(info_phs) + [criteron]
 
 
 
@@ -279,7 +290,7 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     pi_params = core.get_vars('pi')
     # gradient = core.flat_grad(pi_loss, pi_params)
     # AMEND: added by xlv
-    gradient = core.flat_grad(pi_loss, pi_params, clip_norm=0.5)  # this only clip the grads for policy
+    gradient = core.flat_grad(pi_loss, pi_params, clip_norm=10)  # this only clip the grads for policy
     v_ph, hvp = core.hessian_vector_product(d_kl, pi_params)
     if damping_coeff > 0:
         hvp += damping_coeff * v_ph
@@ -287,14 +298,6 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     # Symbols for getting and setting params
     get_pi_params = core.flat_concat(pi_params)
     set_pi_params = core.assign_params_from_flat(v_ph, pi_params)
-
-    # import multiprocessing
-    # config = tf.ConfigProto(
-    #     allow_soft_placement=True,
-    #     inter_op_parallelism_threads=int(os.getenv('RCALL_NUM_CPU', multiprocessing.cpu_count())),
-    #     intra_op_parallelism_threads=int(os.getenv('RCALL_NUM_CPU', multiprocessing.cpu_count())))
-    # config.gpu_options.allow_growth = True
-    # sess = tf.Session(config=config)
 
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
@@ -352,12 +355,12 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
             for j in range(backtrack_iters):
                 kl, pi_l_new = set_and_eval(step=backtrack_coeff**j)
                 if kl <= delta and pi_l_new <= pi_l_old:
-                    logger.log('Accepting new params at step %d of line search.'%j)
+                    base_logger.log('Accepting new params at step %d of line search.'%j)
                     logger.store(BacktrackIters=j)
                     break
 
                 if j==backtrack_iters-1:
-                    logger.log('Line search failed! Keeping old params.')
+                    base_logger.log('Line search failed! Keeping old params.')
                     logger.store(BacktrackIters=j)
                     kl, pi_l_new = set_and_eval(step=0.)
 
@@ -418,27 +421,57 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
         # if (epoch % save_freq == 0) or (epoch == epochs-1):
         #     logger.save_state({'env': env}, None)
 
+        # Determine if we need update value function
+        if v_update:
+            tmp_ret_buf = buf.ret_buf
+            tmp_tdlamret_buf = buf.tdlamret_buf
+            sum_ret = np.sum(tmp_ret_buf)
+            sum_talamret = np.sum(tmp_tdlamret_buf)
+            base_logger.log("Sum of mc return over this iteration: %f" % sum_ret)
+            base_logger.log("Sum of td return over this iteration: %f" % sum_talamret)
+            base_logger.log("Difference of mc return and td return: %f" % (sum_ret - sum_talamret))
+            if sum_ret < sum_talamret:
+                val_update_criteron = False
+                base_logger.log("this iter we do not update value function")
+            else:
+                val_update_criteron = True
+                base_logger.log("this iter we update value function")
+            # AMEND BY XLV
+            update(val_update_criteron=val_update_criteron)
+        else:
+            update()
+
         # Perform TRPO or NPG update!
-        update()
+        # update(val_update_criteron=val_update_criteron)
 
         # Log info about epoch
-        logger.log_tabular('Epoch', epoch+1)
+        base_logger.record_tabular('Epoch', epoch+1)
         # AMEND: added by xlv
-        logger.log_tabular("EpLenMean", np.mean(lenbuffer))
-        logger.log_tabular("EpRewMean", np.mean(rewbuffer))
+        base_logger.record_tabular("EpLenMean", np.mean(lenbuffer))
+        base_logger.record_tabular("EpRewMean", np.mean(rewbuffer))
         # logger.log_tabular('EpRet', with_min_and_max=True)
         # logger.log_tabular('EpLen', average_only=True)
-        logger.log_tabular('VVals', with_min_and_max=True)
-        logger.log_tabular('TotalEnvInteracts', (epoch+1)*steps_per_epoch)
-        logger.log_tabular('LossPi', average_only=True)
-        logger.log_tabular('LossV', average_only=True)
-        logger.log_tabular('DeltaLossPi', average_only=True)
-        logger.log_tabular('DeltaLossV', average_only=True)
-        logger.log_tabular('KL', average_only=True)
+        # logger.log_tabular('VVals', with_min_and_max=True)
+        # logger.log_tabular('LossPi', average_only=True)
+        # logger.log_tabular('LossV', average_only=True)
+        # logger.log_tabular('DeltaLossPi', average_only=True)
+        # logger.log_tabular('DeltaLossV', average_only=True)
+        # logger.log_tabular('KL', average_only=True)
+        base_logger.record_tabular('AverageVVals', np.mean(logger.epoch_dict['VVals']))
+        base_logger.record_tabular('StdVVals', np.std(logger.epoch_dict['VVals']))
+        base_logger.record_tabular('MaxVVals', np.max(logger.epoch_dict['VVals']))
+        base_logger.record_tabular('MinVVals', np.min(logger.epoch_dict['VVals']))
+        base_logger.record_tabular('TotalEnvInteracts', (epoch+1)*steps_per_epoch)
+        base_logger.record_tabular('LossPi', np.mean(logger.epoch_dict['LossPi']))
+        base_logger.record_tabular('LossV', np.mean(logger.epoch_dict['LossV']))
+        base_logger.record_tabular('DeltaLossPi', np.mean(logger.epoch_dict['DeltaLossPi']))
+        base_logger.record_tabular('DeltaLossV', np.mean(logger.epoch_dict['DeltaLossV']))
+        base_logger.record_tabular('KL', np.mean(logger.epoch_dict['KL']))
         if algo=='trpo':
-            logger.log_tabular('BacktrackIters', average_only=True)
-        logger.log_tabular('Time', time.time()-start_time)
-        logger.dump_tabular()
+            # logger.log_tabular('BacktrackIters', average_only=True)
+            base_logger.record_tabular('BacktrackIters', np.mean(logger.epoch_dict['BacktrackIters']))
+        base_logger.record_tabular('Time', time.time()-start_time)
+        base_logger.dump_tabular()
         epoch_so_far = epoch + 1
         ep_mean_rews.append(np.mean(rewbuffer))
 
@@ -458,9 +491,9 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
             eval_success_episodes_so_far = 0
 
             # prepare eval episodes
-            logger.log("********** Start evaluating ... ************")
+            base_logger.log("********** Start evaluating ... ************")
             for eval_epoch in range(eval_max_iters):
-                logger.log("********** Eval Iteration %i ************" % (eval_epoch + 1))
+                base_logger.log("********** Eval Iteration %i ************" % (eval_epoch + 1))
                 eval_ep_lens = []
                 eval_ep_rets = []
                 eval_sucs    = []
@@ -484,18 +517,18 @@ def trpo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                             eval_sucs.append(ep_info['suc'])
                         o, r, d, eval_ep_ret, eval_ep_len = env.reset(), 0, False, 0, 0
 
-                import baselines.logger as base_logger
-                base_logger.record_tabular("EpLenMean", np.mean(eval_lenbuffer))
-                base_logger.record_tabular("EpRewMean", np.mean(eval_rewbuffer))
-                base_logger.record_tabular("EpThisIter", len(eval_ep_lens))
-                base_logger.record_tabular("EpSuccessThisIter", Counter(eval_sucs)[True])
+
+                base_logger.record_tabular("EvalEpLenMean", np.mean(eval_lenbuffer))
+                base_logger.record_tabular("EvalEpRewMean", np.mean(eval_rewbuffer))
+                base_logger.record_tabular("EvalEpThisIter", len(eval_ep_lens))
+                base_logger.record_tabular("EvalEpSuccessThisIter", Counter(eval_sucs)[True])
                 eval_episodes_so_far += len(eval_ep_lens)
                 eval_timesteps_so_far += sum(eval_ep_lens)
                 eval_success_episodes_so_far += Counter(eval_sucs)[True]
-                base_logger.record_tabular("EpisodesSoFar", eval_episodes_so_far)
-                base_logger.record_tabular("TimestepsSoFar", eval_timesteps_so_far)
-                base_logger.record_tabular("EpisodesSuccessSoFar", eval_success_episodes_so_far)
-                base_logger.record_tabular("SuccessRateSoFar", eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
+                base_logger.record_tabular("EvalEpisodesSoFar", eval_episodes_so_far)
+                base_logger.record_tabular("EvalTimestepsSoFar", eval_timesteps_so_far)
+                base_logger.record_tabular("EvalEpisodesSuccessSoFar", eval_success_episodes_so_far)
+                base_logger.record_tabular("EvalSuccessRateSoFar", eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
                 base_logger.dump_tabular()
             eval_success_rates.append(eval_success_episodes_so_far * 1.0 / eval_episodes_so_far) # finish this evaluation cycle
 

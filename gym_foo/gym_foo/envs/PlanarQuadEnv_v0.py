@@ -41,6 +41,8 @@ START_STATE = np.array([3.75, 0, 2, 0, 0, 0])
 # START_STATE = np.array([-2.5, 0, 2.5, 0, 0, 0])
 # START_STATE = np.array([0, 0, 2, 0, 0, 0])
 
+GOAL_PHI_LIMIT = np.pi/8
+
 
 # obstacles position groundtruth
 # (xpos, zpos, xsize, zsize)
@@ -48,15 +50,15 @@ START_STATE = np.array([3.75, 0, 2, 0, 0, 0])
 # OBSTACLES_POS = [(-2, 5, 1.5, 1.5),
 #                  (0, 8.5, 1.5, 1.0),
 #                  (3.5, 5, 3, 1.5)]
-# air_space_202002
+# air_space_202002; in this env, baseline and mpc_init all can not handle it.
 # OBSTACLES_POS = [(-3.5, 6, 3/2, 1/2),
 #                  (0, 9, 1.5/2, 2/2),
-#                  (3.5, 6, 3/2, 1/2),
-#                  (-1, 4, 3/2, 0.5/2)]
+#                  (3.5+0.3+0.2, 6, 3/2, 1/2),
+#                  (-1, 4+0.2, 3/2, 0.5/2)]
 # air_space_202002_Francis
 OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
                  (1, 8.5, 1.5/2, 1.0/2),
-                 (3.5, 5, 3/2, 1.5/2),
+                 (3.5+0.25, 5, 3/2, 1.5/2),
                  (0, 1, 0.5/2, 2/2)]
 
 # wall 0,1,2,3
@@ -115,9 +117,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
         self.goal_pos_tolerance = 1.0
         self.goal_vel_limit = 0.25
-        self.goal_phi_limit = np.pi/8
-        # self.goal_phi_limit = np.pi/6.0
-        # self.goal_phi_limit = np.pi/9.0
+        self.goal_phi_limit = GOAL_PHI_LIMIT
 
         self.pre_obsrv = None
         self.reward_type = reward_type
@@ -147,17 +147,17 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
-            print("new_i:", new_i)
+            # print("new_i:", new_i)
             if laser_data.ranges[new_i] == float('Inf') or np.isinf(laser_data.ranges[new_i]):
-                # discretized_ranges.append(float('Inf'))
-                discretized_ranges.append(10)
+                discretized_ranges.append(float('Inf'))
+                # discretized_ranges.append(10)
             elif np.isnan(laser_data.ranges[new_i]):
                 discretized_ranges.append(float('Nan'))
                 # discretized_ranges.append(0)
             else:
                 discretized_ranges.append(laser_data.ranges[new_i])
                 # discretized_ranges.append(int(laser_data.ranges[new_i]))
-        print(discretized_ranges)
+        # print(discretized_ranges)
         # print(laser_data.ranges)
         return discretized_ranges
 
@@ -197,7 +197,6 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
     def _in_obst(self, laser_data, dynamic_data):
         laser_min_range = 0.6
-        # collision_min_range = 0.8
         tmp_x = dynamic_data.pose.position.x
         tmp_y = dynamic_data.pose.position.y
         tmp_z = dynamic_data.pose.position.z
@@ -246,7 +245,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         elif self.set_additional_goal == 'angle':
             # angle region from 0.4 to 0.3. increase difficulty
             if np.sqrt((x - self.goal_state[0]) ** 2 + (z - self.goal_state[2]) ** 2) <= self.goal_pos_tolerance \
-                    and (abs(phi - self.goal_state[4]) <= self.goal_phi_limit): # 0.30 before
+                    and (abs(phi - self.goal_state[4]) <= self.goal_phi_limit):  # 0.30 before
                 print("in goal with special angle!!")
                 return True
             else:
@@ -588,6 +587,14 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 #     res = quadEnv.step([5.0006609471, 10.4238665043])
 #     print("reset obs:", obs)
 #     print("next obs:", res[0])
+
+
+def _seed(seed=None):
+    np_random, seed = seeding.np_random(seed)
+    return [seed]
+
+if __name__ == "__main__":
+    print("seed:", _seed())
 
 
 

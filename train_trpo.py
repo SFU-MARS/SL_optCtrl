@@ -91,6 +91,6 @@ if __name__ == "__main__":
         logger.log("we are running with {} value initializaiton".format(args['vf_type']))
         trpo.trpo(lambda: env, actor_critic=core.mlp_actor_critic_vinit,
                   ac_kwargs=dict(hidden_sizes=[64] * 2, vinit=args['vf_type'], env=args['gym_env']),
-                  gamma=0.99, seed=0, steps_per_epoch=1024, epochs=300, main_kwargs=args)
+                  gamma=0.99, seed=0, steps_per_epoch=1024, epochs=300, train_v_iters=160, main_kwargs=args)
     else:
         raise ValueError("invalid arguments")
