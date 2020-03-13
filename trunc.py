@@ -46,16 +46,31 @@ def trunc(df, tra_len):
 
 	print("inf rows: ", inf)
 	print("current rows: ", len(df_final))
-	df_final.to_csv("infeasible_trunc_1.csv")
+	df_final.to_csv("feasible_trunc_2.csv")
 
 
-file = "./valFunc_mpc_filled_1.csv"
-df = pd.read_csv(file)
-print(df.dtypes)
-feas = df[df['col_trajectory_flag'] == 2]
-infeas = df[df['col_trajectory_flag'] == 3]
+def special_func_combine(file_list):
+    df1 = pd.read_csv(file_list[0])
+    df2 = pd.read_csv(file_list[1])
+    final_df = pd.concat([df1, df2], sort=False)
+    for i in range(2, len(file_list)):
+    	df = pd.read_csv(file_list[i])
+    	final_df = pd.concat([final_df, df], sort=False)
 
-# trunc(feas, 140)
-trunc(infeas, 140)
+    print(len(final_df))
+    final_df.to_csv("final_data.csv")
+
+
+
+# file = "./valFunc_mpc_filled_2.csv"
+# df = pd.read_csv(file)
+# print(df.dtypes)
+# feas = df[df['col_trajectory_flag'] == 2]
+# infeas = df[df['col_trajectory_flag'] == 3]
+
+# trunc(feas, 80)
+# trunc(infeas, 140)
 # print(len(feas) / 140)
 # print(len(infeas) / 140)
+file_list = ["./infeasible_trunc_0.csv", "./infeasible_trunc_1.csv", "./feasible_trunc_2.csv"]
+special_func_combine(file_list)
