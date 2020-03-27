@@ -30,18 +30,34 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 # FOR TEST NEW WORLD.
 # need to be compatitable with model.sdf and world.sdf for custom setting
 
+
+# GOAL_ANGLE_RANGE = [0, np.pi]/
+GOAL_ANGLE_RANGE = [-np.pi/4, 0]
+GOAL_ANGLE_CENTER = GOAL_ANGLE_RANGE[0] + abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
+GOAL_ANGLE_RADIUS = abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
+logger.log("goal angle range: from {} to {}".format(GOAL_ANGLE_RANGE[0]*180/np.pi, GOAL_ANGLE_RANGE[1]*180/np.pi))
+logger.log("goal angle center: {}".format(GOAL_ANGLE_CENTER*180/np.pi))
+logger.log("goal angle radius: {}".format(GOAL_ANGLE_RADIUS*180/np.pi))
+
 # notice: it's not the gazebo pose state, not --> x,y,z,pitch,roll,yaw !!
 # GOAL_STATE = np.array([4.0, 0., 9., 0., 0.75, 0.])
 # GOAL_STATE = np.array([4.0, 0, 9.0, 0, -np.pi/6, 0])
 # GOAL_STATE = np.array([4.0, 0, 9.0, 0, 0, 0])
-GOAL_STATE = np.array([4.0, 0, 9.0, 0, -np.pi/8, 0])
+# GOAL_STATE = np.array([4.0, 0, 9.0, 0, -np.pi/8, 0])
+# GOAL_STATE = np.array([4.0, 0, 9.0, 0, np.pi/6, 0])
+GOAL_STATE = np.array([4.0, 0.0, 9.0, 0.0, GOAL_ANGLE_CENTER, 0.0])
+
+# GOAL_PHI_LIMIT = np.pi/8
+# GOAL_PHI_LIMIT = 0.3
+# GOAL_PHI_LIMIT = np.pi/6
+GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
+
+
 
 START_STATE = np.array([3.75, 0, 2, 0, 0, 0])
 # START_STATE = np.array([3.5, 0, 2.5, 0, 0, 0])
 # START_STATE = np.array([-2.5, 0, 2.5, 0, 0, 0])
 # START_STATE = np.array([0, 0, 2, 0, 0, 0])
-
-GOAL_PHI_LIMIT = np.pi/8
 
 
 # obstacles position groundtruth
@@ -62,7 +78,7 @@ OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
                  (0, 1, 0.5/2, 2/2)]
 
 # wall 0,1,2,3
-WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.)]
+WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.0)]
 
 
 class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
@@ -88,7 +104,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.Thrustmax = 0.75 * self.m * self.g
         self.Thrustmin = 0
         self.control_reward_coff = 0.01
-        self.collision_reward = -2 * 200 * self.control_reward_coff * (self.Thrustmax ** 2)
+        # self.collision_reward = -2 * 200 * self.control_reward_coff * (self.Thrustmax ** 2)
+        self.collison_reward = -400
         self.goal_reward = 1000
 
         self.start_state = START_STATE
@@ -246,7 +263,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             # angle region from 0.4 to 0.3. increase difficulty
             if np.sqrt((x - self.goal_state[0]) ** 2 + (z - self.goal_state[2]) ** 2) <= self.goal_pos_tolerance \
                     and (abs(phi - self.goal_state[4]) <= self.goal_phi_limit):  # 0.30 before
-                print("in goal with special angle!!")
+                logger.log("in goal with special angle!!")
+                logger.log("x:{}, z:{}, phi:{}".format(x,z,phi))
                 return True
             else:
                 return False
@@ -415,8 +433,10 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         # --- no matter if we use pol_load. Remember when doing supervised learning, normalize obs and rescale actions ---
         # --- use [-1,1] is to be consisten with DDPG and PPO2 (from stable_baselines) default action range ---
         # --- rescale from [-1,1] -> [0,12] because MPC control range is [0,12], not [7,10] ---
+
         # print("action before:", action)
-        action = np.clip(action, -2, 2)
+        # action = np.clip(action, -2, 2)
+        action = 2.0 * np.tanh(action)
         # action = [0 + (12 - 0) * (a_i - (-1)) / (1- (-1)) for a_i in action]
         action = [7 + (10 - 7) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
         # print("action after:", action)
@@ -488,9 +508,35 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         reward = 0
 
         if self.reward_type == 'hand_craft':
+            reward += 0
+        elif self.reward_type == 'hand_craft_mpc':
             # reward = -self.control_reward_coff * (action[0] ** 2 + action[1] ** 2)
             # reward = -1
-            reward += 0
+            # reward += 0
+
+            # print("using hand_craft_mpc")
+            delta_x = obsrv[0] - GOAL_STATE[0]
+            delta_z = obsrv[2] - GOAL_STATE[2]
+            delta_theta = obsrv[4] - GOAL_STATE[4]
+
+            reward += -1.0 * (action[0] ** 2 + action[1] ** 2)
+            reward += -10000.0 * (delta_x ** 2 + delta_z ** 2)
+            reward = reward * 0.0001
+
+            # print("delta x: {}".format(delta_x), "delta z: {}".format(delta_z), "reward from control: {}".format(-1.0 * (action[0] ** 2 + action[1] ** 2)),
+            #       "reward from state diff: {}".format(-100 * (delta_x ** 2 + delta_z ** 2)))
+        elif self.reward_type == "hand_craft_mpc_without_control":
+            delta_x = obsrv[0] - GOAL_STATE[0]
+            delta_z = obsrv[2] - GOAL_STATE[2]
+            delta_theta = obsrv[4] - GOAL_STATE[4]
+
+            reward += -np.sqrt(delta_x ** 2 + delta_z ** 2 + 10.0 * delta_theta ** 2)
+        elif self.reward_type == "hand_craft_mpc_without_control_2":
+            delta_x = obsrv[0] - GOAL_STATE[0]
+            delta_z = obsrv[2] - GOAL_STATE[2]
+
+            reward += -np.sqrt(delta_x ** 2 + delta_z ** 2)
+
         elif self.reward_type == 'ttr' and self.brsEngine is not None:
             # Notice z-axis ttr space is defined from (-5,5), in gazebo it's in (0,10), so you need -5 when you want correct ttr reward
             ttr_obsrv = copy.deepcopy(obsrv)
