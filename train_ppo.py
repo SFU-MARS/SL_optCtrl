@@ -235,6 +235,9 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
         lam = d.get('lam')
         max_iters = num_ppo_iters
 
+        lam = args['lam']
+        logger.log("running lam is:", lam)
+
     if not load:
         pi = algorithm.ppo_learn(env=env, policy=pi, timesteps_per_actorbatch=timesteps_per_actorbatch,
                                  clip_param=clip_param, entcoeff=entcoeff, optim_epochs=optim_epochs,
@@ -253,10 +256,13 @@ if __name__ == "__main__":
         parser.add_argument("--reward_type", help="which type of reward to use.", type=str, default='hand_craft')
         parser.add_argument("--algo", help="which type of algorithm to use.", type=str, default='ppo')
         parser.add_argument("--set_additional_goal", type=str, default="angle")
-        parser.add_argument("--vf_load", type=str, default="yes")
+        parser.add_argument("--vf_load", type=str, default="no")
         parser.add_argument("--pol_load", type=str, default="no")
-        parser.add_argument("--vf_type", type=str, default="boltzmann")
+        parser.add_argument("--vf_type", type=str, default="")
         parser.add_argument("--vf_switch", type=str, default="no")
+
+        parser.add_argument("--lam", type=float, default=0.95)
+        parser.add_argument("--grad_norm", type=float, default=0.5)
         args = parser.parse_args()
         args = vars(args)
 

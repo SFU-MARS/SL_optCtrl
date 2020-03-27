@@ -274,8 +274,9 @@ class MlpPolicy_mod(object):
 
                     elif args['gym_env'] == 'PlanarQuadEnv-v0':
                         wt_filename = "/tf_model/quad/vf_mpc_weights.pkl"
-                        logging = "We are loading external value weights for quadrotor trained by mpc cost"
-                        val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_mpc_filled_cleaned.csv"
+                        logging = "We are loading external value weights for quadrotor trained by mpc cost, from {}".format(wt_filename)
+                        # Note the loaded file name "valFunc_mpc_filled_final.csv"
+                        val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_mpc_filled_final.csv"
                         colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
                                     'reward', 'value', 'cost', 'collision_in_future',
                                     'collision_current', 'col_trajectory_flag']
@@ -286,7 +287,7 @@ class MlpPolicy_mod(object):
                         logger.log(logging)
 
                         # --- prepare stats for proper normalization --- #
-                        print("preparing stats mean and std for normalization ...")
+                        logger.log("preparing stats mean and std for normalization from {}".format(val_filled_path))
                         assert os.path.exists(val_filled_path)
                         val_filled = pd.read_csv(val_filled_path, names=colnames, na_values="?", comment='\t', sep=",",
                                                  skipinitialspace=True, skiprows=1)

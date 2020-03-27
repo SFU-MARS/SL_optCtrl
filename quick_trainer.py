@@ -11,6 +11,8 @@ from tensorflow.python.ops import math_ops
 import numpy as np
 import pickle
 
+from baselines import logger
+
 
 def customerized_loss(y_true, y_pred):
     return K.mean(math_ops.square(y_pred - y_true), axis=-1)
@@ -73,7 +75,9 @@ class Trainer(object):
 
 
     def train_valFunc(self):
-        dirpath = os.path.dirname(__file__)
+        # dirpath = os.path.dirname(__file__)
+        # print(dirpath)
+        dirpath = os.environ['PROJ_HOME_3']
         dataset_path = None
         column_names = None
         model_saving_path = None
@@ -86,13 +90,15 @@ class Trainer(object):
                 model_saving_path = './tf_model/car/vf.h5'
 
         elif self.agent == 'quad':
-            if not os.path.exists(dirpath + "/data/quad/valFunc_mpc_filled_cleaned.csv"):
+            if not os.path.exists(dirpath + "/data/quad/valFunc_mpc_filled_final.csv"):
                 raise ValueError("can not find the training file for quad example!!")
             else:
-                dataset_path = dirpath + "/data/quad/valFunc_mpc_filled_cleaned.csv"
+                dataset_path = dirpath + "/data/quad/valFunc_mpc_filled_final.csv"
                 column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
                                 'reward', 'value', 'cost', 'collision_in_future', 'collision_current', 'col_trajectory_flag']
                 model_saving_path = './tf_model/quad/vf_mpc.h5'
+                logger.log("We use training data from {}".format(dataset_path))
+
 
         elif self.agent == 'dubinsCar':
             if not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv") or \
@@ -166,120 +172,120 @@ class Trainer(object):
         hist.tail()
         hist.to_csv(os.path.join(os.environ['PROJ_HOME_3'], 'tf_model', 'quad', 'value_SL_history.csv'))
 
-        self.plot_history(history)
-
-
-    def train_polFunc(self, less_data=False):
-        dirpath = os.path.dirname(__file__)
-        dataset_path = None
-        if self.agent == 'car':
-            if not os.path.exists(dirpath + "/data/car/polFunc_filled.csv"):
-                raise ValueError("can not find the training file!!")
-            else:
-                dataset_path = dirpath + "/data/car/polFunc_filled.csv"
-            column_names = ['x', 'y', 'theta', 'delta', 'vel', 'acc', 'steer_rate', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7','d8']
-            model_saving_path = './tf_model/car/pf.h5'
-        elif self.agent == 'quad':
-            if not os.path.exists(dirpath + "/data/quad/polFunc_filled.csv"):
-                raise ValueError("can not find the training file!!")
-            else:
-                dataset_path = dirpath + "/data/quad/polFunc_filled.csv"
-            column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'a1', 'a2', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
-            model_saving_path = './tf_model/quad/pf.h5'
-        raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
-                                  skipinitialspace=True, skiprows=1)
-
-        dataset = raw_dataset.copy()
-        print(dataset.tail())
-        print(dataset.isna().sum())
-
-        dataset = dataset.dropna()
-        if less_data:
-            train_dataset_part1 = dataset.iloc[1:100:nrow(dataset), :]
-            train_dataset_part2 = dataset.iloc[2:100:nrow(dataset), :]
-            train_dataset = pd.concat(train_dataset_part1, train_dataset_part2)
-        else:
-            train_dataset = dataset.sample(frac=1.0, random_state=0)
-
-        if self.agent == 'quad':
-            train_stats = train_dataset.describe()
-            train_stats.pop("a1")
-            train_stats.pop("a2")
-            train_stats = train_stats.transpose()
-            train_labels = pd.concat([train_dataset.pop(x) for x in ['a1', 'a2']], 1)
-            # re-scale action for quad, from [0,12] -> [-1,1], then transform back at PlanarQuad env step function
-            train_labels = -1 + (1 - (-1)) * (train_labels - 0) / (12 - 0)
-        elif self.agent == 'car':
-            train_stats = train_dataset.describe()
-            train_stats.pop("acc")
-            train_stats.pop("steer_rate")
-            train_stats = train_stats.transpose()
-            train_labels = pd.concat([train_dataset.pop(x) for x in ['acc', 'steer_rate']], 1)
-
-        model = self.build_policy_model(self.input_shape)
-        model.summary()
-        normed_train_data = self.norm(train_dataset, train_stats)
-
-        EPOCHS = 2500
-
-        history = model.fit(
-            normed_train_data, train_labels,
-            epochs=EPOCHS, validation_split=0.2, verbose=1,
-            callbacks=[PrintDot()])
-
-        keras.models.save_model(model, model_saving_path)
-        hist = pd.DataFrame(history.history)
-        hist['epoch'] = history.epoch
-        hist.tail()
-
         # self.plot_history(history)
 
-    def train_valFunc_merged(self):
-        dirpath = os.path.dirname(__file__)
-        val_filled_path = None
-        val_filled_mpc_path = None
-        if self.agent == 'car':
-            val_filled_mpc_path = dirpath + "/data/car/valFunc_mpc_filled.csv"
-            val_filled_path = dirpath + "/data/car/valFunc_filled.csv"
-            assert os.path.exists(val_filled_mpc_path) and os.path.exists(val_filled_path)
-            column_names = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
-            model_saving_path = './tf_model/car/vf_merged.h5'
-        elif self.agent == 'quad':
-            val_filled_mpc_path = dirpath + "/data/quad/valFunc_mpc_filled.csv"
-            val_filled_path = dirpath + "/data/quad/valFunc_filled.csv"
-            assert os.path.exists(val_filled_mpc_path) and os.path.exists(val_filled_path)
-            column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
-            model_saving_path = './tf_model/quad/vf_merged.h5'
 
-        val_filled = pd.read_csv(val_filled_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
-        val_filled_mpc = pd.read_csv(val_filled_mpc_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
-
-        dataset = pd.concat([val_filled.copy(), val_filled_mpc.copy()])
-        dataset = dataset.dropna()
-        train_dataset = dataset.sample(frac=1.0, random_state=0)
-
-        stats = train_dataset.describe()
-        stats.pop("value")
-        stats = stats.transpose()
-
-        train_labels = train_dataset.pop('value')
-
-        model = self.build_value_model(self.input_shape)
-        model.summary()
-        normed_train_data = self.norm(train_dataset, stats)
-
-        EPOCHS = 2500
-        history = model.fit(
-            normed_train_data, train_labels, batch_size=128,
-            epochs=EPOCHS, validation_split=0.2, verbose=1,
-            callbacks=[PrintDot()])
-
-        keras.models.save_model(model, model_saving_path)
-        hist = pd.DataFrame(history.history)
-        hist['epoch'] = history.epoch
-        hist.tail()
-
-        self.plot_history(history)
+    # def train_polFunc(self, less_data=False):
+    #     dirpath = os.path.dirname(__file__)
+    #     dataset_path = None
+    #     if self.agent == 'car':
+    #         if not os.path.exists(dirpath + "/data/car/polFunc_filled.csv"):
+    #             raise ValueError("can not find the training file!!")
+    #         else:
+    #             dataset_path = dirpath + "/data/car/polFunc_filled.csv"
+    #         column_names = ['x', 'y', 'theta', 'delta', 'vel', 'acc', 'steer_rate', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7','d8']
+    #         model_saving_path = './tf_model/car/pf.h5'
+    #     elif self.agent == 'quad':
+    #         if not os.path.exists(dirpath + "/data/quad/polFunc_filled.csv"):
+    #             raise ValueError("can not find the training file!!")
+    #         else:
+    #             dataset_path = dirpath + "/data/quad/polFunc_filled.csv"
+    #         column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'a1', 'a2', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+    #         model_saving_path = './tf_model/quad/pf.h5'
+    #     raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values="?", comment='\t', sep=",",
+    #                               skipinitialspace=True, skiprows=1)
+    #
+    #     dataset = raw_dataset.copy()
+    #     print(dataset.tail())
+    #     print(dataset.isna().sum())
+    #
+    #     dataset = dataset.dropna()
+    #     if less_data:
+    #         train_dataset_part1 = dataset.iloc[1:100:nrow(dataset), :]
+    #         train_dataset_part2 = dataset.iloc[2:100:nrow(dataset), :]
+    #         train_dataset = pd.concat(train_dataset_part1, train_dataset_part2)
+    #     else:
+    #         train_dataset = dataset.sample(frac=1.0, random_state=0)
+    #
+    #     if self.agent == 'quad':
+    #         train_stats = train_dataset.describe()
+    #         train_stats.pop("a1")
+    #         train_stats.pop("a2")
+    #         train_stats = train_stats.transpose()
+    #         train_labels = pd.concat([train_dataset.pop(x) for x in ['a1', 'a2']], 1)
+    #         # re-scale action for quad, from [0,12] -> [-1,1], then transform back at PlanarQuad env step function
+    #         train_labels = -1 + (1 - (-1)) * (train_labels - 0) / (12 - 0)
+    #     elif self.agent == 'car':
+    #         train_stats = train_dataset.describe()
+    #         train_stats.pop("acc")
+    #         train_stats.pop("steer_rate")
+    #         train_stats = train_stats.transpose()
+    #         train_labels = pd.concat([train_dataset.pop(x) for x in ['acc', 'steer_rate']], 1)
+    #
+    #     model = self.build_policy_model(self.input_shape)
+    #     model.summary()
+    #     normed_train_data = self.norm(train_dataset, train_stats)
+    #
+    #     EPOCHS = 2500
+    #
+    #     history = model.fit(
+    #         normed_train_data, train_labels,
+    #         epochs=EPOCHS, validation_split=0.2, verbose=1,
+    #         callbacks=[PrintDot()])
+    #
+    #     keras.models.save_model(model, model_saving_path)
+    #     hist = pd.DataFrame(history.history)
+    #     hist['epoch'] = history.epoch
+    #     hist.tail()
+    #
+    #     # self.plot_history(history)
+    #
+    # def train_valFunc_merged(self):
+    #     dirpath = os.path.dirname(__file__)
+    #     val_filled_path = None
+    #     val_filled_mpc_path = None
+    #     if self.agent == 'car':
+    #         val_filled_mpc_path = dirpath + "/data/car/valFunc_mpc_filled.csv"
+    #         val_filled_path = dirpath + "/data/car/valFunc_filled.csv"
+    #         assert os.path.exists(val_filled_mpc_path) and os.path.exists(val_filled_path)
+    #         column_names = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+    #         model_saving_path = './tf_model/car/vf_merged.h5'
+    #     elif self.agent == 'quad':
+    #         val_filled_mpc_path = dirpath + "/data/quad/valFunc_mpc_filled.csv"
+    #         val_filled_path = dirpath + "/data/quad/valFunc_filled.csv"
+    #         assert os.path.exists(val_filled_mpc_path) and os.path.exists(val_filled_path)
+    #         column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+    #         model_saving_path = './tf_model/quad/vf_merged.h5'
+    #
+    #     val_filled = pd.read_csv(val_filled_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
+    #     val_filled_mpc = pd.read_csv(val_filled_mpc_path, names=column_names, na_values="?", comment='\t', sep=",", skipinitialspace=True, skiprows=1)
+    #
+    #     dataset = pd.concat([val_filled.copy(), val_filled_mpc.copy()])
+    #     dataset = dataset.dropna()
+    #     train_dataset = dataset.sample(frac=1.0, random_state=0)
+    #
+    #     stats = train_dataset.describe()
+    #     stats.pop("value")
+    #     stats = stats.transpose()
+    #
+    #     train_labels = train_dataset.pop('value')
+    #
+    #     model = self.build_value_model(self.input_shape)
+    #     model.summary()
+    #     normed_train_data = self.norm(train_dataset, stats)
+    #
+    #     EPOCHS = 2500
+    #     history = model.fit(
+    #         normed_train_data, train_labels, batch_size=128,
+    #         epochs=EPOCHS, validation_split=0.2, verbose=1,
+    #         callbacks=[PrintDot()])
+    #
+    #     keras.models.save_model(model, model_saving_path)
+    #     hist = pd.DataFrame(history.history)
+    #     hist['epoch'] = history.epoch
+    #     hist.tail()
+    #
+    #     self.plot_history(history)
 
 
     def norm(self, x, stats):

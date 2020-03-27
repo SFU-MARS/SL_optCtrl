@@ -35,16 +35,24 @@ from gym_foo.gym_foo.envs.DubinsCarEnv_v0 import DubinsCarEnv_v0
 
 CUR_PATH = os.path.dirname(os.path.abspath(__file__))
 
-def csv_clean(filename, horizon, use_feasible=False, truncate=False):
+def csv_clean(filename, horizon, trajs_type, truncate=False):
+    # assert filename == os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_mpc_filled.csv'
     df = pd.read_csv(filename)
 
-    # only use feasible trajectories
-    if use_feasible and filename == os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_mpc_filled.csv':
+    # Use feasible trajectories
+    if trajs_type == 'feasible':
         invalidIndices = df[df['col_trajectory_flag'] == 3].index
         df.drop(invalidIndices, inplace=True)
+    elif trajs_type == 'infeasible':
+        invalidIndices = df[df['col_trajectory_flag'] == 2].index
+        df.drop(invalidIndices, inplace=True)
+    elif trajs_type == 'all':
+        pass
+    else:
+        raise ValueError("invalid trajs type!")
 
     # if truncation is required
-    if truncate and filename == os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_mpc_filled.csv':
+    if truncate:
         df_truncate = pd.DataFrame(columns=df.columns)
         T = len(df.index)
         for i in range(0, T+1-horizon, horizon):
@@ -53,7 +61,7 @@ def csv_clean(filename, horizon, use_feasible=False, truncate=False):
                 df_truncate = df_truncate.append(tmp)
                 # print(tmp['value'].item())
                 if tmp['value'].item() in [1000, -400]:
-                    # print("value is 1000 or 400")
+                    # print("value is 1000 or -400")
                     break
         df = df_truncate
 
@@ -61,22 +69,62 @@ def csv_clean(filename, horizon, use_feasible=False, truncate=False):
     df = df.dropna()
 
     name_to_save = os.path.splitext(filename)[0] + '_cleaned'
-    if use_feasible:
-        name_to_save += '_feasible'
+    name_to_save += '_' + trajs_type
+
     if truncate:
         name_to_save += '_truncated'
-    df_truncate.to_csv(name_to_save + '.csv')
-
-def special_func_combine(filename1, filename2):
-
-    df1 = pd.read_csv(filename1)
-    df2 = pd.read_csv(filename2)
-    result = pd.concat([df1, df2], sort=False)
-    result.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_cleaned.csv')
+    else:
+        name_to_save += '_untruncated'
+    df.to_csv(name_to_save + '.csv')
 
 
 
+""" Be consistent with the saved file name """
 
+def special_func_combine(filenames):
+    result = pd.DataFrame()
+    for fn in filenames:
+        df = pd.read_csv(fn)
+        result = pd.concat([result, df], sort=False)
+        # df1 = pd.read_csv(filename1)
+        # df2 = pd.read_csv(filename2)
+        # result = pd.concat([df1, df2], sort=False)
+
+    result.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv')
+
+def data_balancer():
+    fn = os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv'
+    assert os.path.exists(fn)
+
+    df = pd.read_csv(fn)
+    T = len(df.index)
+
+    infeasindices = df[df['col_trajectory_flag'] == 3].index
+    feasindices   = df[df['col_trajectory_flag'] == 2].index
+
+    infeasNum = len(infeasindices)
+    feasNum = len(feasindices)
+
+    print("Number of infeasible data before: ", infeasNum)
+    print("Number of feasible data before: ", feasNum)
+
+    if infeasNum < feasNum:
+        delindices = np.random.choice(feasindices, np.abs(infeasNum-feasNum), replace=False)
+    else:
+        delindices = np.random.choice(infeasindices, np.abs(infeasNum-feasNum), replace=False)
+
+    df.drop(delindices, inplace=True)
+
+
+    infeasindices = df[df['col_trajectory_flag'] == 3].index
+    feasindices = df[df['col_trajectory_flag'] == 2].index
+
+    infeasNum = len(infeasindices)
+    feasNum = len(feasindices)
+
+    print("Number of infeasible data after: ", infeasNum)
+    print("Number of feasible data after: ", feasNum)
+    df.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv')
 
 class Data_Generator(object):
     def __init__(self):
@@ -185,7 +233,7 @@ class Data_Generator(object):
         rospy.ServiceProxy('gazebo/set_model_state', SetModelState)(car_state)
         return True
 
-    def gen_data(self, data_form='valFunc', agent=None):
+    def gen_data(self, horizon, rew_config, data_form='valFunc', agent=None):
         assert agent in ['quad', 'car', 'dubinsCar']
         unfilled_filename = None
         filled_filename = None
@@ -220,26 +268,53 @@ class Data_Generator(object):
                 # goal_torlerance = np.array([1.0, 1.0, 0.3])
 
                 T = np.shape(states)[0]
-                mpc_horizon = 140
-                discount_factor = 0.90
+                # print("T:", T)
+                # T = 1400
+                mpc_horizon = horizon
+                discount_factor = 0.98
 
                 rews = np.zeros(T, 'float32')
                 vpreds = np.zeros(T, 'float32')
 
-                for i in range(mpc_horizon, T + 1, mpc_horizon):
-                    for j in reversed(range(i - mpc_horizon, i)):
-                        cur_state = states[j, [0,2,4]]
-                        if self.in_goal(cur_state, goal_state, goal_torlerance):
-                            rews[j] = 1000
-                        elif collision_attr[j, 1]:
-                            rews[j] = -400
-                        else:
-                            rews[j] = 0
+                # Data generation using sparse reward setting
+                if rew_config == 'sparse':
+                    for i in range(mpc_horizon, T + 1, mpc_horizon):
+                        for j in reversed(range(i - mpc_horizon, i)):
+                            cur_state = states[j, [0,2,4]]
+                            if self.in_goal(cur_state, goal_state, goal_torlerance):
+                                rews[j] = 1000
+                            elif collision_attr[j, 1]:
+                                rews[j] = -400
+                            else:
+                                rews[j] = 0
 
-                        if j == i - 1 or rews[j] == 1000 or rews[j] == -400:
-                            vpreds[j] = rews[j]
-                        else:
-                            vpreds[j] = rews[j] + discount_factor * vpreds[j + 1]
+                            if j == i - 1 or rews[j] == 1000 or rews[j] == -400:
+                                vpreds[j] = rews[j]
+                            else:
+                                vpreds[j] = rews[j] + discount_factor * vpreds[j + 1]
+
+                # Data generation using MPC-like reward setting
+                elif rew_config == 'MPC':
+                    for i in range(mpc_horizon, T + 1, mpc_horizon):
+                        for j in reversed(range(i - mpc_horizon, i)):
+                            cur_state = states[j, [0,2,4]]
+                            if self.in_goal(cur_state, goal_state, goal_torlerance):
+                                rews[j] = 1000
+                            elif collision_attr[j, 1]:
+                                rews[j] = -400
+                            else:
+                                delta_x = cur_state[0] - goal_state[0]
+                                delta_z = cur_state[1] - goal_state[1]
+                                rews[j] = -np.sqrt(delta_x ** 2 + delta_z ** 2)
+
+                            if j == i - 1 or rews[j] == 1000 or rews[j] == -400:
+                                vpreds[j] = rews[j]
+                            else:
+                                vpreds[j] = rews[j] + discount_factor * vpreds[j + 1]
+                else:
+                    raise ValueError("invalid reward config for generating data!")
+
+
                 rews = rews.reshape(-1, 1)
                 vpreds = vpreds.reshape(-1, 1)
 
@@ -267,6 +342,7 @@ class Data_Generator(object):
                 except rospy.ServiceException as e:
                     print("# Reset simulation failed!")
 
+                # print("len of reader:", len(reader))
                 for id in range(len(reader)):
                     row = reader[id]
                     x  = float(row['x'])
@@ -299,9 +375,10 @@ class Data_Generator(object):
                     except rospy.ServiceException as e:
                         print("/gazebo/pause_physics service call failed")
                     discrete_sensor_data = self.discretize_sensor(sensor_data, 8)
+
                     # --- ignore any invalid sensor readings --- #
-                    if np.isnan(discrete_sensor_data).any() or np.isinf(discrete_sensor_data).any():
-                        continue
+                    # if np.isnan(discrete_sensor_data).any() or np.isinf(discrete_sensor_data).any():
+                    #     continue
 
                     if data_form == 'valFunc_mpc':
                         reward = rews[id, -1]
@@ -343,95 +420,6 @@ class Data_Generator(object):
                         raise ValueError("invalid data form!!")
                     writer.writerow(tmp_dict)
 
-        elif agent=='car':
-            unfilled_filename = os.environ['PROJ_HOME_3'] + '/data/car/' + data_form + '.csv'
-            filled_filename   = os.environ['PROJ_HOME_3'] + '/data/car/' + data_form + '_filled' + '.csv'
-            assert os.path.exists(unfilled_filename)
-
-            with open(unfilled_filename, 'r') as csvfile1, open(filled_filename, 'w', newline='') as csvfile2:
-                reader = csv.DictReader(csvfile1)
-                if data_form == 'valFunc' or data_form == 'valFunc_mpc':
-                    fieldnames = ['x', 'y', 'theta', 'delta', 'vel', 'value', 'd1', 'd2', 'd3', 'd4', 'd5',
-                                  'd6', 'd7', 'd8']
-                elif data_form == 'polFunc':
-                    fieldnames = ['x', 'y', 'theta', 'delta', 'vel', 'acc', 'steer_rate', 'd1', 'd2', 'd3', 'd4', 'd5',
-                                  'd6', 'd7', 'd8']
-                else:
-                    raise ValueError("invalid data form!!")
-
-                writer = csv.DictWriter(csvfile2, fieldnames)
-                writer.writeheader()
-
-                rospy.wait_for_service('/ackermann_vehicle/gazebo/reset_simulation')
-                print("# do I get here??")
-                try:
-                    rospy.ServiceProxy('/ackermann_vehicle/gazebo/reset_simulation', Empty)
-                except rospy.ServiceException as e:
-                    print("# Reset simulation failed!")
-
-                for row in reader:
-                    x = float(row['x'])
-                    y = float(row['y'])
-                    theta = float(row['theta'])
-                    delta = float(row['delta'])
-                    vel = float(row['vel'])
-
-                    # print("current state:", [x, y, theta, delta, vel])
-                    # Here since we want sensor data and sensor data is not related to delta and vel
-                    self.init_car(x, y, theta)
-
-                    sensor_data = None
-                    # --- Then take an instant unfreezing ---
-                    rospy.wait_for_service('/ackermann_vehicle/gazebo/unpause_physics')
-                    try:
-                        rospy.ServiceProxy('/ackermann_vehicle/gazebo/unpause_physics', Empty)
-                    except rospy.ServiceException as e:
-                        print("/ackermann_vehicle/gazebo/unpause_physics service call failed")
-                    # --- Receive sensor data ---
-                    while sensor_data is None:
-                        rospy.wait_for_service("/ackermann_vehicle/gazebo/get_model_state")
-                        try:
-                            sensor_data = rospy.wait_for_message('/ackermann_vehicle/scan', LaserScan, timeout=10)
-                        except rospy.ServiceException as e:
-                            print("/ackermann_vehicle/gazebo/get_model_state service call failed!")
-                    # --- pause simulation to prepare sample ---
-                    rospy.wait_for_service('/ackermann_vehicle/gazebo/pause_physics')
-                    try:
-                        rospy.ServiceProxy('/ackermann_vehicle/gazebo/pause_physics', Empty)
-                    except rospy.ServiceException as e:
-                        print("/ackermann_vehicle/gazebo/pause_physics service call failed")
-                    discrete_sensor_data = self.discretize_sensor(sensor_data, 8)
-
-                    if data_form == 'valFunc' or data_form == 'valFunc_mpc':
-                        value = float(row['value'])
-                        tmp_dict = {'x': x, 'y': y, 'theta': theta, 'delta': delta, 'vel': vel, 'value':value,
-                                    'd1': discrete_sensor_data[0],
-                                    'd2': discrete_sensor_data[1],
-                                    'd3': discrete_sensor_data[2],
-                                    'd4': discrete_sensor_data[3],
-                                    'd5': discrete_sensor_data[4],
-                                    'd6': discrete_sensor_data[5],
-                                    'd7': discrete_sensor_data[6],
-                                    'd8': discrete_sensor_data[7]}
-                    elif data_form == 'polFunc':
-                        acc = float(row['acc'])
-                        steer_rate = float(row['steer_rate'])
-                        tmp_dict = {'x': x, 'y': y, 'theta': theta, 'delta': delta, 'vel': vel, 'acc': acc,
-                                    'steer_rate': steer_rate,
-                                    'd1': discrete_sensor_data[0],
-                                    'd2': discrete_sensor_data[1],
-                                    'd3': discrete_sensor_data[2],
-                                    'd4': discrete_sensor_data[3],
-                                    'd5': discrete_sensor_data[4],
-                                    'd6': discrete_sensor_data[5],
-                                    'd7': discrete_sensor_data[6],
-                                    'd8': discrete_sensor_data[7]}
-                    else:
-                        raise ValueError("invalid data form!!")
-
-                    assert tmp_dict
-                    writer.writerow(tmp_dict)
-
         elif agent == 'dubinsCar':
             unfilled_filename = os.environ['PROJ_HOME_3'] + '/data/dubinsCar/env_difficult/' + data_form + '.csv'
             filled_filename = os.environ['PROJ_HOME_3'] + '/data/dubinsCar/env_difficult/' + data_form + '_filled' + '.csv'
@@ -455,7 +443,7 @@ class Data_Generator(object):
                 goal_torlerance = np.array([1.0, 1.0, 0.75])
 
                 T = np.shape(states)[0]
-                mpc_horizon = 110
+                mpc_horizon = horizon
                 discount_factor = 0.95
 
                 rews = np.zeros(T, 'float32')
@@ -590,13 +578,19 @@ class Data_Generator(object):
 
 
 if __name__ == "__main__":
-    # data_gen = Data_Generator()
-    # data_gen.gen_data(data_form='valFunc_mpc', agent='quad')
-    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_mpc_filled.csv'), use_feasible=True)
+    data_gen = Data_Generator()
+    # data_gen.gen_data(horizon=140, rew_config='sparse', data_form='valFunc_mpc', agent='quad')
 
-    special_func_combine(filename1=os.environ['PROJ_HOME_3']+'/data/quad/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_truncated.csv',
-                         filename2=os.environ['PROJ_HOME_3']+'/data/quad/test_samps_800_N140_warmstart_small_region/valFunc_mpc_filled_cleaned_truncated.csv')
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled.csv'),
+    #           horizon=140, trajs_type='all', truncate=False)
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled.csv'),
+    #           horizon=140, trajs_type='infeasible', truncate=True)
+    #
 
-    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_mpc_filled.csv'), horizon=140, use_feasible=False, truncate=True)
 
+    # filenames = [os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N80_warmstart_short_horizon/valFunc_mpc_filled_cleaned_feasible_truncated.csv'),
+    #              os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_infeasible_truncated.csv'),
+    #              os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled_cleaned_infeasible_truncated.csv')]
+    # special_func_combine(filenames)
 
+    # data_balancer()

@@ -35,14 +35,30 @@ import numpy as np
 
 
 
-basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'baseline')
-basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_fixed')
-basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_switch')
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_switch')
 
 
-basedir_list = [basedir1, basedir2, basedir3]
+
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'mpc_switch')
+# basedir_list = [basedir1, basedir2, basedir3]
+
+# basedir = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_goal_angle_0_60')
+# basedir_list = [basedir]
+
+basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'baseline')
+basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_old_model_new_reward', 'MPC_switch_new_reward')
+
+basedir_list = [basedir1, basedir2]
+
 showdir = basedir_list
-cues_list=['baseline', 'mpc_fixed', 'mpc_switch']
+# cues_list=['baseline', 'mpc_fixed', 'mpc_switch']
+# cues_list = ['baseline']
+cues_list = ['baseline', 'new_MPC_reward']
 
 folder_cue_dict = {}
 for based_dir in basedir_list:
@@ -52,11 +68,13 @@ for based_dir in basedir_list:
         folder_cue_dict.update(dict(zip(folders, cues)))
 
 
-rewards = []
+stats = []
 iterations = []
 hues = []
 
 plt.rc('legend',fontsize=8)
+# choice = 'reward' # or 'success rate'
+choice = 'success rate'
 
 for k,v in folder_cue_dict.items():
     if os.path.isfile(k):
@@ -67,18 +85,24 @@ for k,v in folder_cue_dict.items():
 
     # max_iter_idx = np.max([int(os.path.splitext(i)[0].split('_')[-1]) for i in os.listdir(os.path.join(fullpath, 'result'))])
     max_iter_idx = np.min([np.max([int(os.path.splitext(i)[0].split('_')[-1]) for i in os.listdir(os.path.join(fullpath, 'result'))]), 300])
-    cur_reward = pickle.load(open(os.path.join(fullpath, 'result', 'train_reward_iter_' + str(max_iter_idx) + '.pkl'), 'rb'))
 
-    rewards.extend(cur_reward)
-    iterations.extend(range(len(cur_reward)))
-    hues.extend([cur_hue]*len(cur_reward))
+    if choice == 'reward':
+        cur_stats = pickle.load(open(os.path.join(fullpath, 'result', 'train_reward_iter_' + str(max_iter_idx) + '.pkl'), 'rb'))
+    elif choice == 'success rate':
+        cur_stats = pickle.load(open(os.path.join(fullpath, 'result', 'eval_success_rate_iter_' + str(max_iter_idx) + '.pkl'), 'rb'))
+    else:
+        print("choice is invalid")
+    stats.extend(cur_stats)
+    iterations.extend(range(len(cur_stats)))
+    hues.extend([cur_hue]*len(cur_stats))
 
 
-d = {'hues':hues, 'iterations':iterations, 'rewards':rewards}
+d = {'hues':hues, 'iterations':iterations, choice:stats}
 df = pd.DataFrame(data=d)
 print(df)
 
-ax = sns.lineplot(x="iterations", y="rewards", hue='hues', data=df)
+ax = sns.lineplot(x="iterations", y=choice, hue='hues', data=df)
 
-plt.savefig("/home/xlv/Desktop/comparison.png")
+
+# plt.savefig("/home/xlv/Desktop/comparison.png")
 plt.show()

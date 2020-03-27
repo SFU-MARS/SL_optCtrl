@@ -124,6 +124,8 @@ def ppo_learn(env, policy,
     The only reason I copied it here is to update the function to not create a new policy but instead update
     the current one for a few iterations.
     """
+    grad_norm = args['grad_norm']
+    logger.log("running grad norm:", grad_norm)
 
     # Setup losses and stuff
     # ----------------------------------------
@@ -131,11 +133,11 @@ def ppo_learn(env, policy,
     # oldpi = create_policy("oldpi", env) # Network for old policy
     oldpi = create_policy("oldpi", env, args=args, vf_load=True if args['vf_load'] == "yes" else False, pol_load=True if args['pol_load'] == "yes" else False)
 
-    atarg = tf.placeholder(dtype=tf.float32, shape=[None]) # Target advantage function (if applicable)
-    ret = tf.placeholder(dtype=tf.float32, shape=[None]) # Empirical return
+    atarg = tf.placeholder(dtype=tf.float32, shape=[None])  # Target advantage function (if applicable)
+    ret = tf.placeholder(dtype=tf.float32, shape=[None])  # Empirical return
 
-    lrmult = tf.placeholder(name='lrmult', dtype=tf.float32, shape=[]) # learning rate multiplier, updated with schedule
-    clip_param = clip_param * lrmult # Annealed cliping parameter epislon
+    lrmult = tf.placeholder(name='lrmult', dtype=tf.float32, shape=[])  # learning rate multiplier, updated with schedule
+    clip_param = clip_param * lrmult  # Annealed cliping parameter epislon
 
     ob = U.get_placeholder_cached(name="ob")
     ac = pi.pdtype.sample_placeholder([None])
@@ -165,15 +167,20 @@ def ppo_learn(env, policy,
                               lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
             logger.log("loading external valfunc and vf_loss is updated based on certain criteron!")
         elif args['vf_switch'] == "no":
+            one_valnn = False
             vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
             logger.log("loading external valfunc and vf_loss is fixed!")
         # XLV: alway add one more value NN with non-stop updating
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
 
     else:
+        one_valnn = False
         vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
+        # vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
+        #                       lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
-        logger.log("not loading external valfunc and vf_loss is updating!")
+        # logger.log("not loading external valfunc and vf_loss is updating based on certain criteron!")
+        logger.log("not loading external valfunc and vf_loss is updating every iteration!")
 
 
     # total_loss = pol_surr + pol_entpen + vf_loss
@@ -196,9 +203,9 @@ def ppo_learn(env, policy,
 
     # XLV: added for limit gradient change
     if one_valnn:
-        lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult, criteron], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
+        lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult, criteron], losses + [U.flatgrad(total_loss, var_list, clip_norm=grad_norm)])
     else:
-        lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=0.5)])
+        lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=grad_norm)])
 
     adam = MpiAdam(var_list, epsilon=adam_epsilon)
 
@@ -261,68 +268,10 @@ def ppo_learn(env, policy,
         else:
             raise NotImplementedError
 
-
-        # logstd_saturate = np.log(0.5)
-        # """ policy logstd scheduler """
-        # if len(eval_success_rates):
-        #     logstd = [var for var in tf.global_variables() if var.name == 'pi/pol/logstd:0'][0]
-        #     '''exponential decay'''
-        #     # logstd_val = -0.69 - 2.31 * eval_success_rates[-1]
-        #     '''polynomial decay'''
-        #     # logstd_val = np.log(-0.45 * eval_success_rates[-1] ** 2 + 0.5)
-        #     '''linear decay (sometimes this is the best at first, but less stable on late period'''
-        #     # logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
-        #     '''linear decay dynamic deque (more stable but performance becomes conservative)'''
-        #     # logstd_val = np.log(-0.45 * np.mean(eval_suc_buffer) + 0.5)
-        #     '''linear decay (former) + dynamic deque (latter)'''
-        #     if np.any(np.array(eval_success_rates) > 0.8):
-        #         logstd_val = np.log(-0.45 * np.mean(eval_suc_buffer) + 0.5)
-        #         logger.log("now we are using latter style!!")
-        #         print("success rates so far:", eval_success_rates)
-        #     else:
-        #         logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
-        #         logger.log("now we are still in earlier stage!!")
-        #         print("success rates so far:", eval_success_rates)
-        #
-        #     logstd_assign_op = logstd.assign(tf.constant([[logstd_val, logstd_val]], dtype=tf.float32, shape=(1,2)))
-        #     sess = tf.get_default_session()
-        #     sess.run(logstd_assign_op)
-        #     logger.log("current exploration logstd: %f" %(logstd_val))
-        #
-        #     '''linear decay saturate (not so good, keep saturating perhaps is not a good idea)'''
-        #     # logstd_val = np.log(-0.45 * eval_success_rates[-1] + 0.5)
-        #     # if logstd_val < logstd_saturate:
-        #     #     logstd_saturate = logstd_val
-        #     #     logger.log("upcoming new logstd:%f" %(logstd_val))
-        #     #     logger.log("updating logstd_saturate to %f !" %(logstd_saturate))
-        #     # else:
-        #     #     logger.log("upcoming new logstd:%f" % (logstd_val))
-        #     #     logger.log("saturating logstd_saturate as %f !" %(logstd_saturate))
-        #     #
-        #     # logstd_assign_op = logstd.assign(tf.constant([[logstd_saturate, logstd_saturate]], dtype=tf.float32, shape=(1, 2)))
-        #     # sess = tf.get_default_session()
-        #     # sess.run(logstd_assign_op)
-        #     # logger.log("current exploration logstd: %f" %(logstd_saturate))
-
-        # kernels = [v for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES) if v.name.endswith('kernel:0')]
-        # sess = tf.get_default_session()
-        # kernel0 = [sess.run(kernels[0])]
-
-
         logger.log("********** Iteration %i ************" %(iters_so_far+1)) # Current iteration index
 
         seg = seg_gen.__next__()
         add_vtarg_and_adv(seg, gamma, lam)
-
-        # if np.mean(rewbuffer) >= 200 and args['vf_switch'] == "yes":
-        #     switch = True
-        #
-        # if switch:
-        #     logger.log("Switch to standard value function with non-stop updating!")
-        #     add_vtarg_and_adv_ghost(seg, gamma, lam)
-        # else:
-        #     logger.log("Still use fixed value function")
-        #     add_vtarg_and_adv(seg, gamma, lam)
 
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
         rews = seg['rew']
@@ -330,55 +279,26 @@ def ppo_learn(env, policy,
         event_flags = seg['event_flag']
         train_sucs = seg['suc']
         mc_rets = seg['mcreturn']
-
         vpredbefore = seg['vpred']
-        # if switch:
-        #     vpredbefore = seg["vpred_ghost"]  # predicted value function before udpate
-        # else:
-        #     vpredbefore = seg["vpred"]
+        tdtarget = seg['tdtarget']
 
-        # print("obs shape:", np.shape(ob))
-        # print("vpred shape:", np.shape(vpredbefore))
-
-        logger.log("Sum of mc return over this iteration: %f" % np.sum(mc_rets))
-        logger.log("Sum of td return over this iteration: %f" % np.sum(tdlamret))
-        logger.log("Difference of mc return and td return: %f" % (np.sum(mc_rets) - np.sum(tdlamret)))
+        logger.log("Sum of td target over this iteration: %f" % np.sum(tdtarget))
+        logger.log("Sum of approximate mc return over this iteration: %f" % np.sum(tdlamret))
 
 
-        # if episodes_so_far > 0:
-        #     rand = np.random.uniform()
-        #     if rand <= ep_suc_so_far/episodes_so_far:
-        #         val_update_criteron = True
-        #         logger.log("random number: %f" %rand)
-        #         logger.log("this iter we update value function")
-        #     else:
-        #         val_update_criteron = False
-        #         logger.log("this iter we do not update value function")
-
-        # if np.mean(rewbuffer) >= 200:
-        #     val_update_criteron = True
-        #     logger.log("this iter we update value function")
-        # else:
-        #     val_update_criteron = False
-        #     logger.log("this iter we do not update value function")
-
-        if np.sum(mc_rets) < np.sum(tdlamret):
-            val_update_criteron = False
-            logger.log("this iter we do not update value function")
+        if one_valnn:
+            if np.sum(tdlamret) < np.sum(tdtarget):
+                val_update_criteron = False
+                logger.log("Now we are running with MPC switch pattern. This iter we do not update value function")
+            else:
+                val_update_criteron = True
+                logger.log("Now we are running with MPC switch pattern. This iter we update value function")
         else:
-            val_update_criteron = True
-            logger.log("this iter we update value function")
+            if args['vf_load'] == "yes":
+                logger.log("Now we are running on MPC fixed pattern, not updating value at all!")
+            else:
+                logger.log("Now we are running on baseline pattern, value is updated on every iteration!")
 
-
-
-        # """ In case of saving any observation for visualization purpose  """
-        # if save_obs:
-        #     globals.g_iter_id += 1
-        #     tmp_seg = {}
-        #     tmp_seg["ob"] = seg["ob"]
-        #     tmp_seg["new"] = seg["new"]
-        #     with open(globals.g_hm_dirpath + '/iter_' + str(globals.g_iter_id) + '.pkl', 'wb') as f:
-        #         pickle.dump(tmp_seg, f)
 
 
         """ In case of collecting real-time sim data and its vpred for furthur debugging """
@@ -390,17 +310,18 @@ def ppo_learn(env, policy,
             vpred_shaped = vpredbefore.reshape(-1, 1)
             atarg_shaped = atarg.reshape(-1,1)
             tdlamret_shaped = tdlamret.reshape(-1,1)
+            tdtarget_shaped = tdtarget.reshape(-1,1)
             rews_shaped = rews.reshape(-1,1)
             event_flags_shaped = np.array(event_flags).reshape(-1,1)
 
-            log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, rews_shaped, event_flags_shaped), axis=1)
+            log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, tdtarget_shaped, rews_shaped, event_flags_shaped), axis=1)
 
             if args['gym_env'] == 'PlanarQuadEnv-v0':
                 log_df = pd.DataFrame(log_data,
-                                            columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
+                                            columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'tdtarget','rews', 'events'])
             elif args['gym_env'] == 'DubinsCarEnv-v0':
                 log_df = pd.DataFrame(log_data,
-                                            columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
+                                            columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'tdtarget', 'rews', 'events'])
             else:
                 raise ValueError("invalid env !!!")
             log_df.to_csv(f, header=True)
@@ -452,9 +373,9 @@ def ppo_learn(env, policy,
             # logger.log(fmt_row(13, np.mean(losses, axis=0)))
 
             grads_shape = np.array(grads).shape
-            grad_norm_checking = np.less_equal(np.array(grads), np.ones(grads_shape) * 0.6)
+            grad_norm_checking = np.less_equal(np.array(grads), np.ones(grads_shape) * (grad_norm+0.1))
             if np.all(grad_norm_checking):
-                logger.log("gradient norm checking passed! all gradients are clipped to less than 0.5!")
+                logger.log("gradient norm checking passed! all gradients are clipped to less than {}!".format(grad_norm))
             else:
                 logger.log("gradient norm checking failed!")
 
@@ -484,6 +405,7 @@ def ppo_learn(env, policy,
         logger.record_tabular("EpLenMean", np.mean(lenbuffer))
         logger.record_tabular("EpRewMean", np.mean(rewbuffer))
         logger.record_tabular("EpThisIter", len(lens))
+        logger.record_tabular("EpRewMeanThisIter", np.mean(seg["ep_rets"]))
         logger.record_tabular("EpSuccessThisIter", Counter(train_sucs)[True])
         logger.record_tabular("SucRateThisIter", Counter(train_sucs)[True] / len(lens))
         episodes_so_far += len(lens)
@@ -498,8 +420,6 @@ def ppo_learn(env, policy,
 
         if MPI.COMM_WORLD.Get_rank()==0:
             logger.dump_tabular()
-
-
 
         """ Evaluation """
         EVALUATION_FREQUENCY = 10  # 10
