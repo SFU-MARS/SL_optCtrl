@@ -146,7 +146,7 @@ class Data_Generator(object):
 
             if (np.sqrt((state[0] - goal_state[0]) ** 2 + (state[1] - goal_state[1]) ** 2) <= goal_pos_tolerance
                 or (np.abs(state[0] - goal_state[0]) <= goal_pos_tolerance and np.abs(state[1] - goal_state[1]) <= goal_pos_tolerance)) \
-                and abs(state[2] - goal_state[2]) < goal_theta_tolerance:
+                and abs(state[2] - goal_state[2]) <= goal_theta_tolerance:
                 print("in goal with specific angle!!")
                 return True
             else:
@@ -579,7 +579,7 @@ class Data_Generator(object):
 
 if __name__ == "__main__":
     data_gen = Data_Generator()
-    # data_gen.gen_data(horizon=140, rew_config='sparse', data_form='valFunc_mpc', agent='quad')
+    data_gen.gen_data(horizon=140, rew_config='MPC', data_form='valFunc_mpc', agent='quad')
 
     # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled.csv'),
     #           horizon=140, trajs_type='all', truncate=False)
