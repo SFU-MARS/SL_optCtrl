@@ -105,7 +105,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.Thrustmin = 0
         self.control_reward_coff = 0.01
         # self.collision_reward = -2 * 200 * self.control_reward_coff * (self.Thrustmax ** 2)
-        self.collison_reward = -400
+        self.collision_reward = -400
         self.goal_reward = 1000
 
         self.start_state = START_STATE
@@ -598,7 +598,9 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         # if abs(obsrv[4] - self.goal_state[4]) < 0.40:
         #     print("good tilting!")
 
-        if obsrv[4] > 1.2 or obsrv[4] < -1.2:
+
+        # Amend: modified by xlv, abs(obsrv[4]) > 1.2 -> abs(obsrv[4]) > 1.4
+        if obsrv[4] > 1.4 or obsrv[4] < -1.4:
             reward += self.collision_reward * 2
             done = True
             self.step_counter = 0
