@@ -155,26 +155,26 @@ def ppo_learn(env, policy,
 
     # Default we do not use single value NN
     criteron = tf.placeholder(name='criteron', dtype=tf.bool, shape=[])
-    one_valnn = False
+    cond_val_update = False  # An indicator of value update
 
     # warning: do not update weights of value network if loading customized external value initialization.
     if args['vf_load'] == "yes":
         if args['vf_switch'] == "yes":
             # vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
 
-            one_valnn = True
+            cond_val_update = True
             vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
                               lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
             logger.log("loading external valfunc and vf_loss is updated based on certain criteron!")
         elif args['vf_switch'] == "no":
-            one_valnn = False
+            cond_val_update = False
             vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
             logger.log("loading external valfunc and vf_loss is fixed!")
         # XLV: alway add one more value NN with non-stop updating
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
 
     else:
-        one_valnn = False
+        cond_val_update = False
         vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
         # vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
         #                       lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
@@ -195,14 +195,14 @@ def ppo_learn(env, policy,
     var_list = pi.get_trainable_variables()
     print("trainable variables:", var_list)
 
-    if one_valnn:
+    if cond_val_update:
         lossandgrad = U.function([ob, ac, atarg, ret, lrmult, criteron], losses + [U.flatgrad(total_loss, var_list)])
     else:
         lossandgrad = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list)])
 
 
     # XLV: added for limit gradient change
-    if one_valnn:
+    if cond_val_update:
         lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult, criteron], losses + [U.flatgrad(total_loss, var_list, clip_norm=grad_norm)])
     else:
         lossandgrad_clip = U.function([ob, ac, atarg, ret, lrmult], losses + [U.flatgrad(total_loss, var_list, clip_norm=grad_norm)])
@@ -210,7 +210,7 @@ def ppo_learn(env, policy,
     adam = MpiAdam(var_list, epsilon=adam_epsilon)
 
     assign_old_eq_new = U.function([],[], updates=[tf.assign(oldv, newv) for (oldv, newv) in zipsame(oldpi.get_variables(), pi.get_variables())])
-    if one_valnn:
+    if cond_val_update:
         compute_losses = U.function([ob, ac, atarg, ret, lrmult, criteron], losses)
     else:
         compute_losses = U.function([ob, ac, atarg, ret, lrmult], losses)
@@ -286,7 +286,7 @@ def ppo_learn(env, policy,
         logger.log("Sum of approximate mc return over this iteration: %f" % np.sum(tdlamret))
 
 
-        if one_valnn:
+        if cond_val_update:
             if np.sum(tdlamret) < np.sum(tdtarget):
                 val_update_criteron = False
                 logger.log("Now we are running with MPC switch pattern. This iter we do not update value function")
@@ -348,13 +348,13 @@ def ppo_learn(env, policy,
             grads = []   # list of sublists, each of which gives the gradients w.r.t all variables based on a set of samples with size "optim_batchsize"
             for batch in d.iterate_once(optim_batchsize):
                 if start_clip_grad:
-                    if not one_valnn:
+                    if not cond_val_update:
                         *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                     else:
                         *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
                                                          cur_lrmult, val_update_criteron)
                 else:
-                    if not one_valnn:
+                    if not cond_val_update:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                     else:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
@@ -382,7 +382,7 @@ def ppo_learn(env, policy,
         logger.log("Evaluating losses...")
         losses = []
         for batch in d.iterate_once(optim_batchsize):
-            if not one_valnn:
+            if not cond_val_update:
                 newlosses = compute_losses(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
             else:
                 newlosses = compute_losses(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult, val_update_criteron)

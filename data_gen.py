@@ -233,7 +233,7 @@ class Data_Generator(object):
         rospy.ServiceProxy('gazebo/set_model_state', SetModelState)(car_state)
         return True
 
-    def gen_data(self, horizon, rew_config, data_form='valFunc', agent=None):
+    def gen_data(self, horizon, rew_config, goal_config, data_form='valFunc', agent=None):
         assert agent in ['quad', 'car', 'dubinsCar']
         unfilled_filename = None
         filled_filename = None
@@ -260,12 +260,15 @@ class Data_Generator(object):
                 # goal_torlerance = np.array([1.0, 1.0, np.pi/6])
 
                 # For quad env: air_space_202002_Francis (a easier one, target angle to the left)
-                goal_state = np.array([4.0, 9.0, -np.pi/8])
-                goal_torlerance = np.array([1.0, 1.0, np.pi/8])
+                if goal_config == 'left':
+                    goal_state = np.array([4.0, 9.0, -np.pi/8])
+                    goal_torlerance = np.array([1.0, 1.0, np.pi/8])
+
 
                 # For quad env: air_space_202002_Francis (a easier one, target angle to the right)
-                # goal_state = np.array([4.0, 9.0, 0.75])
-                # goal_torlerance = np.array([1.0, 1.0, 0.3])
+                elif goal_config == 'right':
+                    goal_state = np.array([4.0, 9.0, 0.75])
+                    goal_torlerance = np.array([1.0, 1.0, 0.3])
 
                 T = np.shape(states)[0]
                 # print("T:", T)
@@ -578,19 +581,32 @@ class Data_Generator(object):
 
 
 if __name__ == "__main__":
-    data_gen = Data_Generator()
-    data_gen.gen_data(horizon=140, rew_config='MPC', data_form='valFunc_mpc', agent='quad')
+    # data_gen = Data_Generator()
+    # data_gen.gen_data(horizon=140, rew_config='MPC', goal_config='right', data_form='valFunc_mpc', agent='quad')
 
-    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled.csv'),
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'],
+    #                        'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled.csv'),
     #           horizon=140, trajs_type='all', truncate=False)
-    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled.csv'),
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'],
+    #                        'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled.csv'),
     #           horizon=140, trajs_type='infeasible', truncate=True)
     #
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'],
+    #                        'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled.csv'),
+    #           horizon=140, trajs_type='infeasible', truncate=True)
+    #
+    #
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'],
+    #                        'data/quad/new_model_new_reward_training_data/test_samps_800_N80_warmstart_short_horizon/valFunc_mpc_filled.csv'),
+    #           horizon=80, trajs_type='feasible', truncate=True)
 
 
-    # filenames = [os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N80_warmstart_short_horizon/valFunc_mpc_filled_cleaned_feasible_truncated.csv'),
-    #              os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_infeasible_truncated.csv'),
-    #              os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled_cleaned_infeasible_truncated.csv')]
+
+    # filenames = [os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/new_model_new_reward_training_data/test_samps_800_N80_warmstart_short_horizon/valFunc_mpc_filled_cleaned_feasible_truncated.csv'),
+    #              os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_infeasible_truncated.csv'),
+    #              os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled_cleaned_infeasible_truncated.csv')]
     # special_func_combine(filenames)
 
-    # data_balancer()
+    filenames = [os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/old_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_all_untruncated.csv')]
+    special_func_combine(filenames)
+    data_balancer()
