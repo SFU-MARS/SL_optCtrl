@@ -1,4 +1,7 @@
 import pandas as pd
+pd.options.display.max_columns = None
+pd.options.display.max_rows = None
+
 import os
 
 import seaborn as sns
@@ -129,6 +132,8 @@ class Trainer(object):
         dataset = raw_dataset.copy()
         dataset = dataset.dropna()
         train_dataset = dataset.sample(frac=1.0, random_state=0)
+
+        print(train_dataset.head())
 
         stats = train_dataset.describe()
         stats.pop("reward")
@@ -379,6 +384,6 @@ if __name__ == "__main__":
     # trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc_soft.h5")
 
     trainer = Trainer(method='mpc', target="valFunc", agent='quad')
-    trainer.train_valFunc()
+    # trainer.train_valFunc()
     trainer.save_model_weights("./tf_model/quad/vf_mpc.h5")
 

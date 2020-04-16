@@ -6,11 +6,11 @@ logger = logging.getLogger(__name__)
 # Register envs
 # ----------------------------------------
 # Ackermann
-register(
-    # For gym id, the correct form would be xxx-v0, not xxx_v0
-    id='AckermannEnv-v0',
-    entry_point='gym_foo.gym_foo.envs:AckermannEnv_v0',
-)
+# register(
+#     # For gym id, the correct form would be xxx-v0, not xxx_v0
+#     id='AckermannEnv-v0',
+#     entry_point='gym_foo.gym_foo.envs:AckermannEnv_v0',
+# )
 
 # PlanarQuadrotor
 register(

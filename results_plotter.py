@@ -29,36 +29,66 @@ import numpy as np
 # basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_mpcdmin_0.3', 'mpc_fixed')
 # basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_mpcdmin_0.3', 'mpc_switch')
 
-# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_limited_start_area', 'baseline')
-# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_limited_start_area', 'mpc_fixed')
-# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests','quad_task_air_space_202002_Francis_limited_start_area', 'mpc_switch')
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_limited_start_area', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_limited_start_area', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_limited_start_area', 'mpc_switch')
 
 
 
-# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'baseline')
-# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_fixed')
-# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_switch')
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_only_use_feasible', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_only_use_feasible', 'mpc_switch')
 
 
 
 
-# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'baseline')
-# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'mpc_fixed')
-# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'mpc_switch')
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_mpc_truncation', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_mpc_truncation', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_air_space_202002_Francis_mpc_truncation', 'mpc_switch')
 # basedir_list = [basedir1, basedir2, basedir3]
 
 # basedir = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_goal_angle_0_60')
 # basedir_list = [basedir]
 
-basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'baseline')
-basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_old_model_new_reward', 'MPC_switch_new_reward')
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_mpc_truncation', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_air_space_202002_Francis_old_model_new_reward', 'MPC_switch_new_reward')
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_mpc_fixed_new_reward')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_mpc_switch_new_reward')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_baseline_new_reward')
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_tests', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_tests', 'fixed_mpc')
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_tests_3', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'quad_task_exploration', 'quad_task_tests_3', 'fixed_mpc')
+
+
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_mpc_old_model_new_reward', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_mpc_old_model_new_reward', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_mpc_old_model_new_reward', 'mpc_switch')
+
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_mpc_new_model_new_reward', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_mpc_new_model_new_reward', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_mpc_new_model_new_reward', 'mpc_switch')
+
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'mpc_fixed')
+
+basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline')
+basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_baseline_test_adv_shift', '0_60')
+
 
 basedir_list = [basedir1, basedir2]
 
 showdir = basedir_list
 # cues_list=['baseline', 'mpc_fixed', 'mpc_switch']
 # cues_list = ['baseline']
-cues_list = ['baseline', 'new_MPC_reward']
+# cues_list = ['baseline', 'mpc_fixed']
+cues_list = ['baseline', 'baseline_adv_shift']
 
 folder_cue_dict = {}
 for based_dir in basedir_list:
@@ -73,8 +103,8 @@ iterations = []
 hues = []
 
 plt.rc('legend',fontsize=8)
-# choice = 'reward' # or 'success rate'
-choice = 'success rate'
+choice = 'reward'  # or 'success rate'
+# choice = 'success rate'
 
 for k,v in folder_cue_dict.items():
     if os.path.isfile(k):
@@ -101,7 +131,7 @@ d = {'hues':hues, 'iterations':iterations, choice:stats}
 df = pd.DataFrame(data=d)
 print(df)
 
-ax = sns.lineplot(x="iterations", y=choice, hue='hues', data=df)
+ax = sns.lineplot(x="iterations", y=choice, hue='hues', hue_order=cues_list, data=df)
 
 
 # plt.savefig("/home/xlv/Desktop/comparison.png")

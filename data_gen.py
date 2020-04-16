@@ -86,13 +86,19 @@ def special_func_combine(filenames):
     for fn in filenames:
         df = pd.read_csv(fn)
         result = pd.concat([result, df], sort=False)
-        # df1 = pd.read_csv(filename1)
-        # df2 = pd.read_csv(filename2)
-        # result = pd.concat([df1, df2], sort=False)
+
+    infeasindices = result[result['col_trajectory_flag'] == 3].index
+    feasindices = result[result['col_trajectory_flag'] == 2].index
+
+    infeasNum = len(infeasindices)
+    feasNum = len(feasindices)
+
+    print("Number of infeasible data before: ", infeasNum)
+    print("Number of feasible data before: ", feasNum)
 
     result.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv')
 
-def data_balancer():
+def data_balancer(add_baddata=False):
     fn = os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv'
     assert os.path.exists(fn)
 
@@ -109,12 +115,11 @@ def data_balancer():
     print("Number of feasible data before: ", feasNum)
 
     if infeasNum < feasNum:
-        delindices = np.random.choice(feasindices, np.abs(infeasNum-feasNum), replace=False)
+        delindices = np.random.choice(feasindices, int(np.abs(feasNum-0.67*infeasNum)), replace=False)
     else:
-        delindices = np.random.choice(infeasindices, np.abs(infeasNum-feasNum), replace=False)
+        delindices = np.random.choice(infeasindices, 0, replace=False)
 
     df.drop(delindices, inplace=True)
-
 
     infeasindices = df[df['col_trajectory_flag'] == 3].index
     feasindices = df[df['col_trajectory_flag'] == 2].index
@@ -124,6 +129,25 @@ def data_balancer():
 
     print("Number of infeasible data after: ", infeasNum)
     print("Number of feasible data after: ", feasNum)
+
+
+    # Adding edge bad data
+    if add_baddata:
+        print("adding bad data ...")
+        bad_data = pd.read_csv(os.environ['PROJ_HOME_3']+'/data/quad/bad_data.csv')
+        df = pd.concat([df, bad_data], sort=False)
+
+        # bad data has "col_trajectory_flag = 0"
+        infeasindices = df[(df['col_trajectory_flag'] == 3) | (df['col_trajectory_flag'] == 0)].index
+        feasindices = df[df['col_trajectory_flag'] == 2].index
+
+        infeasNum = len(infeasindices)
+        feasNum = len(feasindices)
+
+        print("Number of infeasible data after adding bad data: ", infeasNum)
+        print("Number of feasible data after adding bad data: ", feasNum)
+
+
     df.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv')
 
 class Data_Generator(object):
@@ -254,6 +278,8 @@ class Data_Generator(object):
 
                 states = raw[:, :6]
                 collision_attr = raw[:, 6:]
+                goal_state = None
+                goal_torlerance = None
 
                 # For quad env: air_space_202002 (more difficult one)
                 # goal_state = np.array([4.0, 9.0, 0])  # this is for {x, z, phi}
@@ -601,12 +627,13 @@ if __name__ == "__main__":
     #           horizon=80, trajs_type='feasible', truncate=True)
 
 
-
+    #
     # filenames = [os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/new_model_new_reward_training_data/test_samps_800_N80_warmstart_short_horizon/valFunc_mpc_filled_cleaned_feasible_truncated.csv'),
     #              os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_infeasible_truncated.csv'),
     #              os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart_newangle/valFunc_mpc_filled_cleaned_infeasible_truncated.csv')]
     # special_func_combine(filenames)
+    # data_balancer()
 
     filenames = [os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/old_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_all_untruncated.csv')]
     special_func_combine(filenames)
-    data_balancer()
+    # data_balancer()
