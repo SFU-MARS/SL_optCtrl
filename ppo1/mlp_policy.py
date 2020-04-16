@@ -192,21 +192,42 @@ class MlpPolicy_mod(object):
                 """
                     Loading external value groundtruth computed by value iteration, but no weight transferring.
                 """
-                # print("we are loading external value groundtruth computed by value iteration, but no weight transferring!")
-                #
-                # val_interp_f = value_interpolation_function()
-                # val_interp_f.setup()
-                #
-                #
-                # constant = tf.py_func(val_interp_f.interpolate_value, [ob[:,:3]], tf.float32)
-                #
-                # obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
-                # last_out = obz
-                # for i in range(num_hid_layers):
-                #     last_out = tf.nn.tanh(tf.layers.dense(last_out, hid_size, name="fc%i" % (i + 1), kernel_initializer=U.normc_initializer(1.0)))
-                #     # print("hid size:", hid_size)
-                # self.vpred = tf.layers.dense(last_out, 1, name='final', kernel_initializer=U.normc_initializer(1.0))[:,0]
-                # self.vpred = self.vpred - self.vpred + constant
+                if args['vf_type'] == 'vi_gd':
+                    if args['gym_env'] == 'DubinsCarEnv-v0':
+                        logger.log("we are loading external value groundtruth computed by value iteration for car example, but no weight transferring!")
+
+                        val_interp_f = value_interpolation_function_car()
+                        val_interp_f.setup()
+
+                        constant = tf.py_func(val_interp_f.interpolate_value, [ob[:,:3]], tf.float32)
+
+                        obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
+                        last_out = obz
+                        for i in range(num_hid_layers):
+                            last_out = tf.nn.tanh(tf.layers.dense(last_out, hid_size, name="fc%i" % (i + 1), kernel_initializer=U.normc_initializer(1.0)))
+                            # print("hid size:", hid_size)
+                        self.vpred = tf.layers.dense(last_out, 1, name='final', kernel_initializer=U.normc_initializer(1.0))[:,0]
+                        self.vpred = self.vpred - self.vpred + constant
+                    elif args['gym_env'] == 'PlanarQuadEnv-v0':
+                        logger.log(
+                            "we are loading external value groundtruth computed by value iteration for quad example, but no weight transferring!")
+
+                        val_interp_f = value_interpolation_function_quad()
+                        val_interp_f.setup()
+
+                        constant = tf.py_func(val_interp_f.interpolate_value, [ob[:, :6]], tf.float32)
+
+                        obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
+                        last_out = obz
+                        for i in range(num_hid_layers):
+                            last_out = tf.nn.tanh(tf.layers.dense(last_out, hid_size, name="fc%i" % (i + 1),
+                                                                  kernel_initializer=U.normc_initializer(1.0)))
+                            # print("hid size:", hid_size)
+                        self.vpred = tf.layers.dense(last_out, 1, name='final',
+                                                     kernel_initializer=U.normc_initializer(1.0))[:, 0]
+                        self.vpred = self.vpred - self.vpred + constant
+
+
                 # Loading external value computed by value iteration as initialization.
 
                 if args['vf_type'] == "boltzmann":
@@ -275,6 +296,7 @@ class MlpPolicy_mod(object):
                     elif args['gym_env'] == 'PlanarQuadEnv-v0':
                         wt_filename = "/tf_model/quad/vf_mpc_weights.pkl"
                         logging = "We are loading external value weights for quadrotor trained by mpc cost, from {}".format(wt_filename)
+
                         # Note the loaded file name "valFunc_mpc_filled_final.csv"
                         val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_mpc_filled_final.csv"
                         colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',

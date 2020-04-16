@@ -136,6 +136,8 @@ def ppo_learn(env, policy,
     atarg = tf.placeholder(dtype=tf.float32, shape=[None])  # Target advantage function (if applicable)
     ret = tf.placeholder(dtype=tf.float32, shape=[None])  # Empirical return
 
+    advret = tf.placeholder(dtype=tf.float32, shape=[None])
+
     lrmult = tf.placeholder(name='lrmult', dtype=tf.float32, shape=[])  # learning rate multiplier, updated with schedule
     clip_param = clip_param * lrmult  # Annealed cliping parameter epislon
 
@@ -160,16 +162,20 @@ def ppo_learn(env, policy,
     # warning: do not update weights of value network if loading customized external value initialization.
     if args['vf_load'] == "yes":
         if args['vf_switch'] == "yes":
-            # vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
-
             cond_val_update = True
             vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
                               lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
-            logger.log("loading external valfunc and vf_loss is updated based on certain criteron!")
+            logger.log("loading external valfunc and vf_loss is updated based on normal criteron!")
+
         elif args['vf_switch'] == "no":
             cond_val_update = False
             vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
             logger.log("loading external valfunc and vf_loss is fixed!")
+
+        elif args['vf_switch'] == 'advanced':
+            vf_loss = tf.reduce_mean(tf.square(pi.vpred - advret))
+            logger.log("loading external valfunc and vf_loss is updated based on advanced criteron!")
+
         # XLV: alway add one more value NN with non-stop updating
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
 
@@ -179,7 +185,6 @@ def ppo_learn(env, policy,
         # vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
         #                       lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
-        # logger.log("not loading external valfunc and vf_loss is updating based on certain criteron!")
         logger.log("not loading external valfunc and vf_loss is updating every iteration!")
 
 
@@ -274,6 +279,9 @@ def ppo_learn(env, policy,
         add_vtarg_and_adv(seg, gamma, lam)
 
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
+        if args['adv_shift'] == "yes":
+            logger.log(" --- advantage shift test is enabled --- ")
+            tdlamret -= 100
         rews = seg['rew']
         ep_rets = seg['ep_rets']
         event_flags = seg['event_flag']

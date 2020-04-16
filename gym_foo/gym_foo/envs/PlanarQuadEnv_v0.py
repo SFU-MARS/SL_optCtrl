@@ -31,8 +31,8 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 # need to be compatitable with model.sdf and world.sdf for custom setting
 
 
-# GOAL_ANGLE_RANGE = [0, np.pi]/
-GOAL_ANGLE_RANGE = [-np.pi/4, 0]
+GOAL_ANGLE_RANGE = [0, np.pi/3]
+# GOAL_ANGLE_RANGE = [-np.pi/4, 0]
 GOAL_ANGLE_CENTER = GOAL_ANGLE_RANGE[0] + abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 GOAL_ANGLE_RADIUS = abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 logger.log("goal angle range: from {} to {}".format(GOAL_ANGLE_RANGE[0]*180/np.pi, GOAL_ANGLE_RANGE[1]*180/np.pi))
@@ -435,8 +435,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         # --- rescale from [-1,1] -> [0,12] because MPC control range is [0,12], not [7,10] ---
 
         # print("action before:", action)
-        # action = np.clip(action, -2, 2)
-        action = 2.0 * np.tanh(action)
+        action = np.clip(action, -2, 2)
+        # action = 2.0 * np.tanh(action)
         # action = [0 + (12 - 0) * (a_i - (-1)) / (1- (-1)) for a_i in action]
         action = [7 + (10 - 7) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
         # print("action after:", action)
@@ -626,23 +626,16 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-# if __name__ == "__main__":
-#     quadEnv = PlanarQuadEnv_v0()
-#     quadEnv.reward_type = "hand_craft"
-#     quadEnv.set_additional_goal = 'None'
-#     quadEnv.customized_reset = [-1.1254724508, -0.0746026367, 2.2481865046, 0.0826751712,  0.0529436985, 0]
-#     obs = quadEnv.reset()
-#     res = quadEnv.step([5.0006609471, 10.4238665043])
-#     print("reset obs:", obs)
-#     print("next obs:", res[0])
 
 
-def _seed(seed=None):
-    np_random, seed = seeding.np_random(seed)
-    return [seed]
 
 if __name__ == "__main__":
-    print("seed:", _seed())
+    quadEnv = PlanarQuadEnv_v0(reward_type = "hand_craft", set_additional_goal = 'None')
+    obs = quadEnv.reset()
+    while True:
+        print("enter while loop!")
+        # rospy.sleep(0.1)
+        print(quadEnv.step([8, 8]))
 
 
 

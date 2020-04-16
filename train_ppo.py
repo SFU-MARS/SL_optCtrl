@@ -263,6 +263,7 @@ if __name__ == "__main__":
 
         parser.add_argument("--lam", type=float, default=0.95)
         parser.add_argument("--grad_norm", type=float, default=0.5)
+        parser.add_argument("--adv_shift", type=str, default="no")
         args = parser.parse_args()
         args = vars(args)
 
