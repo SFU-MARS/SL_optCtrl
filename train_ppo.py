@@ -321,7 +321,7 @@ if __name__ == "__main__":
 
             # Load pre-trained model for evaluation
             # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/grad_norm_0.5_kl_0.015_std_0.5_baseline/27-Jan-2020_01-44-06DubinsCarEnv-v0_hand_craft_ppo/model'
-            # LOAD_DIR =  os.environ['PROJ_HOME_3'] + '/runs_log_tests/grad_norm_0.5_kl_0.015_std_0.5_fixed_value_vi/23-Jan-2020_00-13-24DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/model'
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/grad_norm_0.5_kl_0.015_std_0.5_fixed_value_vi/23-Jan-2020_00-13-24DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/model'
 
 
             # eval_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=180, args=args)

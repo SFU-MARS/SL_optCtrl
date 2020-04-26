@@ -93,18 +93,26 @@ class Trainer(object):
                 model_saving_path = './tf_model/car/vf.h5'
 
         elif self.agent == 'quad':
-            if not os.path.exists(dirpath + "/data/quad/valFunc_mpc_filled_final.csv"):
+            if not os.path.exists(dirpath + "/data/quad/valFunc_mpc_filled_final.csv") and \
+                    not os.path.exists(dirpath + "/data/quad/valFunc_vi_filled_cleaned.csv"):
                 raise ValueError("can not find the training file for quad example!!")
             else:
-                dataset_path = dirpath + "/data/quad/valFunc_mpc_filled_final.csv"
-                column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
-                                'reward', 'value', 'cost', 'collision_in_future', 'collision_current', 'col_trajectory_flag']
-                model_saving_path = './tf_model/quad/vf_mpc.h5'
-                logger.log("We use training data from {}".format(dataset_path))
+                if self.method == 'vi':
+                    dataset_path = dirpath + "/data/quad/valFunc_vi_filled_cleaned.csv"
+                    column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+                    model_saving_path = './tf_model/quad/vf_vi.h5'
+                    logger.log("We use training data from {}".format(dataset_path))
+
+                elif self.method == 'mpc':
+                    dataset_path = dirpath + "/data/quad/valFunc_mpc_filled_final.csv"
+                    column_names = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
+                                    'reward', 'value', 'cost', 'collision_in_future', 'collision_current', 'col_trajectory_flag']
+                    model_saving_path = './tf_model/quad/vf_mpc.h5'
+                    logger.log("We use training data from {}".format(dataset_path))
 
 
         elif self.agent == 'dubinsCar':
-            if not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv") or \
+            if not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv") and \
                     not os.path.exists(dirpath + "/data/dubinsCar/env_difficult/valFunc_mpc_filled_cleaned.csv"):
                 raise ValueError("can not find the training file for dubins car example!!")
             else:
@@ -132,32 +140,44 @@ class Trainer(object):
         dataset = raw_dataset.copy()
         dataset = dataset.dropna()
         train_dataset = dataset.sample(frac=1.0, random_state=0)
-
         print(train_dataset.head())
 
-        stats = train_dataset.describe()
-        stats.pop("reward")
-        stats.pop("value")
-        stats.pop("cost")
-        stats.pop("collision_in_future")
-        stats.pop("collision_current")
-        stats.pop("col_trajectory_flag")
 
+        stats = train_dataset.describe()
+
+        # quad with vi
+        stats.pop("value")
+
+        # quad with mpc
+        # stats.pop("reward")
+        # stats.pop("value")
+        # stats.pop("cost")
+        # stats.pop("collision_in_future")
+        # stats.pop("collision_current")
+        # stats.pop("col_trajectory_flag")
+
+        # dubinsCar with mpc
         # stats.pop("reward")
         # stats.pop("value")
         # stats.pop("cost")
         # stats.pop("status")
         stats = stats.transpose()
 
-        train_dataset.pop('reward')
-        train_dataset.pop('cost')
-        train_dataset.pop('collision_in_future')
-        train_dataset.pop('collision_current')
-        train_dataset.pop('col_trajectory_flag')
+        # quad with vi
+        # nothing to pop from train_dataset
 
+        # quad with mpc
+        # train_dataset.pop('reward')
+        # train_dataset.pop('cost')
+        # train_dataset.pop('collision_in_future')
+        # train_dataset.pop('collision_current')
+        # train_dataset.pop('col_trajectory_flag')
+
+        # dubinsCar with mpc
         # train_dataset.pop('reward')
         # train_dataset.pop('cost')
         # train_dataset.pop('status')
+
         train_labels = train_dataset.pop('value')
 
         model = self.build_value_model(self.input_shape)
@@ -383,7 +403,7 @@ if __name__ == "__main__":
     # trainer.train_valFunc()
     # trainer.save_model_weights("./tf_model/dubinsCar/vf_mpc_soft.h5")
 
-    trainer = Trainer(method='mpc', target="valFunc", agent='quad')
-    # trainer.train_valFunc()
-    trainer.save_model_weights("./tf_model/quad/vf_mpc.h5")
+    trainer = Trainer(method='vi', target="valFunc", agent='quad')
+    trainer.train_valFunc()
+    trainer.save_model_weights("./tf_model/quad/vf_vi.h5")
 

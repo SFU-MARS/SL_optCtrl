@@ -208,6 +208,7 @@ class MlpPolicy_mod(object):
                             # print("hid size:", hid_size)
                         self.vpred = tf.layers.dense(last_out, 1, name='final', kernel_initializer=U.normc_initializer(1.0))[:,0]
                         self.vpred = self.vpred - self.vpred + constant
+
                     elif args['gym_env'] == 'PlanarQuadEnv-v0':
                         logger.log(
                             "we are loading external value groundtruth computed by value iteration for quad example, but no weight transferring!")
@@ -229,32 +230,43 @@ class MlpPolicy_mod(object):
 
 
                 # Loading external value computed by value iteration as initialization.
+                elif args['vf_type'] == "boltzmann":
+                    if args['gym_env'] == 'DubinsCarEnv-v0':
+                        wt_filename = "/tf_model/dubinsCar/vf_weights.pkl"
+                        logging = "We are loading external value weights for dubins car trained by value iteration"
+                        val_filled_path = os.environ['PROJ_HOME_3'] + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv"
+                        colnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
 
-                if args['vf_type'] == "boltzmann":
-                    with open(os.environ['PROJ_HOME_3'] + "/tf_model/dubinsCar/vf_weights.pkl", 'rb') as f:
+                    elif args['gym_env'] == 'PlanarQuadEnv-v0':
+                        wt_filename = "/tf_model/quad/vf_vi_weights.pkl"
+                        logging = "We are loading external value weights for quadrotor trained by value iteration"
+                        val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_vi_filled_cleaned.csv"
+                        colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+
+                    with open(os.environ['PROJ_HOME_3'] + wt_filename, 'rb') as f:
                         weights = pickle.load(f)
-                        # print("shape of weights:", np.array(weights).shape)
-                        # print("weights:", weights)
-                        print("loading external value weights computed by value iteration!")
+                        logger.log(logging)
 
                         # --- prepare stats for proper normalization --- #
-                        print("preparing stats mean and std for normalization ...")
-                        val_filled_path = os.environ['PROJ_HOME_3'] + "/data/dubinsCar/env_difficult/valFunc_filled_cleaned.csv"
+                        logger.log("preparing stats mean and std for normalization from {}".format(val_filled_path))
                         assert os.path.exists(val_filled_path)
-                        colnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7','d8']
                         val_filled = pd.read_csv(val_filled_path, names=colnames, na_values="?", comment='\t', sep=",",
                                                  skipinitialspace=True, skiprows=1)
 
                         stats_source = val_filled.copy()
                         stats_source.dropna()
-                        stats_source.pop('value')
                         stats = stats_source.describe()
+
+                        if args['gym_env'] == 'DubinsCarEnv-v0':
+                            stats.pop('value')
+                        elif args['gym_env'] == 'PlanarQuadEnv-v0':
+                            stats.pop('value')
+                        else:
+                            raise ValueError("gym env is not valid!")
                         stats = stats.transpose()
 
                         # obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
                         obz = tf.clip_by_value((ob - np.array(stats['mean'])) / np.array(stats['std']), -5.0, 5.0)
-                        # ----------------------------------------------- #
-
 
                         out_1 = tf.layers.dense(inputs=obz,
                                                   units=64,
@@ -336,7 +348,6 @@ class MlpPolicy_mod(object):
 
                         # obz = tf.clip_by_value((ob - self.ob_rms.mean) / self.ob_rms.std, -5.0, 5.0)
                         obz = tf.clip_by_value((ob - np.array(stats['mean'])) / np.array(stats['std']), -5.0, 5.0)
-                        # ----------------------------------------------- #
 
                         out_1 = tf.layers.dense(inputs=obz,
                                                 units=64,

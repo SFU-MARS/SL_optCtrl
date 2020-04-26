@@ -8,6 +8,6 @@
   "optim_stepsize":3e-4,
   "optim_batchsize":64,
   "gamma":0.998,
-  "lam":0.95
+  "lam":1.00
 }
 
