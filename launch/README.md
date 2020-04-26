@@ -1,0 +1,1 @@
+This folder should have ros launch file to boot necessary ros nodes and Gazebo simulator.

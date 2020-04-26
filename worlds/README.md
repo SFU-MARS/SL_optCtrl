@@ -1,0 +1,1 @@
+This folder should have Gazebo world description file, like *.world
