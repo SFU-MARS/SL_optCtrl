@@ -6,8 +6,9 @@ tests/
 tf_model/car/
 tf_model/quad/
 runs_log_tests/
-gym_foo/gym_foo/envs/__pycache__/*.pyc
-ppo1/__pycache__/*.pyc
 .idea/workspace.xml
 *.pyc
-value_iteration/value_matrix_quad_6D/
+*.npy
+*.txt
+*.csv
+runs_log_filtered/

@@ -290,12 +290,15 @@ def ppo_learn(env, policy,
         vpredbefore = seg['vpred']
         tdtarget = seg['tdtarget']
 
-        logger.log("Sum of td target over this iteration: %f" % np.sum(tdtarget))
-        logger.log("Sum of approximate mc return over this iteration: %f" % np.sum(tdlamret))
+        print(len(mc_rets))
+        print(len(vpredbefore))
+
+        logger.log("Sum of value pred over this iteration: %f" % np.sum(vpredbefore))
+        logger.log("Sum of mc return over this iteration: %f" % np.sum(mc_rets))
 
 
         if cond_val_update:
-            if np.sum(tdlamret) < np.sum(tdtarget):
+            if np.sum(mc_rets) < np.sum(vpredbefore):
                 val_update_criteron = False
                 logger.log("Now we are running with MPC switch pattern. This iter we do not update value function")
             else:

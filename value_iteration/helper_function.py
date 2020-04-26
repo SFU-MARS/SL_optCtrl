@@ -51,11 +51,16 @@ class value_interpolation_function_quad(object):
 		self.theta = (-math.pi / 2, math.pi / 2)
 		self.w = (-math.pi*5/3, math.pi*5/3)
 
-		self.ranges = np.array([self.x, self.z, self.vx, self.vz, self.theta, self.w])
-		self.state_step_num = np.array([11, 11, 9, 9, 11, 11])
+		# self.ranges = np.array([self.x, self.z, self.vx, self.vz, self.theta, self.w])
+		# self.state_step_num = np.array([11, 11, 9, 9, 11, 11])
 
-		self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_matrix_quad_6D/value_matrix_7.npy"
-		print("using value file:", self.value_file_path)
+		self.ranges = np.array([self.x,  self.vx, self.z, self.vz, self.theta, self.w])
+		self.state_step_num = np.array([11, 9, 11, 9, 11, 11])
+
+		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_matrix_quad_6D/value_matrix_7.npy"
+
+		self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy"
+		# print("using value file:", self.value_file_path)
 		self.fill_value = -400
 		self.value = None
 		self.interpolating_function = None
@@ -86,8 +91,8 @@ class value_interpolation_function_quad(object):
 		return self.interpolating_function(v).astype(np.float32)
 
 
-# test = value_interpolation_function()
+# test = value_interpolation_function_quad()
 #
 # test.setup()
 #
-# print(test.interpolate_value(np.zeros([10,3])))
+# print(test.interpolate_value(np.zeros([10,6])))

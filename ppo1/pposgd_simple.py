@@ -127,7 +127,7 @@ def add_vtarg_and_adv(seg, gamma, lam):
         G[t] = rew[t] + gamma * G[t+1] * nonterminal
         tdtarget[t] = rew[t] + gamma * vpred[t+1] * nonterminal
     seg["tdlamret"] = seg["adv"] + seg["vpred"]
-    # AMEND: added by xlv, return G except the last element and tdtarget
+    # AMEND: added by xlv, return G except the last element, and tdtarget
     seg["mcreturn"] = G[:-1]
     seg["tdtarget"] = tdtarget
 

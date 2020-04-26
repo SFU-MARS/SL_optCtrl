@@ -35,46 +35,52 @@ from gym_foo.gym_foo.envs.DubinsCarEnv_v0 import DubinsCarEnv_v0
 
 CUR_PATH = os.path.dirname(os.path.abspath(__file__))
 
-def csv_clean(filename, horizon, trajs_type, truncate=False):
-    # assert filename == os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_mpc_filled.csv'
+def csv_clean(filename, horizon=None, trajs_type=None, truncate=False):
     df = pd.read_csv(filename)
 
-    # Use feasible trajectories
-    if trajs_type == 'feasible':
-        invalidIndices = df[df['col_trajectory_flag'] == 3].index
-        df.drop(invalidIndices, inplace=True)
-    elif trajs_type == 'infeasible':
-        invalidIndices = df[df['col_trajectory_flag'] == 2].index
-        df.drop(invalidIndices, inplace=True)
-    elif trajs_type == 'all':
-        pass
+    # special process only for /data/quad/valFunc_mpc_filled_final.csv
+    if filename == os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_mpc_filled_final.csv':
+        # Use feasible trajectories
+        if trajs_type == 'feasible':
+            invalidIndices = df[df['col_trajectory_flag'] == 3].index
+            df.drop(invalidIndices, inplace=True)
+        elif trajs_type == 'infeasible':
+            invalidIndices = df[df['col_trajectory_flag'] == 2].index
+            df.drop(invalidIndices, inplace=True)
+        elif trajs_type == 'all':
+            pass
+        else:
+            raise ValueError("invalid trajs type!")
+
+        # if truncation is required
+        if truncate:
+            df_truncate = pd.DataFrame(columns=df.columns)
+            T = len(df.index)
+            for i in range(0, T+1-horizon, horizon):
+                for j in range(i, i+horizon):
+                    tmp = df.iloc[[j]]
+                    df_truncate = df_truncate.append(tmp)
+                    # print(tmp['value'].item())
+                    if tmp['value'].item() in [1000, -400]:
+                        # print("value is 1000 or -400")
+                        break
+            df = df_truncate
+
+        df = df.replace([np.inf, -np.inf], np.nan)
+        df = df.dropna()
+
+        name_to_save = os.path.splitext(filename)[0] + '_cleaned'
+        name_to_save += '_' + trajs_type
+
+        if truncate:
+            name_to_save += '_truncated'
+        else:
+            name_to_save += '_untruncated'
     else:
-        raise ValueError("invalid trajs type!")
+        df = df.replace([np.inf, -np.inf], np.nan)
+        df = df.dropna()
+        name_to_save = os.path.splitext(filename)[0] + '_cleaned'
 
-    # if truncation is required
-    if truncate:
-        df_truncate = pd.DataFrame(columns=df.columns)
-        T = len(df.index)
-        for i in range(0, T+1-horizon, horizon):
-            for j in range(i, i+horizon):
-                tmp = df.iloc[[j]]
-                df_truncate = df_truncate.append(tmp)
-                # print(tmp['value'].item())
-                if tmp['value'].item() in [1000, -400]:
-                    # print("value is 1000 or -400")
-                    break
-        df = df_truncate
-
-    df = df.replace([np.inf, -np.inf], np.nan)
-    df = df.dropna()
-
-    name_to_save = os.path.splitext(filename)[0] + '_cleaned'
-    name_to_save += '_' + trajs_type
-
-    if truncate:
-        name_to_save += '_truncated'
-    else:
-        name_to_save += '_untruncated'
     df.to_csv(name_to_save + '.csv')
 
 
@@ -257,7 +263,7 @@ class Data_Generator(object):
         rospy.ServiceProxy('gazebo/set_model_state', SetModelState)(car_state)
         return True
 
-    def gen_data(self, horizon, rew_config, goal_config, data_form='valFunc', agent=None):
+    def gen_data(self, data_form, agent, horizon=None, rew_config=None, goal_config=None):
         assert agent in ['quad', 'car', 'dubinsCar']
         unfilled_filename = None
         filled_filename = None
@@ -296,9 +302,13 @@ class Data_Generator(object):
                     goal_state = np.array([4.0, 9.0, 0.75])
                     goal_torlerance = np.array([1.0, 1.0, 0.3])
 
+                else:
+                    raise ValueError("invalid goal config!")
+
                 T = np.shape(states)[0]
                 # print("T:", T)
                 # T = 1400
+                assert horizon != None and rew_config != None and goal_config != None
                 mpc_horizon = horizon
                 discount_factor = 0.98
 
@@ -347,6 +357,7 @@ class Data_Generator(object):
                 rews = rews.reshape(-1, 1)
                 vpreds = vpreds.reshape(-1, 1)
 
+
             """ Read unfilled file and choose what we want and write as filled file """
             with open(unfilled_filename, 'r') as csvfile1, open(filled_filename, 'w', newline='') as csvfile2:
                 reader = csv.DictReader(csvfile1)
@@ -356,6 +367,8 @@ class Data_Generator(object):
                 if data_form == 'valFunc_mpc':
                     fieldnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
                                   'reward', 'value', 'cost', 'collision_in_future', 'collision_current', 'col_trajectory_flag']
+                elif data_form == 'valFunc_vi':
+                    fieldnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
                 elif data_form == 'polFunc':
                     fieldnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'a1', 'a2', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
                 else:
@@ -430,6 +443,18 @@ class Data_Generator(object):
                                     'collision_current': collision_current,
                                     'col_trajectory_flag': col_trajectory_flag}
                         # print("tmp_dict:", tmp_dict)
+                        assert tmp_dict
+                    elif data_form == 'valFunc_vi':
+                        value = float(row['value'])
+                        tmp_dict = {'x': x, 'vx': vx, 'z': z, 'vz': vz, 'phi': phi, 'w': w, 'value':value,
+                                    'd1': discrete_sensor_data[0],
+                                    'd2': discrete_sensor_data[1],
+                                    'd3': discrete_sensor_data[2],
+                                    'd4': discrete_sensor_data[3],
+                                    'd5': discrete_sensor_data[4],
+                                    'd6': discrete_sensor_data[5],
+                                    'd7': discrete_sensor_data[6],
+                                    'd8': discrete_sensor_data[7]}
                         assert tmp_dict
                     elif data_form == 'polFunc':
                         a1 = float(row['a1'])
@@ -607,8 +632,9 @@ class Data_Generator(object):
 
 
 if __name__ == "__main__":
-    # data_gen = Data_Generator()
-    # data_gen.gen_data(horizon=140, rew_config='MPC', goal_config='right', data_form='valFunc_mpc', agent='quad')
+    data_gen = Data_Generator()
+    data_gen.gen_data(data_form='valFunc_vi', agent='quad')
+    csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_vi_filled.csv'))
 
     # csv_clean(os.path.join(os.environ['PROJ_HOME_3'],
     #                        'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled.csv'),
@@ -634,6 +660,6 @@ if __name__ == "__main__":
     # special_func_combine(filenames)
     # data_balancer()
 
-    filenames = [os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/old_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_all_untruncated.csv')]
-    special_func_combine(filenames)
+    # filenames = [os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/old_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled_cleaned_all_untruncated.csv')]
+    # special_func_combine(filenames)
     # data_balancer()
