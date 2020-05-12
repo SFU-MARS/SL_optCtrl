@@ -7,85 +7,104 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from scipy.interpolate import RegularGridInterpolator
 import time
+import scipy.ndimage as ndimage
 
-class env_quadrotor_6d(object):
+# import collection
+
+class env_quad_6d(object):
 	def __init__(self):
-		########### World Setting ########## 
+		########### Quadrotor Setting ##########
 		self.x = (-5, 5)
 		self.z = (0, 10)
-		self.gravity = 9.8
-		self.obstacles = None
 
-		########### Drone Setting ##########
-		self.vx = (-2, 2)
-		self.vz = (-2, 2)
-		self.theta = (-math.pi, math.pi)
-		self.omega = (-2*math.pi, 2*math.pi)
-		self.ranges = np.array([self.x, self.z, self.vx, self.vz, self.theta, self.omega])
+		self.vx = (-4, 5)
+		self.vz = (-2, 5)
 
+		# self.vx = (-7, 7)
+		# self.vz = (-7, 7)
+
+		self.theta = (-math.pi / 2, math.pi / 2)
+		self.w = (-math.pi*5/3, math.pi*5/3)
+		# self.w = (-math.pi * 2, math.pi * 2)
+
+		self.t1 = (7, 12)
+		self.t2 = (7, 12)
+
+		self.ranges = np.array([self.x, self.z, self.vx, self.vz, self.theta, self.w])
+		self.actions = np.array([self.t1, self.t2])
+		self.dim = np.array([0, 1, 2, 3, 4, 5])
+
+
+		self.length = 0.3
 		self.mass = 1.25
-		self.length = 0.5
 		self.inertia = 0.125
 		self.trans = 0.25 # Cdv
 		self.rot = 0.02255 # Cd_phi
-		self.delta = 0.4
-
-		self.t1 = (0, 36.7875 / 2)
-		self.t2 = (0, 36.7875 / 2)
-		self.actions = np.array([self.t1, self.t2])
 		########### Goal Setting ##########
-		self.goal_x = (3.5, 4.5)
-		self.goal_z = (8.5, 9.5)
-		self.goal_vx = (-2, 2)
-		self.goal_vz = (-2, 2)
-		# self.goal_theta = (0.45, 1.05)
-		self.goal_theta = self.theta
-		self.goal_omega = self.omega
-		self.goals = np.array([self.goal_x, self.goal_z, self.goal_vx, self.vz, self.goal_theta, self.goal_omega])
+		self.goal_x = (3, 5)
+		self.goal_z = (8, 10)
+		# self.goal_theta = (-np.pi / 4, 0)
+		# self.goal_theta = (-np.pi / 3, np.pi / 3)
+		self.goal_theta = (-np.pi / 6, np.pi / 3)
+
+		self.goals = np.array([self.goal_x, self.goal_z, self.goal_theta])
 
 		########### Algorithm Setting ##########
-		self.discount = 0.90
-		self.threshold = 0.5
+		self.discount = 0.998
+		self.threshold = 2
+		self.delta = 0.3
+		self.tau = 1
+		self.gravity = 9.8
 
-		# reward = [regula state, in goal, crashed, overspeed]
-		self.reward_list = np.array([0, 1000, -400, -200], dtype = float)
+		# reward = [regula state, in goal, crashed, turnover]
+		self.turnover = (-1.4, 1.4)
+		self.reward_list = np.array([0, 1000, -400, -800], dtype = float)
 
 		########## Discreteness Setting ##########
-		# 6D state
+		# 4D state
 		# 2D action
-		# (x, z, vx, vz, theta, omega)
-		# (t1, t2)
-		self.state_step_num = np.array([11, 11, 11, 11, 9, 9])
-		self.action_step_num = np.array([5, 5])
+		# (x, y, theta, steer_angle)
+		# (v, omega)
+		self.state_step_num = np.array([11, 11, 9, 9, 11, 11])
+		# self.state_step_num = np.array([5, 5, 5, 5, 11, 11]) # for test
+		self.action_step_num = np.array([6, 6])
+		self.all_step_num = np.concatenate((self.state_step_num, self.action_step_num), axis = None)
 
 		########## Algorithm Declaration ##########
 		self.state_grid = None
 		self.action_grid = None
 
 		self.value = None
-		self.reward = None
+		self.update = None
+		self.order = None
 
 		self.state_type = None
 		self.state_reward = None
 
-		########## Subsystem Setting ##########
-		self.dim = [[0, 2, 4, 5], [1, 3, 4, 5]]
+		self.acts = None
 
-	def add_obstacle(self, x1, x2, z1, z2):
-		if ((x1 > x2) or (z1 > z2)):
-			print("Add obstacle error! Check parameters")
-			return
+		self.obstacles = None
 
-		if (self.obstacles is None):
-			self.obstacles = np.array([[x1, x2, z1, z2]], dtype = float)
-		else:
-			self.obstacles = np.concatenate((self.obstacles, np.array([[x1, x2, z1, z2]])), axis = 0)
+
+	def algorithm_init(self):
+		self.add_obstacles()
+		self.state_discretization()
+		self.state_init()
+		self.action_init()
+
+	def add_obstacles(self):
+		self.obstacles = np.array([[-2.75, -1.25, 4.25, 5.75], # [x0, x1, y0, y1]
+									[0.25, 1.75, 8.0, 9.0], 
+									[2.25, 5.25, 4.25, 5.75], 
+									[-0.25, 0.25, 0, 2]], dtype = float)
+
+		print(self.obstacles)
 
 	def state_discretization(self):
 		state_dim_num = len(self.state_step_num)
 		action_dim_num = len(self.action_step_num)
 
-		########### Space Declaration ##########
+		########## Space Declaration ##########
 		l = []
 		for size in self.state_step_num:
 			x = np.empty((size), dtype = float)
@@ -102,89 +121,306 @@ class env_quadrotor_6d(object):
 		for i in range(state_dim_num):
 			self.state_grid[i] = np.linspace(self.ranges[i][0], self.ranges[i][1], self.state_step_num[i])
 		for i in range(action_dim_num):
-			self.action_grid[i] = np.linspace(self.actions[i][0], self.actions[i][1], self.action_step_num[i])
+			self.action_grid[i] = np.linspace(self.actions[i][0], self.actions[i][1], self.action_step_num[i])	
 
-	def state_init(self, system):
-		if (system == 0):
-			self.states = np.array(np.meshgrid(self.state_grid[0],
-												self.state_grid[2],
-												self.state_grid[4],
-												self.state_grid[5])).T.reshape(-1, len(self.dim[system]))
-		else:
-			self.states = np.array(np.meshgrid(self.state_grid[1],
-												self.state_grid[3],
-												self.state_grid[4],
-												self.state_grid[5])).T.reshape(-1, len(self.dim[system]))
+		print(self.state_grid)
 
 
-		self.value = np.zeros(self.state_step_num[self.dim[system]], dtype = float)
-		self.reward = np.zeros(self.states.shape[0], dtype = float)
-		delete_list = []
+	def state_init(self):
+		self.states = np.array(np.meshgrid(self.state_grid[0],
+											self.state_grid[1],
+											self.state_grid[2],
+											self.state_grid[3],
+											self.state_grid[4],
+											self.state_grid[5])).T.reshape(-1, len(self.state_grid))
 
-		# print(self.states.shape)
+		self.value = np.zeros(self.state_step_num, dtype = float)
+		self.update = np.zeros(self.states.shape[0], dtype = bool)
+		self.order =  np.zeros(self.states.shape, dtype = float)
 
+		ordered = np.zeros(self.states.shape[0], dtype = bool)
+
+		#### Calculate the distance between states and goal ####
+		# x = 3
+		# y = 8
+		# radius = 0.5
+		# total_count = 0
+		# while (total_count < self.states.shape[0]):
+		# 	for i, s in enumerate(self.states):
+		# 		if (ordered[i]):
+		# 			continue
+		# 		d = (s[0] - x) * (s[0] - x) + (s[1] - y) * (s[1] - y)
+		# 		if (math.sqrt(d) <= radius):
+		# 			self.order[total_count] = self.states[i]
+		# 			total_count += 1
+		# 			ordered[i] = True
+		# 	radius += 0.5
+		# 	print("current radius: ", radius, "current ordered: ", total_count)
+
+		# self.states = self.order
+		########################################################
+
+		counter_0 = 0
+		counter_1 = 0
+		counter_2 = 0
+		counter_3 = 0
+ 
 		for i, s in enumerate(self.states):
-			state_type = self.state_check(s, self.dim[system])
-			if (state_type == 1):
-				index = tuple(self.state_to_index(s, self.dim[system]))
+			state_type = self.state_check(s, self.dim)
+			if (state_type > 0):
+				index = tuple(self.state_to_index(s))
 				self.value[index] = self.reward_list[state_type]
-				delete_list.append(i)
+			
+			self.update[i] = (state_type == 0)
+			counter_0 += int(state_type == 0)
+			counter_1 += int(state_type == 1)
+			counter_2 += int(state_type == 2)
+			counter_3 += int(state_type == 3)
 
-		# print(self.states.shape)
+		print(len(self.states))
+		print("update states: ", counter_0)
+		print("goal states: ", counter_1)
+		print("crashed states: ", counter_2)
+		print("turnover states: ", counter_3)
 
-		# self.states = np.delete(self.states, delete_list, 0)
-		# self.reward = np.delete(self.reward, delete_list, 0)
 
-		print("The number of states: ", self.states.shape)
+
 
 	def action_init(self):
 		self.acts = np.array(np.meshgrid(self.action_grid[0],
 										self.action_grid[1])).T.reshape(-1, self.actions.shape[0])
+		
 
-	def value_iteration(self, system):
-		self.algorithm_init(system)
+	def state_check(self, s, dim):
+		temp = 0
+		temp = self.check_goal(s)
+		if (temp):
+			return temp
 
+		temp = self.check_crash(s)
+		if (temp):
+			return temp
+
+		temp = self.check_turnover(s[4])
+		if (temp):
+			return temp
+
+		return temp
+
+	def check_goal(self, s):
+		for i, v in enumerate(s[:2]):
+			if (v < self.goals[i][0]  or  v > self.goals[i][1]):
+				return 0
+
+		if (s[4] < self.goals[2][0]  or  s[4] > self.goals[2][1]):
+			return 0 
+
+		return 1
+
+	def check_crash(self, s):
+		# return 2 = crashed
+		# return 0 = no crash
+
+		width = 0.2
+
+		if (self.obstacles is not None  and  len(self.obstacles)):
+			for obs in self.obstacles:
+				if (s[0] >= obs[0] - width  and  
+					s[0] <= obs[1] + width  and
+					s[1] >= obs[2] - width  and  
+					s[1] <= obs[3] + width):
+					return 2
+
+		if (s[0] <= self.ranges[0][0] + width  or  
+			s[0] >= self.ranges[0][1] - width):
+			return 2
+
+		if (s[1] < self.ranges[1][0] + width  or  
+			s[1] > self.ranges[1][1] - width):
+			return 2
+
+		return 0 
+
+	def check_turnover(self, s):
+		# return 3 = turnover
+		# return 0 = in normal
+
+		if (s < self.turnover[0]  or  s > self.turnover[1]):
+			return 3
+
+		return 0
+
+	def check_cross(self, s, s_):
+		k = (s_[1] - s[1]) / (s_[0] - s[0])
+
+		if (np.absolute(k) > 10000 or np.absolute(k) < 0.0001):
+			return False
+
+		b = s[1] - k*s[0]
+
+		
+		if (self.obstacles is not None  and  len(self.obstacles)):
+			for obs in self.obstacles:
+
+				if ( (s[0] >= obs[0]  and  s[0] <= obs[1])  or  (s_[0] >= obs[0]  and  s_[0] <= obs[1]) ):
+					y = k * obs[0] + b
+					if ( y >= obs[2]  and  y <= obs[3]):
+						return True
+			
+					y = k * obs[1] + b
+					if ( y >= obs[2]  and  y <= obs[3]):
+						return True
+
+				if ( (s[1] >= obs[2]  and  s[1] <= obs[3])  or  (s_[1] >= obs[2]  and  s_[1] <= obs[3]) ):			
+					x = (obs[2] - b) / k
+					if ( x >= obs[0]  and  x <= obs[1]):
+						return True
+
+				
+					x = (obs[3] - b) / k
+					if ( x >= obs[0]  and  x <= obs[1]):
+						return True
+
+		return False
+
+
+	def state_to_index(self, s):
+		grid = np.copy(self.state_grid)
+
+		index = []
+		for i, v in enumerate(s):
+			grid[i] = np.absolute(grid[i] - v)
+			index.append(grid[i].argmin())
+
+		return index
+
+	def action_to_index(self, a):
+		grid = np.copy(self.action_grid)
+
+		index = []
+		for i, v in enumerate(a):
+			grid[i] = np.absolute(grid[i] - v)
+			index.append(grid[i].argmin())
+
+		return index
+
+	def state_transition(self, s, a):
+		action_sum = np.sum(a)
+		action_diff = a[0] - a[1]
+
+		state_ = np.array([s[0] + s[2] * self.delta,
+							s[1] + s[3] * self.delta,
+							s[2] + self.delta * (-self.trans * s[2] + math.sin(s[4]) * action_sum) / self.mass,
+							s[3] + self.delta * (-self.gravity + (-self.trans * s[3] + math.cos(s[4]) * action_sum) / self.mass),
+							s[4] + s[5] * self.delta,
+							s[5] + self.delta * (-self.rot * s[5] + self.length * action_diff) / self.inertia])
+
+		while (state_[4] > math.pi):
+			state_[4] = -math.pi + (state_[4] - math.pi)
+
+		while (state_[4] < -math.pi):
+			state_[4] = math.pi + (state_[4] + math.pi)
+
+		return state_
+
+
+
+	def value_iteration(self, mode = "default"):
 		iteration = 0
+
 		while True:
 			delta = 0
+			# interpolating_function = RegularGridInterpolator((self.state_grid[0],
+			# 													self.state_grid[1],
+			# 													self.state_grid[2],
+			# 													self.state_grid[3],
+			# 													self.state_grid[4],
+			# 													self.state_grid[5]),
+			# 													self.value,
+			# 													bounds_error = False,
+			# 													fill_value = self.reward_list[2])
+
+			# total_time = 0
+			# states_counter = 0
+			# interpolation_time = 0
+
 			for i, s in enumerate(self.states):
-				best_value = -1000000
-				state_type = self.state_check(s, self.dim[system])
-				if (state_type > 0):
+				if (self.update[i] == False):
 					continue
 
-				current_reward = self.reward[i]
+				if (mode == "boltzmann"):
+					best_value = 0
+					qvalue = np.array([], dtype = float)
+					bolt = np.array([], dtype = float)
+				else:
+					best_value = -10000
 
-				for i, a in enumerate(self.acts):
-					if (system == 0):
-						s_ = self.state_transition_x(s, a)
-					else:
-						s_ = self.state_transition_z(s, a)
+				for _, a in enumerate(self.acts):
+					s_ = self.state_transition(s, a)
+					next_step_type = self.state_check(s_, self.dim)
+					#### Obstacle crossing judgement ####
 
-					next_step_type = self.state_check(s_, self.dim[system])
+					# if (next_step_type <= 1):
+					# 	if (self.check_cross(s, s_)):
+					# 		next_step_type = 2
 
 					if (next_step_type >= 2):
-						next_step_value = (next_step_type == 2) * self.reward_list[2] + (next_step_type == 3) * self.reward_list[3]
+						next_step_value = self.reward_list[next_step_type]
 					else:
-						sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim[system])
-						interpolating_function = RegularGridInterpolator((sub_states[0],
-																			sub_states[1],
-																			sub_states[2],
-																			sub_states[3]),
-																			sub_value_matrix,
-																			bounds_error = False,
-																			fill_value = self.reward_list[2])
-						next_step_value = interpolating_function(s_)
+						sub_value_matrix, sub_states = self.seek_neighbors_values(s_, self.dim)
 
-					best_value = max(best_value, current_reward + self.discount * next_step_value)
+						#### Old version interpolation function ####
 
-				index = tuple(self.state_to_index(s, self.dim[system]))
+						# interpolating_function = RegularGridInterpolator((sub_states[0],
+						# 													sub_states[1],
+						# 													sub_states[2],
+						# 													sub_states[3],
+						# 													sub_states[4],
+						# 													sub_states[5]),
+						# 													sub_value_matrix,
+						# 													bounds_error = False,
+						# 													fill_value = self.reward_list[2])
+						# next_step_value = interpolating_function(s_)
+
+						####################################
+
+						#### ndimgae map coordinates ####
+						sub_states = np.array(sub_states, dtype = float)
+						s_ = (s_ - sub_states[:, 0]) / (sub_states[:, 1] - sub_states[:, 0])
+						s_ = np.array([s_],dtype=float)
+
+						next_step_value = ndimage.map_coordinates(sub_value_matrix, s_.T, mode = "constant", cval = self.reward_list[2])
+
+						interpolation_time += time.time() - temp_t
+						##################################
+
+
+					if (mode == "boltzmann"):
+						temp_value = self.discount * next_step_value
+						qvalue = np.append(qvalue, [[temp_value]])
+						# 100 is a scalar to solve math range error. The value range becomes [-4, 10]
+						bolt = np.append(bolt, [[math.exp(temp_value / 100 / self.tau)]])
+					else:
+						best_value = max(best_value, self.discount * next_step_value)
+
+				index = tuple(self.state_to_index(s))
+				if (mode == "boltzmann"):
+					total = bolt.sum()
+					p_a = bolt / total
+					best_value = np.matmul(p_a, np.transpose(qvalue))
+
 				current_delta = abs(best_value - self.value[index])
 				delta = max(delta, current_delta)
+
 				self.value[index] = best_value
 
+				# states_counter += 1
+				# total_time += time.time() - t
+				# if (states_counter % 10000 == 0):
+				# 	print(total_time)
+				# 	print(interpolation_time)
 
-			self.value_output(system, iteration, True)
+			self.value_output(iteration, True)
 			print("iteraion %d:" %(iteration))
 			print("delta: ", delta)
 			print("\n\n")			
@@ -194,67 +430,8 @@ class env_quadrotor_6d(object):
 			if (delta < self.threshold):
 				break
 
-	def value_output(self, system, iteration_number, readable_file = False):
-		dir_path = "./value_matrix/"
-		try:
-			os.mkdir(dir_path)
-		except:
-	   		print(dir_path + " exist!")
-
-		file_name = "value_matrix" + "_" + str(system) + "_" + str(iteration_number)
-		print(file_name)
-
-		np.save(dir_path + file_name, self.value)
-
-		if (readable_file == True):
-			file_name = file_name + ".txt"
-			f = open(dir_path + file_name, "w")
-
-			for i, s in enumerate(self.states):
-				index = tuple(self.state_to_index(s, self.dim[system]))
-				s = np.array2string(s, precision = 4, separator = '  ')
-				s += '  ' + format(self.value[index], '.4f') + '\n'
-				f.write(s)
-
-			f.close()
-
-	def state_transition_x(self, state, action):
-		action_sum = np.sum(action)
-		action_diff = action[0] - action[1]
-
-		state_ = np.array([state[0] + state[1] * self.delta,
-							state[1] + self.delta / self.mass * (-self.trans * state[1] + math.sin(state[2]) * action_sum),
-							state[2] + state[3] * self.delta,
-							state[3] + self.delta / self.inertia * (-self.rot * state[3] + self.length * action_diff)])
-
-		while (state_[2] > self.theta[1]):
-			state_[2] = self.theta[0] + (state_[2] - self.theta[1])
-
-		while (state_[2] < self.theta[0]):
-			state_[2] = self.theta[1] + (state_[2] - self.theta[0])
-
-		return state_
-
-	def state_transition_z(self, state, action):
-		action_sum = np.sum(action)
-		action_diff = action[0] - action[1]
-
-		state_ = np.array([state[0] + state[1] * self.delta,
-							state[1] + self.delta * ((-self.trans * state[1] + math.cos(state[2]) * action_sum) / self.mass - self.gravity),
-							state[2] + state[3] * self.delta,
-							state[3] + self.delta / self.inertia * (-self.rot * state[3] + self.length * action_diff)
-							])	
-
-		while (state_[2] > self.theta[1]):
-			state_[2] = self.theta[0] + (state_[2] - self.theta[1])
-
-		while (state_[2] < self.theta[0]):
-			state_[2] = self.theta[1] + (state_[2] - self.theta[0])
-
-		return state_
-
 	def seek_neighbors_values(self, state, dim):
-		index = self.state_to_index(state, dim)
+		index = self.state_to_index(state)
 		r = []
 		sub_states = []
 
@@ -273,260 +450,271 @@ class env_quadrotor_6d(object):
 			r.append([left, right])
 			sub_states.append(self.state_grid[dim[i]][left:right])	
 
-		if (dim[0] == 0):
-			return self.value[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1], r[3][0]:r[3][1]], sub_states
-		else:
-			return self.value[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1], r[3][0]:r[3][1]], sub_states
+		return self.value[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1], r[3][0]:r[3][1], r[4][0]:r[4][1], r[5][0]:r[5][1]], sub_states
 
-	def state_check(self, s, dim):
-		# This function is used for returning the state_type of a state
-		# Also including check whether the state is out of range
 
-		# temp = (0, 1, 2, 3) -> (regular state, in goal, crashed, overspeed)
-		temp = 0
-		# Check in goal range
-		temp = self.check_goal(s, dim)
-		if (temp):
-			return temp
-
-		temp = self.check_crash(s, dim)
-		if (temp):
-			return temp
-
-		temp = self.check_overspeed(s, dim)
-		if (temp):
-			return temp
-
-		return temp
-
-	def check_goal(self, s, dim):
-		for i, d in enumerate(dim):
-			if (s[i] < self.goals[d][0] or s[i] > self.goals[d][1]):
-				return 0
-
-		return 1
-
-	def check_crash(self, s, dim):
-		# return 1 = crashed
-		# return 0 = no crash
-
-		if (self.obstacles is not None and len(self.obstacles)):
-			temp_obs = None
-			if (dim[0] == 0):
-				temp_obs = self.obstacles[:, :2]
-			else:
-				temp_obs = self.obstacles[:, 2:]
-
-			for obs in temp_obs:
-				if (s[0] >= obs[0] and s[0] <= obs[1]):
-					return 2
-
-		if (s[0] < self.ranges[dim[0]][0] or s[0] > self.ranges[dim[0]][1]):
-			return 2
-
-		return 0
-
-	def check_overspeed(self, s, dim):
-		# return 3 = overspeed
-		# return 0 = regular speed
-		# Only check the velocity and angular velocity
-		for i, d in enumerate(dim):
-			if (i == 0 or i == 2): # pass the x and theta variable
-				continue
-
-			if (s[i] < self.ranges[d][0] or s[i] > self.ranges[d][1]):
-				return 3
-
-		return 0
-
-	def state_to_index(self, state, dim):
-		grid = self.state_grid[dim]
-
-		for i in range(len(dim)):
-			grid[i] = np.absolute(grid[i] - state[i])
-
-		index = []
-		for i in range(len(dim)):
-			index.append(grid[i].argmin())
-
-		return index
-
-	def plot_2D_result(self, dir_path, file_name):
-		save_path = "./plots_quadrotor_6D/plot_2D/"
-		data = np.load(dir_path + file_name)
-		values = np.sort(data.reshape(-1))
-		plt.plot(values)
-
+	def value_output(self, iteration_number, readable_file = False):
+		dir_path = "./value_matrix_quad_6D/"
 		try:
-			os.makedirs(save_path)
+			os.mkdir(dir_path)
 		except:
-			print(save_path + " exists!")
+	   		print(dir_path + " exist!")
 
-		plt.savefig(save_path + file_name.split(".")[0])
-		plt.clf()
+		file_name = "value_matrix" + "_" + str(iteration_number)
+		print(file_name)
 
-	def plot_3D_result(self, dir_path, file_name, system = 0):
-		file = dir_path + file_name
+		np.save(dir_path + file_name, self.value)
+
+		if (readable_file == True):
+			file_name = file_name + ".txt"
+			f = open(dir_path + file_name, "w")
+
+			for i, s in enumerate(self.states):
+				index = tuple(self.state_to_index(s))
+				s = np.array2string(s, precision = 4, separator = '  ')
+				s += '  ' + format(self.value[index], '.4f') + '\n'
+				f.write(s)
+
+			f.close()
+
+	def plot_2D_result(self, mode = "max"):
+		# file = "./value_matrix_quad_6D/value_matrix_7.npy"
+		file = "./value_matrix_10.npy"
+
 		data = np.load(file)
 
-		theta_index = 0
-		while theta_index < data.shape[-1]:
-			omega_index = 0
-
-			save_path = "./plots_quadrotor_6D/plot_3D_" + str(system) + "/theta_" + str(theta_index)
-			try:
-				os.makedirs(save_path)
-			except:
-				print(save_path + " exist!")
-
-			while omega_index < data.shape[-2]:
-				print(theta_index, omega_index)
-				x = np.zeros(data.shape[:-2])
-				vx = np.zeros(data.shape[:-2])
-				value = np.zeros(data.shape[:-2])
-
-				for i, d in np.ndenumerate(data):
-					if (i[-1] == omega_index  and  i[-2] == theta_index):
-						x[i[:-2]] = self.state_grid[0 + system][i[0]]
-						vx[i[:-2]] = self.state_grid[2 + system][i[1]]
-						value[i[:-2]] = d
-
-
-				fig = plt.figure()
-				ax = fig.gca(projection='3d')
-
-				surf = ax.plot_surface(x, vx, value, cmap=cm.coolwarm,
-					   linewidth=0, antialiased=False)
-				fig.colorbar(surf, shrink=0.5, aspect=5)
-
-				ax.set_xlabel('x/z', fontsize = 15)
-				ax.set_ylabel('vx/vz', fontsize = 15)
-				ax.set_zlabel('value', fontsize = 15)
-				title = "theta: " + str(round(self.state_grid[4][theta_index], 2)) + "   omega: " + str(round(self.state_grid[5][omega_index], 2))
-				ax.set_title(title, fontsize = 15)
-
-				# plt.show()
-				print(save_path)
-				fig.savefig(save_path + "/omega_" + str(omega_index), dpi=fig.dpi)
-
-				omega_index += 1
-			theta_index += 1
-
-	def plot_4D_result(self, dir_path, file_name, system = 0):
-		file = dir_path + file_name
-		data = np.load(file)
-
-		save_path = "./plots_quadrotor_6D/plot_4D_" + str(system)
+		save_path = "./"
 		try:
 			os.makedirs(save_path)
 		except:
 			print(save_path + " exist!")
 
-		omega_index = 0
-		# 4d plots
-		while omega_index < data.shape[-1]:
+		print(data.shape)
+
+		if (mode == "direct"):
+			theta_index = 0
+
+
+			while theta_index < data.shape[2]:
+				x = np.zeros(data.shape[:-1])
+				y = np.zeros(data.shape[:-1])
+				value = np.zeros(data.shape[:-1])
+
+				for i, d in np.ndenumerate(data):
+					if (i[-1] == theta_index):
+						x[i[:-1]] = self.state_grid[0][i[0]]
+						y[i[:-1]] = self.state_grid[1][i[1]]
+						value[i[:-1]] = d
+
+
+				fig = plt.figure()
+				ax = fig.gca(projection='3d')
+
+				surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+					   linewidth=0, antialiased=False)
+				fig.colorbar(surf, shrink=0.5, aspect=5)
+
+				ax.set_xlabel('x', fontsize = 15)
+				ax.set_ylabel('y', fontsize = 15)
+				ax.set_zlabel('value', fontsize = 15)
+				title = "theta: " + str(round(self.state_grid[2][theta_index], 2))
+				ax.set_title(title, fontsize = 15)
+
+				theta_index += 1
+				# plt.show()
+				fig.savefig(save_path + "hard_task_boltzmann_" + "theta_" + str(theta_index), dpi=fig.dpi)
+
+
+		if (mode == "average"):
 			x = np.zeros(data.shape[:-1])
-			vx = np.zeros(data.shape[:-1])
-			theta = np.zeros(data.shape[:-1])
-			value = np.zeros(data.shape[:-1])
+			y = np.zeros(data.shape[:-1])
+			value = np.full(data.shape[:-1], 0)
 
 			for i, d in np.ndenumerate(data):
-				if (i[-1] == omega_index):
-					x[i[:-1]] = self.state_grid[0 + system][i[0]]
-					vx[i[:-1]] = self.state_grid[2 + system][i[1]]
-					theta[i[:-1]] = self.state_grid[4][i[2]]
-					value[i[:-1]] = d
-	 
-			x = x.reshape(-1)
-			vx = vx.reshape(-1)
-			theta = theta.reshape(-1)
-			value = value.reshape(-1)
+				x[i[:-1]] = self.state_grid[0][i[0]]
+				y[i[:-1]] = self.state_grid[1][i[1]]
+				value[i[:-1]] += d
+
+			value = value / 11
 
 			fig = plt.figure()
-			ax = fig.add_subplot(111, projection='3d')
+			ax = fig.gca(projection='3d')
+			surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+					linewidth=0, antialiased=False)
+			fig.colorbar(surf, shrink=0.5, aspect=5)
 
-			img = ax.scatter(x, vx, theta, c=value, cmap=plt.hot())
-			fig.colorbar(img)
+			ax.set_xlabel('x', fontsize = 15)
+			ax.set_ylabel('y', fontsize = 15)
+			ax.set_zlabel('value', fontsize = 15)
 
-			# ax.view_init(45,60)
+			plt.show()
 
-			ax.set_xlabel('x/z', fontsize = 15)
-			ax.set_ylabel('vx/vz', fontsize = 15)
-			ax.set_zlabel('theta', fontsize = 15)
 
-			# plt.show()
-			fig.savefig(save_path + "/theta_" + str(omega_index), dpi=fig.dpi)
+		if (mode == "max"):
+			x = np.zeros(data.shape[:2])
+			y = np.zeros(data.shape[:2])
+			value = np.full(data.shape[:2], -800)
 
-			omega_index += 1
+			for i, d in np.ndenumerate(data):
+				x[i[:2]] = self.state_grid[0][i[0]]
+				y[i[:2]] = self.state_grid[1][i[1]]
+				value[i[:2]] = max(value[i[:2]], d)
 
-	def fill_table(self, csv_path, dir_path, num_x = 0, num_z = 0):
-		data = pd.read_csv(csv_path)
+			fig = plt.figure()
+			ax = fig.gca(projection='3d')
+			surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+					linewidth=0, antialiased=False)
+			fig.colorbar(surf, shrink=0.5, aspect=5)
 
-		if (dir_path):
-			file_x = dir_path + "value_matrix_0_" + str(num_x) + ".npy"
-			file_z = dir_path + "value_matrix_1_" + str(num_z) + ".npy"
+			ax.set_xlabel('x', fontsize = 15)
+			ax.set_ylabel('y', fontsize = 15)
+			ax.set_zlabel('value', fontsize = 15)
 
-			try:
-				value_x = np.load(file_x)
-				value_z = np.load(file_z)
-			except:
-				print("Failed to reload value matrix!")
+			plt.show()
 
-		min_value = min(np.min(value_x), np.min(value_z))
+	def test_interpolation(self):
+		self.value = np.load("./value_matrix_quad_6D/value_matrix_10.npy")
 
-		interpolating_function_x = RegularGridInterpolator((self.state_grid[0],
+		### Sample data ###
+
+		n = 10000
+		data = []
+		while (len(data) < n):
+			sample = []
+			for d in range(len(self.ranges)):
+				v = np.random.uniform(self.ranges[d][0], self.ranges[d][1], 1)
+				sample.append(v)
+			sample = np.array(sample, dtype = float).reshape(-1)
+			if (self.check_crash(sample) == 2):
+				continue
+			data.append(sample)
+
+		data = np.array(data, dtype = float)		
+
+
+		### Old Interpolation version ###
+
+		t = time.time()
+		
+		final_0 = []
+		for s in data:
+			sub_value_matrix, sub_states = self.seek_neighbors_values(s, self.dim)
+			test_if = RegularGridInterpolator((sub_states[0],
+												sub_states[1],
+												sub_states[2],
+												sub_states[3],
+												sub_states[4],
+												sub_states[5]),
+												sub_value_matrix,
+												bounds_error = False,
+												fill_value = self.reward_list[2])
+			value = test_if(s)
+			final_0.append(value)
+			# print(value)
+
+
+		print("scipy Regular grid interpolation: ", time.time() - t)
+
+
+		### New Interpolation version ###
+		import scipy.ndimage as ndimage
+		t = time.time()
+
+		final_1 = []
+		for s in data:
+			sub_value_matrix, sub_states = self.seek_neighbors_values(s, self.dim)
+			sub_states = np.array(sub_states, dtype = float)
+			s = (s - sub_states[:, 0]) / (sub_states[:, 1] - sub_states[:, 0])
+			s = np.array([s],dtype=float)
+
+			value = ndimage.map_coordinates(sub_value_matrix, s.T, mode = "constant", cval = -400)
+			# print(value)
+			final_1.append(value)
+
+		print("ndimage map coordinates method: ", time.time() - t)
+
+		print(np.array([final_0, final_1], dtype = float).T)
+
+		# data = np.array([[0, 1], [2, 3]], dtype = float)
+		# import scipy.ndimage as ndimage
+		# v = ndimage.map_coordinates(data, np.array([[0.5, 0.5]]).T)
+		# print(v)
+		
+
+	def generate_samples_interpolate(self, n):
+		data = []
+		while (len(data) < n):
+			sample = []
+			for d in range(len(self.ranges)):
+				v = np.random.uniform(self.ranges[d][0], self.ranges[d][1], 1)
+				sample.append(v)
+			sample = np.array(sample, dtype = float).reshape(-1)
+			if (self.check_crash(sample) == 2):
+				continue
+			data.append(sample)
+
+		data = np.array(data, dtype = float)
+
+		file_name = "./value_matrix_quad_6D/value_matrix_12.npy"
+
+		self.value = np.load(file_name)
+		interploating_function = RegularGridInterpolator((self.state_grid[0],
+															self.state_grid[1],
 															self.state_grid[2],
-															self.state_grid[4],
-															self.state_grid[5]), 
-															value_x, 
-															bounds_error = False, 
-															fill_value = min_value)
-
-		interpolating_function_y = RegularGridInterpolator((self.state_grid[1],
 															self.state_grid[3],
 															self.state_grid[4],
-															self.state_grid[5]), 
-															value_z, 
-															bounds_error = False, 
-															fill_value = min_value)
+															self.state_grid[5]),
+															self.value,
+															bounds_error = False,
+															fill_value = self.reward_list[2])
 
-		data = data.astype({'value': 'float'})
+		value = np.empty((n), dtype = float)
+		for i, d in enumerate(data):
+			value[i] = interploating_function(d)
 
+		dataset = pd.DataFrame({'x': data[:, 0],
+								'vx': data[:, 2],
+								'z': data[:, 1],
+								'vz': data[:, 3],
+								'theta': data[:, 4],
+								'w': data[:, 5],
+								'value': value})
+		dataset = dataset[['x', 'vx', 'z', 'vz', 'theta', 'w', 'value']]
+		dataset.to_csv("./quad_6D_value_iteration_samples.csv")
 
-		for index, row in data.iterrows():
-			state_x = np.array([row.x, row.vx, row.phi, row.w])
-			state_z = np.array([row.z, row.vz, row.phi, row.w])
-			value_x = interpolating_function_x(state_x)
-			value_z = interpolating_function_y(state_z)
-			value = min(value_x, value_z)
+	def refill_values(self):
+		state_file = "./valFunc_vi_filled_cleaned.csv"
+		value_file = "./value_matrix_quad_6D/value_matrix_12.npy"
 
-			data.at[index, 'value'] = value
+		self.value = np.load(value_file)
+		df = pd.read_csv(state_file)
 
-		data.to_csv("./refactor2_valueFunc_train_linear_filled.csv")
+		for index, row in df.iterrows():
+			s = row[['x', 'z', 'vx', 'vz', 'phi', 'w']]
+			s = s.to_numpy()
 
-	def algorithm_init(self, system = 0):
-		env.state_discretization()
-		env.state_init(system)
-		env.action_init()
+			sub_value_matrix, sub_states = self.seek_neighbors_values(s, self.dim)
+			sub_states = np.array(sub_states, dtype = float)
+			s = (s - sub_states[:, 0]) / (sub_states[:, 1] - sub_states[:, 0])
+			s = np.array([s],dtype=float)
 
+			value = ndimage.map_coordinates(sub_value_matrix, s.T, mode = "constant", cval = self.reward_list[2])
+			df = df.set_value(index, 'value', value)
 
-env = env_quadrotor_6d()
-env.value_iteration(0)
-# env.value_iteration(1)
-
-# env.algorithm_init()
-
-# env.plot_2D_result("./value_matrix/", "value_matrix_0_26.npy")
-# env.plot_2D_result("./value_matrix/", "value_matrix_1_32.npy")
-# env.plot_3D_result("./value_matrix/", "value_matrix_0_26.npy", 0)
-# env.plot_3D_result("./value_matrix/", "value_matrix_1_32.npy", 1)
-# env.plot_4D_result("./value_matrix/", "value_matrix_0_26.npy", 0)
-# env.plot_4D_result("./value_matrix/", "value_matrix_1_32.npy", 1)
-env.fill_table("./valueFunc_train.csv", "./value_matrix/", 26, 32)
-
-
-
+		df.to_csv("./new_version_interpolation_valFunc_vi_filled_cleaned.csv")
 
 
 
+env = env_quad_6d()
+env.algorithm_init()
+# env.generate_samples_interpolate(100000)
+env.value_iteration()
+# env.refill_values()
+# env.plot_2D_result(mode = "max")
+# s = np.array([0.3, 8.05, -4, 5, 0, -5.236], dtype = float)
+# s_ = np.array([0.2, 7.95, -4, 5, 0, -5.236], dtype = float)
+# print(env.check_cross(s, s_))
+# a = np.array([12, 12], dtype =float)
+# print(env.state_transition(s, a))
+# env.test_interpolation()
 
