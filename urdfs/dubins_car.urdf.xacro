@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+    - Base      : kobuki
+    - Stacks    : hexagons
+    - Sensors   : None
+-->
+<robot name="turtlebot" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:property name="M_PI" value="3.1415926535897931" />
+    <xacro:property name="M_PI_2" value="1.5707963267945" />
+  <xacro:include filename="$(find turtlebot_description)/urdf/turtlebot_common_library.urdf.xacro" />
+  <xacro:include filename="$(find kobuki_description)/urdf/kobuki.urdf.xacro" />
+  <xacro:include filename="$(find turtlebot_description)/urdf/stacks/hexagons.urdf.xacro"/>
+  <!-- <xacro:include filename="$(find turtlebot_description)/urdf/sensors/asus_xtion_pro.urdf.xacro"/> -->
+
+  <kobuki/>
+  <stack_hexagons                 parent="base_link"/>
+  <!-- <sensor_asus_xtion_pro          parent="base_link"/> -->
+
+    <!-- Hokuyo UTM-30LX sensor -->
+    <xacro:include filename="$(find hector_sensors_description)/urdf/hokuyo_utm30lx.urdf.xacro" />
+    <xacro:hokuyo_utm30lx name="laser0" parent="base_link" ros_topic="scan" update_rate="40" ray_count="1081" min_angle="-90" max_angle="90">
+      <origin xyz="0.0 0.0 0.45" rpy="0 0 0"/>
+    </xacro:hokuyo_utm30lx>
+</robot>

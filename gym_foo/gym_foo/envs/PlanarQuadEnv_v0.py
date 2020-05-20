@@ -1,9 +1,7 @@
 import gym
 from gym import spaces
 from gym.utils import seeding
-import numpy as np
-import gazebo_env
-from utils.utils import *
+from utils.tools import *
 from gazebo_msgs.msg import ModelState
 from geometry_msgs.msg import Twist, Pose
 from geometry_msgs.msg import Wrench
@@ -17,13 +15,10 @@ from gazebo_msgs.srv import ApplyJointEffort
 from gazebo_msgs.srv import JointRequest # the type of clear joint effort
 from gazebo_msgs.srv import ApplyBodyWrench
 
-from gazebo_msgs.msg import ContactsState
-
 import rospy
-import time
 import copy
 
-from baselines import logger
+from utils import logger
 
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
@@ -35,9 +30,9 @@ GOAL_ANGLE_RANGE = [0, np.pi/3]
 # GOAL_ANGLE_RANGE = [-np.pi/4, 0]
 GOAL_ANGLE_CENTER = GOAL_ANGLE_RANGE[0] + abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 GOAL_ANGLE_RADIUS = abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
-logger.log("goal angle range: from {} to {}".format(GOAL_ANGLE_RANGE[0]*180/np.pi, GOAL_ANGLE_RANGE[1]*180/np.pi))
-logger.log("goal angle center: {}".format(GOAL_ANGLE_CENTER*180/np.pi))
-logger.log("goal angle radius: {}".format(GOAL_ANGLE_RADIUS*180/np.pi))
+logger.log("goal angle range: from {} to {}".format(GOAL_ANGLE_RANGE[0] * 180 / np.pi, GOAL_ANGLE_RANGE[1] * 180 / np.pi))
+logger.log("goal angle center: {}".format(GOAL_ANGLE_CENTER * 180 / np.pi))
+logger.log("goal angle radius: {}".format(GOAL_ANGLE_RADIUS * 180 / np.pi))
 
 # notice: it's not the gazebo pose state, not --> x,y,z,pitch,roll,yaw !!
 # GOAL_STATE = np.array([4.0, 0., 9., 0., 0.75, 0.])
@@ -81,10 +76,13 @@ OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
 WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.0)]
 
 
-class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
+class PlanarQuadEnv_v0(gym.Env):
     def __init__(self, reward_type, set_additional_goal, **kwargs):
-        # Launch the simulation with the given launchfile name
-        gazebo_env.GazeboEnv.__init__(self, "Quadrotor.launch")
+        self.port = "11311"
+        self.port_gazebo = "11345"
+        os.environ["ROS_MASTER_URI"] = "http://localhost:" + self.port
+        os.environ["GAZEBO_MASTER_URI"] = "http://localhost:" + self.port_gazebo
+        rospy.init_node('PlanarQuadEnv', anonymous=True)
 
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
         self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
@@ -95,8 +93,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.clear_joint_effort = rospy.ServiceProxy('/gazebo/clear_joint_forces', JointRequest)
         self.force = rospy.ServiceProxy('/gazebo/apply_body_wrench', ApplyBodyWrench)
 
-
-        self._seed()
+        # cancel additional seed, because we already have it in train_ppo.py
+        # self._seed()
 
         self.m = 1.25
         self.g = 9.81
@@ -104,7 +102,6 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.Thrustmax = 0.75 * self.m * self.g
         self.Thrustmin = 0
         self.control_reward_coff = 0.01
-        # self.collision_reward = -2 * 200 * self.control_reward_coff * (self.Thrustmax ** 2)
         self.collision_reward = -400
         self.goal_reward = 1000
 
@@ -118,12 +115,10 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         high_obsrv = np.array([5., 2., 10., 2., np.pi, np.pi/3] + [5*2] * self.num_lasers)
         low_obsrv = np.array([-5., -2., 0., -2., -np.pi, -np.pi/3] + [0] * self.num_lasers)
 
-        # controls are two thrusts
-        # here high_action and low_action is only used by DDPG and stable_baseline's PPO2. Set [-1,1] is to be consistent with the default DDPG action range
-        # high_action = np.array([1., 1.])
-        # low_action  = np.array([-1., -1.])
-        high_action = np.array([12.0, 12.0])
-        low_action  = np.array([0.0, 0.0])
+        # This is consistent with the step() function clipping range.
+        # Since you cannot expect NN output is in line with your real physics property. So there always needs transformation
+        high_action = np.array([2.0, 2.0])
+        low_action = np.array([-2.0, -2.0])
 
         self.state_space = spaces.Box(low=low_state, high=high_state)
         self.observation_space = spaces.Box(low=low_obsrv, high=high_obsrv)
@@ -140,9 +135,6 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.reward_type = reward_type
         self.set_additional_goal = set_additional_goal
 
-        # no need any more
-        # self.brsEngine = None
-
         # used to monitor episode steps
         self.step_counter = 0
 
@@ -155,62 +147,28 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         self.customized_reset = None
         self.num_envs = 1
 
+    def _seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
+
+
     def _discretize_laser(self, laser_data, new_ranges):
 
         discretized_ranges = []
 
         full_ranges = float(len(laser_data.ranges))
-        # print("laser ranges num: %d" % full_ranges)
 
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
-            # print("new_i:", new_i)
             if laser_data.ranges[new_i] == float('Inf') or np.isinf(laser_data.ranges[new_i]):
                 discretized_ranges.append(float('Inf'))
-                # discretized_ranges.append(10)
             elif np.isnan(laser_data.ranges[new_i]):
                 discretized_ranges.append(float('Nan'))
-                # discretized_ranges.append(0)
             else:
                 discretized_ranges.append(laser_data.ranges[new_i])
-                # discretized_ranges.append(int(laser_data.ranges[new_i]))
-        # print(discretized_ranges)
-        # print(laser_data.ranges)
+
         return discretized_ranges
 
-    """
-    def _in_obst(self, contact_data):
-
-        if len(contact_data.states) != 0:
-            if contact_data.states[0].collision1_name != "" and contact_data.states[0].collision2_name != "":
-                return True
-        else:
-            return False
-    """
-
-    # def _in_obst(self, laser_data, dynamic_data):
-    #      laser_min_range = 0.6
-    #      # collision_min_range = 0.8
-    #      tmp_x = dynamic_data.pose.position.x
-    #      tmp_y = dynamic_data.pose.position.y
-    #      tmp_z = dynamic_data.pose.position.z
-    #
-    #      if tmp_z <= laser_min_range:
-    #          # print("tmp_z:", tmp_z)
-    #          return True
-    #      if Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[0][0], OBSTACLES_POS[0][1])) < 0.5*np.sqrt((OBSTACLES_POS[0][2])**2 + (OBSTACLES_POS[0][3])**2) + 0.5 \
-    #         or Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[1][0], OBSTACLES_POS[1][1])) < 0.5*np.sqrt((OBSTACLES_POS[1][2])**2 + (OBSTACLES_POS[1][3])**2) + 0.5 \
-    #         or Euclid_dis((tmp_x, tmp_z), (OBSTACLES_POS[2][0], OBSTACLES_POS[2][1])) < 0.5*np.sqrt((OBSTACLES_POS[2][2])**2 + (OBSTACLES_POS[2][3])**2) + 0.5 \
-    #         or np.abs(tmp_x - WALLS_POS[0][0]) < laser_min_range \
-    #         or np.abs(tmp_x - WALLS_POS[1][0]) < laser_min_range \
-    #         or np.abs(tmp_z - WALLS_POS[2][1]) < laser_min_range:
-    #          return True
-    #
-    #      # check the obstacle by sensor reflecting data
-    #      # for idx, item in enumerate(laser_data.ranges):
-    #      #     if laser_min_range > laser_data.ranges[idx] > 0:
-    #      #         return True
-    #      return False
 
     def _in_obst(self, laser_data, dynamic_data):
         laser_min_range = 0.6
@@ -223,10 +181,8 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
 
         quad_r = 0.55
         for i, obs in enumerate(OBSTACLES_POS):
-            if tmp_x >= obs[0] - obs[2] - quad_r and \
-                tmp_x <= obs[0] + obs[2] + quad_r and \
-                tmp_z >= obs[1] - obs[3] - quad_r and \
-                tmp_z <= obs[1] + obs[3] + quad_r:
+            if obs[0] - obs[2] - quad_r <= tmp_x <= obs[0] + obs[2] + quad_r and \
+                    obs[1] - obs[3] - quad_r <= tmp_z <= obs[1] + obs[3] + quad_r:
                 return True
 
         if np.abs(tmp_x - WALLS_POS[0][0]) < laser_min_range \
@@ -264,7 +220,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
             if np.sqrt((x - self.goal_state[0]) ** 2 + (z - self.goal_state[2]) ** 2) <= self.goal_pos_tolerance \
                     and (abs(phi - self.goal_state[4]) <= self.goal_phi_limit):  # 0.30 before
                 logger.log("in goal with special angle!!")
-                logger.log("x:{}, z:{}, phi:{}".format(x,z,phi))
+                logger.log("x:{}, z:{}, phi:{}".format(x, z, phi))
                 return True
             else:
                 return False
@@ -280,27 +236,6 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         else:
             raise ValueError("invalid param for set_additional_goal!")
 
-    def _in_half_goal(self, state):
-        assert len(state) == self.state_dim
-
-        x = state[0]
-        z = state[2]
-        # print("z pos:", z)
-
-        phi = state[4]
-        # print("phi:", phi)
-
-        vx = state[1]
-        vz = state[3]
-
-        if self.set_additional_goal == 'angle' or self.set_additional_goal == 'vel':
-            if np.sqrt((x - self.goal_state[0]) ** 2 + (z - self.goal_state[2]) ** 2) <= self.goal_pos_tolerance:
-                print("in half goal, pos reached!")
-                return True
-            else:
-                return False
-        else:
-            raise ValueError('None additional goal does not have half_goal!!')
 
     def get_obsrv(self, laser_data, dynamic_data):
 
@@ -410,8 +345,6 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         return np.asarray(obsrv)
 
     def step(self, action):
-        # print("action:", action)
-        # print("action shape:", action.shape)
         if len(np.shape(action)) > 1:
             high_dim_ac_form = True
             action = np.squeeze(action)
@@ -454,15 +387,6 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         # wrench.torque.y = 1.0
         wrench.torque.z = 0
 
-
-        # if self.sim_stepcounter % self.MPC_RL_factor == 0:
-        #     self.old_wrench = wrench
-        # if self.sim_stepcounter == self.MPC_RL_factor:
-        #     self.sim_stepcounter = 0
-        # self.sim_stepcounter += 1
-        #
-        # rospy.wait_for_service('/gazebo/apply_body_wrench')
-        # self.force(body_name="base_link", reference_frame="world", wrench=self.old_wrench, start_time=rospy.Time().now(), duration=rospy.Duration(1))
 
         rospy.wait_for_service('/gazebo/apply_body_wrench')
         self.force(body_name="base_link", reference_frame="world", wrench=wrench, start_time=rospy.Time().now(), duration=rospy.Duration(1))
@@ -622,9 +546,7 @@ class PlanarQuadEnv_v0(gazebo_env.GazeboEnv):
         else:
             return np.asarray(obsrv), reward, done, {'suc':suc, 'event':event_flag}
 
-    def _seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
+
 
 
 

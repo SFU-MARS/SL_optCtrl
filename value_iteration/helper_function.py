@@ -58,8 +58,9 @@ class value_interpolation_function_quad(object):
 		self.state_step_num = np.array([11, 9, 11, 9, 11, 11])
 
 		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_matrix_quad_6D/value_matrix_7.npy"
-
 		self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy"
+
+
 		# print("using value file:", self.value_file_path)
 		self.fill_value = -400
 		self.value = None

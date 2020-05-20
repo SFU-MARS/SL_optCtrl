@@ -38,7 +38,8 @@ class env_quad_6d(object):
 		self.goal_x = (3, 5)
 		self.goal_z = (8, 10)
 		# self.goal_theta = (-np.pi, np.pi)
-		self.goal_theta = (-np.pi / 3, 0)
+		# self.goal_theta = (-np.pi / 3, 0)
+		self.goal_theta = (0, np.pi/3)
 		self.goals = np.array([self.goal_x, self.goal_z, self.goal_theta])
 
 		########### Algorithm Setting ##########
@@ -347,7 +348,7 @@ class env_quad_6d(object):
 
 
 	def value_output(self, iteration_number, readable_file = False):
-		dir_path = "./value_matrix_quad_6D/"
+		dir_path = "./value_matrix_quad_6D_0_60/"
 		try:
 			os.mkdir(dir_path)
 		except:
@@ -370,12 +371,202 @@ class env_quad_6d(object):
 
 			f.close()
 
+	# --- From here to the end: added from value_iteration_6d_xubo_version_3 ---
+	# --- These code is for generating samples for value network training ---
+	# --- The file we should use: non_transferred version of value matrix ---
+	def plot_2D_result(self, mode="max"):
+		file = "./value_matrix_quad_6D/value_matrix_7.npy"
+		# file = "./value_matrix_9.npy"
+
+		data = np.load(file)
+
+		save_path = "./"
+		try:
+			os.makedirs(save_path)
+		except:
+			print(save_path + " exist!")
+
+		print(data.shape)
+
+		if (mode == "direct"):
+			theta_index = 0
+
+			while theta_index < data.shape[2]:
+				x = np.zeros(data.shape[:-1])
+				y = np.zeros(data.shape[:-1])
+				value = np.zeros(data.shape[:-1])
+
+				for i, d in np.ndenumerate(data):
+					if (i[-1] == theta_index):
+						x[i[:-1]] = self.state_grid[0][i[0]]
+						y[i[:-1]] = self.state_grid[1][i[1]]
+						value[i[:-1]] = d
+
+				fig = plt.figure()
+				ax = fig.gca(projection='3d')
+
+				surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+									   linewidth=0, antialiased=False)
+				fig.colorbar(surf, shrink=0.5, aspect=5)
+
+				ax.set_xlabel('x', fontsize=15)
+				ax.set_ylabel('y', fontsize=15)
+				ax.set_zlabel('value', fontsize=15)
+				title = "theta: " + str(round(self.state_grid[2][theta_index], 2))
+				ax.set_title(title, fontsize=15)
+
+				theta_index += 1
+				# plt.show()
+				fig.savefig(save_path + "hard_task_boltzmann_" + "theta_" + str(theta_index), dpi=fig.dpi)
+
+		if (mode == "average"):
+			x = np.zeros(data.shape[:-1])
+			y = np.zeros(data.shape[:-1])
+			value = np.full(data.shape[:-1], 0)
+
+			for i, d in np.ndenumerate(data):
+				x[i[:-1]] = self.state_grid[0][i[0]]
+				y[i[:-1]] = self.state_grid[1][i[1]]
+				value[i[:-1]] += d
+
+			value = value / 11
+
+			fig = plt.figure()
+			ax = fig.gca(projection='3d')
+			surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+								   linewidth=0, antialiased=False)
+			fig.colorbar(surf, shrink=0.5, aspect=5)
+
+			ax.set_xlabel('x', fontsize=15)
+			ax.set_ylabel('y', fontsize=15)
+			ax.set_zlabel('value', fontsize=15)
+
+			plt.show()
+
+		if (mode == "max"):
+			x = np.zeros(data.shape[:2])
+			y = np.zeros(data.shape[:2])
+			value = np.full(data.shape[:2], -800)
+
+			for i, d in np.ndenumerate(data):
+				x[i[:2]] = self.state_grid[0][i[0]]
+				y[i[:2]] = self.state_grid[1][i[1]]
+				value[i[:2]] = max(value[i[:2]], d)
+
+			fig = plt.figure()
+			ax = fig.gca(projection='3d')
+			surf = ax.plot_surface(x, y, value, cmap=cm.coolwarm,
+								   linewidth=0, antialiased=False)
+			fig.colorbar(surf, shrink=0.5, aspect=5)
+
+			ax.set_xlabel('x', fontsize=15)
+			ax.set_ylabel('y', fontsize=15)
+			ax.set_zlabel('value', fontsize=15)
+
+			plt.show()
+
+	def test_interpolation(self):
+		t = time.time()
+		self.value = np.load("./value_matrix_quad_6D/value_matrix_7.npy")
+		interpolating_function = RegularGridInterpolator((self.state_grid[0],
+														  self.state_grid[1],
+														  self.state_grid[2],
+														  self.state_grid[3],
+														  self.state_grid[4],
+														  self.state_grid[5]),
+														 self.value,
+														 bounds_error=False,
+														 fill_value=self.reward_list[2])
+		print("interpolation 0: ", time.time() - t)
+
+		t = time.time()
+		s = np.array([0, 7.5, -4, 5, 0, -5.236], dtype=float)
+		sub_value_matrix, sub_states = self.seek_neighbors_values(s, self.dim)
+		test_if = RegularGridInterpolator((sub_states[0],
+										   sub_states[1],
+										   sub_states[2],
+										   sub_states[3],
+										   sub_states[4],
+										   sub_states[5]),
+										  sub_value_matrix,
+										  bounds_error=False,
+										  fill_value=self.reward_list[2])
+		print("interpolation 1: ", time.time() - t)
+
+		t = time.time()
+		value_1 = interpolating_function(s)
+		print(time.time() - t)
+
+		t = time.time()
+		value_2 = test_if(s)
+		print(time.time() - t)
+		print(value_1, value_2)
+
+		s = np.array([0, 0, 0, 0, 0, 0], dtype=float)
+		sub_value_matrix, sub_states = self.seek_neighbors_values(s, self.dim)
+		test_if = RegularGridInterpolator((sub_states[0],
+										   sub_states[1],
+										   sub_states[2],
+										   sub_states[3],
+										   sub_states[4],
+										   sub_states[5]),
+										  sub_value_matrix,
+										  bounds_error=False,
+										  fill_value=self.reward_list[2])
+		value_1 = interpolating_function(s)
+		value_2 = test_if(s)
+		print(value_1, value_2)
+
+	def generate_samples_interpolate(self, n):
+		data = []
+		while (len(data) < n):
+			sample = []
+			for d in range(len(self.ranges)):
+				v = np.random.uniform(self.ranges[d][0], self.ranges[d][1], 1)
+				sample.append(v)
+			sample = np.array(sample, dtype=float).reshape(-1)
+			if (self.check_crash(sample) == 2):
+				continue
+			data.append(sample)
+
+		data = np.array(data, dtype=float)
+
+		file_name = "./value_matrix_quad_6D/value_matrix_7.npy"
+
+		self.value = np.load(file_name)
+		interploating_function = RegularGridInterpolator((self.state_grid[0],
+														  self.state_grid[1],
+														  self.state_grid[2],
+														  self.state_grid[3],
+														  self.state_grid[4],
+														  self.state_grid[5]),
+														 self.value,
+														 bounds_error=False,
+														 fill_value=self.reward_list[2])
+
+		value = np.empty((n), dtype=float)
+		for i, d in enumerate(data):
+			value[i] = interploating_function(d)
+
+		dataset = pd.DataFrame({'x': data[:, 0],
+								'vx': data[:, 2],
+								'z': data[:, 1],
+								'vz': data[:, 3],
+								'phi': data[:, 4],
+								'w': data[:, 5],
+								'value': value})
+		dataset = dataset[['x', 'vx', 'z', 'vz', 'phi', 'w', 'value']]
+		dataset.to_csv("./quad_6D_value_iteration_samples.csv")
+
 
 
 
 env = env_quad_6d()
 env.algorithm_init()
 env.value_iteration()
+# env.generate_samples_interpolate(500000)
+
+
 # s = np.array([0, 7.5, -4, 5, 0, -5.236], dtype = float)
 # a = np.array([12, 12], dtype =float)
 # print(env.state_transition(s, a))

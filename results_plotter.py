@@ -74,21 +74,45 @@ import numpy as np
 # basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_mpc_new_model_new_reward', 'mpc_fixed')
 # basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_mpc_new_model_new_reward', 'mpc_switch')
 
+#
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'vi_fixed')
+
+# basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline')
+# basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_baseline_test_adv_shift', '0_60')
 
 # basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline')
 # basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'mpc_fixed')
+# basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'mpc_switch')
+# basedir4 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'vi_fixed')
+# basedir5 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'vi_gd_fixed')
+# basedir6 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'vi_switch')
+# basedir7 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline_fixed')
+# basedir8 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline_switch')
+
+
+
+# basedir_list = [basedir1, basedir2, basedir3, basedir4, basedir5, basedir6, basedir7, basedir8]
+
 
 basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline')
-basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_baseline_test_adv_shift', '0_60')
+basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline_fixed')
+basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests',  'quad_task_exploration', 'quad_task_air_space_202002_Francis_goal_angle_0_60', 'baseline_switch')
 
 
-basedir_list = [basedir1, basedir2]
+
+basedir_list = [basedir1, basedir2, basedir3]
 
 showdir = basedir_list
+
+cues_list = ['baseline', 'baseline_fixed', 'basline_switch']
+
 # cues_list=['baseline', 'mpc_fixed', 'mpc_switch']
 # cues_list = ['baseline']
-# cues_list = ['baseline', 'mpc_fixed']
-cues_list = ['baseline', 'baseline_adv_shift']
+# cues_list = ['baseline', 'mpc_fixed', 'vi_fixed']
+# cues_list = ['baseline', 'baseline_adv_shift']
+# cues_list = ['baseline', 'mpc_fixed', 'mpc_switch', 'vi_fixed', 'vi_gd_fixed', 'vi_switch', 'baseline_fixed', 'basline_switch']
 
 folder_cue_dict = {}
 for based_dir in basedir_list:
@@ -104,7 +128,7 @@ hues = []
 
 plt.rc('legend',fontsize=8)
 choice = 'reward'  # or 'success rate'
-# choice = 'success rate'
+#choice = 'success rate'
 
 for k,v in folder_cue_dict.items():
     if os.path.isfile(k):

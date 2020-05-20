@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from baselines.common.cmd_util import make_mujoco_env, mujoco_arg_parser
-from baselines.common import tf_util as U
-from baselines import logger
+from ppo1.common.cmd_util import make_mujoco_env, mujoco_arg_parser
+from ppo1.common import tf_util as U
+from utils import logger
+
 
 def train(env_id, num_timesteps, seed):
     from baselines.ppo1 import mlp_policy, pposgd_simple

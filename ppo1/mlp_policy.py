@@ -1,19 +1,16 @@
-from baselines.common.mpi_running_mean_std import RunningMeanStd
-import baselines.common.tf_util as U
+from ppo1.common.mpi_running_mean_std import RunningMeanStd
+import ppo1.common.tf_util as U
 import tensorflow as tf
 import gym
-from baselines.common.distributions import make_pdtype
-import os
+from ppo1.common.distributions import make_pdtype
 import pickle
-import numpy as np
-import pandas as pd
-from utils.plotting_performance import *
-from utils.utils import *
+from utils.tools import *
 
 from value_iteration.helper_function import *
-from tensorflow.python.ops import math_ops
 
-import baselines.logger as logger
+import utils.logger as logger
+
+
 class MlpPolicy(object):
     recurrent = False
 

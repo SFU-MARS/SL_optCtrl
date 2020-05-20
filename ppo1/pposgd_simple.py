@@ -1,12 +1,13 @@
-from baselines.common import Dataset, explained_variance, fmt_row, zipsame
-from baselines import logger
-import baselines.common.tf_util as U
+from ppo1.common.dataset import Dataset
+from ppo1.common import explained_variance, fmt_row, zipsame
+from utils import logger
+import ppo1.common.tf_util as U
 import tensorflow as tf, numpy as np
 import time
-from baselines.common.mpi_adam import MpiAdam
-from baselines.common.mpi_moments import mpi_moments
+from ppo1.common.mpi_adam import MpiAdam
+from ppo1.common.mpi_moments import mpi_moments
 from mpi4py import MPI
-from collections import deque, defaultdict
+from collections import deque
 
 
 def traj_segment_generator(pi, env, horizon, stochastic):
@@ -229,7 +230,7 @@ def learn(env, policy_fn,
         else:
             raise NotImplementedError
 
-        logger.log("********** Iteration %i ************"%iters_so_far)
+        logger.log("********** Iteration %i ************" % iters_so_far)
 
         seg = seg_gen.__next__()
         add_vtarg_and_adv(seg, gamma, lam)
@@ -263,7 +264,7 @@ def learn(env, policy_fn,
         meanlosses,_,_ = mpi_moments(losses, axis=0)
         logger.log(fmt_row(13, meanlosses))
         for (lossval, name) in zipsame(meanlosses, loss_names):
-            logger.record_tabular("loss_"+name, lossval)
+            logger.record_tabular("loss_" + name, lossval)
         logger.record_tabular("ev_tdlam_before", explained_variance(vpredbefore, tdlamret))
         lrlocal = (seg["ep_lens"], seg["ep_rets"]) # local values
         listoflrpairs = MPI.COMM_WORLD.allgather(lrlocal) # list of tuples
