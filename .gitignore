@@ -1,30 +1,16 @@
-*.world
-*.xacro
-toolboxls/
-helperOC/
 *.h5
 *.pkl
 *.csv
 *.png
-
 *.pyc
 *.npy
 *.txt
 
-spinningup/
-stable-baselines/
+
 runs_log_tests/
-runs_log_filtered/
-!*.md
-mpc/
-*.launch
-
-tests/test_ACER
-tests/test_behavior_cloning
-tests/test_bicycle_env
-tests/test_transition_mismatch
-tests/test_vpg_off_policy
-
+runs_log_ddpg/
+data/
+tests/
 
 .idea/
 

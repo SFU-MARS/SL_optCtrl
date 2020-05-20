@@ -31,15 +31,15 @@ import matplotlib.pyplot as plt
 import matlab.engine
 import pickle
 
-from gym_foo.gym_foo.envs.DubinsCarEnv_v0 import DubinsCarEnv_v0
+from gym_foo.gym_foo.envs.DubinsCarEnv_v0_old import DubinsCarEnv_v0
 
 CUR_PATH = os.path.dirname(os.path.abspath(__file__))
 
 def csv_clean(filename, horizon=None, trajs_type=None, truncate=False):
     df = pd.read_csv(filename)
 
-    # special process only for /data/quad/valFunc_mpc_filled_final.csv
-    if filename == os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_mpc_filled_final.csv':
+    # special process for choosing trajectories type or truncation
+    if horizon != None or trajs_type != None:
         # Use feasible trajectories
         if trajs_type == 'feasible':
             invalidIndices = df[df['col_trajectory_flag'] == 3].index
@@ -84,77 +84,77 @@ def csv_clean(filename, horizon=None, trajs_type=None, truncate=False):
     df.to_csv(name_to_save + '.csv')
 
 
-
-""" Be consistent with the saved file name """
-
-def special_func_combine(filenames):
-    result = pd.DataFrame()
-    for fn in filenames:
-        df = pd.read_csv(fn)
-        result = pd.concat([result, df], sort=False)
-
-    infeasindices = result[result['col_trajectory_flag'] == 3].index
-    feasindices = result[result['col_trajectory_flag'] == 2].index
-
-    infeasNum = len(infeasindices)
-    feasNum = len(feasindices)
-
-    print("Number of infeasible data before: ", infeasNum)
-    print("Number of feasible data before: ", feasNum)
-
-    result.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv')
-
-def data_balancer(add_baddata=False):
-    fn = os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv'
-    assert os.path.exists(fn)
-
-    df = pd.read_csv(fn)
-    T = len(df.index)
-
-    infeasindices = df[df['col_trajectory_flag'] == 3].index
-    feasindices   = df[df['col_trajectory_flag'] == 2].index
-
-    infeasNum = len(infeasindices)
-    feasNum = len(feasindices)
-
-    print("Number of infeasible data before: ", infeasNum)
-    print("Number of feasible data before: ", feasNum)
-
-    if infeasNum < feasNum:
-        delindices = np.random.choice(feasindices, int(np.abs(feasNum-0.67*infeasNum)), replace=False)
-    else:
-        delindices = np.random.choice(infeasindices, 0, replace=False)
-
-    df.drop(delindices, inplace=True)
-
-    infeasindices = df[df['col_trajectory_flag'] == 3].index
-    feasindices = df[df['col_trajectory_flag'] == 2].index
-
-    infeasNum = len(infeasindices)
-    feasNum = len(feasindices)
-
-    print("Number of infeasible data after: ", infeasNum)
-    print("Number of feasible data after: ", feasNum)
-
-
-    # Adding edge bad data
-    if add_baddata:
-        print("adding bad data ...")
-        bad_data = pd.read_csv(os.environ['PROJ_HOME_3']+'/data/quad/bad_data.csv')
-        df = pd.concat([df, bad_data], sort=False)
-
-        # bad data has "col_trajectory_flag = 0"
-        infeasindices = df[(df['col_trajectory_flag'] == 3) | (df['col_trajectory_flag'] == 0)].index
-        feasindices = df[df['col_trajectory_flag'] == 2].index
-
-        infeasNum = len(infeasindices)
-        feasNum = len(feasindices)
-
-        print("Number of infeasible data after adding bad data: ", infeasNum)
-        print("Number of feasible data after adding bad data: ", feasNum)
-
-
-    df.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv')
+#
+# """ Be consistent with the saved file name """
+#
+# def special_func_combine(filenames):
+#     result = pd.DataFrame()
+#     for fn in filenames:
+#         df = pd.read_csv(fn)
+#         result = pd.concat([result, df], sort=False)
+#
+#     infeasindices = result[result['col_trajectory_flag'] == 3].index
+#     feasindices = result[result['col_trajectory_flag'] == 2].index
+#
+#     infeasNum = len(infeasindices)
+#     feasNum = len(feasindices)
+#
+#     print("Number of infeasible data before: ", infeasNum)
+#     print("Number of feasible data before: ", feasNum)
+#
+#     result.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv')
+#
+# def data_balancer(add_baddata=False):
+#     fn = os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv'
+#     assert os.path.exists(fn)
+#
+#     df = pd.read_csv(fn)
+#     T = len(df.index)
+#
+#     infeasindices = df[df['col_trajectory_flag'] == 3].index
+#     feasindices   = df[df['col_trajectory_flag'] == 2].index
+#
+#     infeasNum = len(infeasindices)
+#     feasNum = len(feasindices)
+#
+#     print("Number of infeasible data before: ", infeasNum)
+#     print("Number of feasible data before: ", feasNum)
+#
+#     if infeasNum < feasNum:
+#         delindices = np.random.choice(feasindices, int(np.abs(feasNum-0.67*infeasNum)), replace=False)
+#     else:
+#         delindices = np.random.choice(infeasindices, 0, replace=False)
+#
+#     df.drop(delindices, inplace=True)
+#
+#     infeasindices = df[df['col_trajectory_flag'] == 3].index
+#     feasindices = df[df['col_trajectory_flag'] == 2].index
+#
+#     infeasNum = len(infeasindices)
+#     feasNum = len(feasindices)
+#
+#     print("Number of infeasible data after: ", infeasNum)
+#     print("Number of feasible data after: ", feasNum)
+#
+#
+#     # Adding edge bad data
+#     if add_baddata:
+#         print("adding bad data ...")
+#         bad_data = pd.read_csv(os.environ['PROJ_HOME_3']+'/data/quad/bad_data.csv')
+#         df = pd.concat([df, bad_data], sort=False)
+#
+#         # bad data has "col_trajectory_flag = 0"
+#         infeasindices = df[(df['col_trajectory_flag'] == 3) | (df['col_trajectory_flag'] == 0)].index
+#         feasindices = df[df['col_trajectory_flag'] == 2].index
+#
+#         infeasNum = len(infeasindices)
+#         feasNum = len(feasindices)
+#
+#         print("Number of infeasible data after adding bad data: ", infeasNum)
+#         print("Number of feasible data after adding bad data: ", feasNum)
+#
+#
+#     df.to_csv(os.environ['PROJ_HOME_3']+'/data/quad/valFunc_mpc_filled_final.csv')
 
 class Data_Generator(object):
     def __init__(self):
@@ -310,7 +310,8 @@ class Data_Generator(object):
                 # T = 1400
                 assert horizon != None and rew_config != None and goal_config != None
                 mpc_horizon = horizon
-                discount_factor = 0.98
+                # discount_factor=0.90
+                discount_factor = 0.998  # same as RL gamma
 
                 rews = np.zeros(T, 'float32')
                 vpreds = np.zeros(T, 'float32')
@@ -635,6 +636,13 @@ if __name__ == "__main__":
     data_gen = Data_Generator()
     data_gen.gen_data(data_form='valFunc_vi', agent='quad')
     csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_vi_filled.csv'))
+
+
+    # data_gen = Data_Generator()
+    # data_gen.gen_data(data_form='valFunc_mpc', agent='quad', horizon=140, rew_config='sparse', goal_config='left')
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_mpc_filled.csv'))
+
+    # csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/old_model_old_reward_training_data/gamma_0.998/valFunc_mpc_filled_cleaned.csv'), horizon=140, trajs_type='all', truncate=True)
 
     # csv_clean(os.path.join(os.environ['PROJ_HOME_3'],
     #                        'data/quad/new_model_new_reward_training_data/test_samps_800_N140_warmstart/valFunc_mpc_filled.csv'),

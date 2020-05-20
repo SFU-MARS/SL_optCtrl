@@ -14,7 +14,7 @@ from tensorflow.python.ops import math_ops
 import numpy as np
 import pickle
 
-from baselines import logger
+from utils import logger
 
 
 def customerized_loss(y_true, y_pred):
@@ -406,4 +406,8 @@ if __name__ == "__main__":
     trainer = Trainer(method='vi', target="valFunc", agent='quad')
     trainer.train_valFunc()
     trainer.save_model_weights("./tf_model/quad/vf_vi.h5")
+    #
+    # trainer = Trainer(method='mpc', target="valFunc", agent='quad')
+    # trainer.train_valFunc()
+    # trainer.save_model_weights("./tf_model/quad/vf_mpc.h5")
 

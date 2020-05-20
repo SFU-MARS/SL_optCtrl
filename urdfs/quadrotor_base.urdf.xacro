@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!--<xacro:include filename="$(find hector_sensors_description)/urdf/hokuyo_utm30lx.urdf.xacro"/>-->
+    <xacro:property name="pi" value="3.1415926535897931"/>
+
+    <!-- Main quadrotor link -->
+    <xacro:macro name="quadrotor_base_macro">
+        <link name="base_link">
+            <inertial>
+                <!--<mass value="1.00"/>-->
+                <mass value="1.25" />
+                <origin xyz="0 0 0"/>
+                <inertia ixx="0.125" ixy="0.0" ixz="0.0" iyy="0.125" iyz="0.0" izz="0.125"/>
+            </inertial>
+
+            <visual name="base_link_visual">
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="model://quadrotor/meshes/quadrotor_base.dae" />
+                    <!--<box size=".7 .7 .25" />-->
+                    <!--<mesh>-->
+                        <!--<uri>model://quadrotor/meshes/quadrotor_base.dae</uri>-->
+                    <!--</mesh>-->
+                </geometry>
+            </visual>
+
+            <collision name="base_link_collision">
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <!--<box size=".8 .8 .25" />-->
+                    <!--<box size=".8 .8 .6" />-->
+                    <box size=".8 .8 .4" />
+                    <!--<mesh>-->
+                        <!--<uri>model://quadrotor/meshes/quadrotor_base.dae</uri>-->
+                    <!--</mesh>-->
+                </geometry>
+            </collision>
+        </link>
+
+        <gazebo reference="base_link">
+                <sensor name="quad_contact_sensor" type="contact">
+                    <always_on>true</always_on>
+                    <update_rate>30.0</update_rate>
+                    <visualize>true</visualize>
+                    <contact>
+                        <collision>base_link_collision_collision</collision>
+                    </contact>
+                    <plugin name="gazebo_ros_bumper_plugin" filename="libgazebo_ros_bumper.so">
+                        <bumperTopicName>gazebo_ros_bumper</bumperTopicName>
+                        <frameName>world</frameName>
+                    </plugin>
+                </sensor>
+        </gazebo>
+
+
+    <!-- Hokuyo UTM-30LX sensor -->
+    <!--<xacro:include filename="$(find hector_sensors_description)/urdf/hokuyo_utm30lx.urdf.xacro" />-->
+    <!--<xacro:hokuyo_utm30lx name="laser0" parent="base_link" ros_topic="scan" update_rate="40" ray_count="1081" min_angle="-90" max_angle="90">-->
+      <!--<origin xyz="0.0 0.0 0.26" rpy="-${pi} -${pi}/2 ${pi}/2"/>-->
+    <!--</xacro:hokuyo_utm30lx>-->
+
+
+    </xacro:macro>
+</robot>

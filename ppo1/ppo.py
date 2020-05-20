@@ -1,17 +1,13 @@
-from ppo1.mlp_policy import MlpPolicy, MlpPolicy_mod
+from ppo1.mlp_policy import MlpPolicy_mod
 from ppo1.pposgd_simple import *
-from collections import defaultdict
-from baselines.common import tf_util as U
-import numpy as np
+from ppo1.common import tf_util as U
 from collections import Counter
-import globals
 import pickle
 
 import pandas as pd
-import os, sys
 
-from utils.plotting_performance import *
-from utils.utils import *
+
+from utils.tools import *
 
 
 
@@ -165,7 +161,7 @@ def ppo_learn(env, policy,
             cond_val_update = True
             vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
                               lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
-            logger.log("loading external valfunc and vf_loss is updated based on normal criteron!")
+            logger.log("loading external valfunc and vf_loss is updated based on MC-TD criteron!")
 
         elif args['vf_switch'] == "no":
             cond_val_update = False
@@ -173,19 +169,37 @@ def ppo_learn(env, policy,
             logger.log("loading external valfunc and vf_loss is fixed!")
 
         elif args['vf_switch'] == 'advanced':
+            # not used for now
             vf_loss = tf.reduce_mean(tf.square(pi.vpred - advret))
             logger.log("loading external valfunc and vf_loss is updated based on advanced criteron!")
 
-        # XLV: alway add one more value NN with non-stop updating
+        else:
+            logger.log("the argument for vf_switch is not valid, please double-check it.")
+
+        # XLV: always add one more value NN with non-stop updating
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
 
     else:
-        cond_val_update = False
-        vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
-        # vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
-        #                       lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
+        if args['vf_switch'] == "yes":
+            cond_val_update = True
+            vf_loss = tf.cond(criteron, lambda: tf.reduce_mean(tf.square(pi.vpred - ret)),
+                              lambda: tf.reduce_mean(tf.square(pi.vpred - pi.vpred)))
+            logger.log("vf is randomly initialized (ppo baseline), but vf_loss is updated using MC-TD criteron!")
+
+        elif args['vf_switch'] == "no":
+            cond_val_update = False
+            vf_loss = tf.reduce_mean(tf.square(pi.vpred - pi.vpred))
+            logger.log("vf is randomly initialized (ppo baseline), and vf_loss is fixed!")
+
+        elif args['vf_switch'] == "always":
+            # this is the default ppo value update strategy. remember to set properly.
+            cond_val_update = False
+            vf_loss = tf.reduce_mean(tf.square(pi.vpred - ret))
+            logger.log("vf is randomly initialized (ppo baseline), vf_loss is updated every iteration!")
+
+
         vf_ghost_loss = tf.reduce_mean(tf.square(pi.vpred_ghost - ret))
-        logger.log("not loading external valfunc and vf_loss is updating every iteration!")
+
 
 
     # total_loss = pol_surr + pol_entpen + vf_loss
@@ -273,7 +287,7 @@ def ppo_learn(env, policy,
         else:
             raise NotImplementedError
 
-        logger.log("********** Iteration %i ************" %(iters_so_far+1)) # Current iteration index
+        logger.log("********** Iteration %i ************" % (iters_so_far + 1)) # Current iteration index
 
         seg = seg_gen.__next__()
         add_vtarg_and_adv(seg, gamma, lam)
@@ -300,15 +314,15 @@ def ppo_learn(env, policy,
         if cond_val_update:
             if np.sum(mc_rets) < np.sum(vpredbefore):
                 val_update_criteron = False
-                logger.log("Now we are running with MPC switch pattern. This iter we do not update value function")
+                logger.log("We are using MC-TD value update rule. This iter we do not update value function")
             else:
                 val_update_criteron = True
-                logger.log("Now we are running with MPC switch pattern. This iter we update value function")
-        else:
-            if args['vf_load'] == "yes":
-                logger.log("Now we are running on MPC fixed pattern, not updating value at all!")
-            else:
-                logger.log("Now we are running on baseline pattern, value is updated on every iteration!")
+                logger.log("We are using MC-TD value update rule. This iter we update value function")
+
+        elif args['vf_switch'] == 'no':
+            logger.log("value function is fixed all the time!")
+        elif args['vf_switch'] == 'always':
+            logger.log("value is always being updated in every iteration!")
 
 
 
@@ -353,7 +367,7 @@ def ppo_learn(env, policy,
 
         # Here we do a bunch of optimization epochs over the data
         start_clip_grad = True # we also use clip_norm for gradient
-        kl_threshold = 0.015 # kl update limit
+        kl_threshold = 0.5 # kl update limit
         for _ in range(optim_epochs):
             losses = []  # list of sublists, each of which gives the loss based on a set of samples with size "optim_batchsize"
             grads = []   # list of sublists, each of which gives the gradients w.r.t all variables based on a set of samples with size "optim_batchsize"
@@ -377,7 +391,7 @@ def ppo_learn(env, policy,
                     adam.update(g, optim_stepsize * cur_lrmult)
                     # logger.log("KL loss is %f" %(newlosses[3]))
                 else:
-                    logger.log("KL loss is %f larger than kl_threshold %f, early stop further updating!" %(newlosses[3], kl_threshold))
+                    logger.log("KL loss is %f larger than kl_threshold %f, early stop further updating!" % (newlosses[3], kl_threshold))
                     break # break only jump out of the inner loop
                 grads.append(g)
                 losses.append(newlosses)
@@ -401,7 +415,7 @@ def ppo_learn(env, policy,
         meanlosses,_,_ = mpi_moments(losses, axis=0)
         logger.log(fmt_row(13, meanlosses))
         for (lossval, name) in zipsame(meanlosses, loss_names):
-            logger.record_tabular("loss_"+name, lossval)
+            logger.record_tabular("loss_" + name, lossval)
 
         logger.record_tabular("ev_tdlam_before", explained_variance(vpredbefore, tdlamret))
         lrlocal = (seg["ep_lens"], seg["ep_rets"]) # local values
@@ -425,7 +439,7 @@ def ppo_learn(env, policy,
         ep_suc_so_far += Counter(train_sucs)[True]
         logger.record_tabular("EpisodesSoFar", episodes_so_far)
         logger.record_tabular("EpSuccessSoFar", ep_suc_so_far)
-        logger.record_tabular("SucRateSoFar", ep_suc_so_far/episodes_so_far)
+        logger.record_tabular("SucRateSoFar", ep_suc_so_far / episodes_so_far)
         logger.record_tabular("TimestepsSoFar", timesteps_so_far)
         logger.record_tabular("TimeElapsed", time.time() - tstart)
 
@@ -455,7 +469,7 @@ def ppo_learn(env, policy,
                 if eval_max_iters and eval_iters_so_far >= eval_max_iters:
                     break
 
-                logger.log("********** Eval Iteration %i ************" %(eval_iters_so_far+1))
+                logger.log("********** Eval Iteration %i ************" % (eval_iters_so_far + 1))
 
                 eval_seg = eval_seg_gen.__next__()
 

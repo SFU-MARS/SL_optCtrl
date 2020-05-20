@@ -1,7 +1,7 @@
-import baselines.common.tf_util as U
+import ppo1.common.tf_util as U
 import tensorflow as tf
 import gym
-from baselines.common.distributions import make_pdtype
+from ppo1.common import make_pdtype
 
 class CnnPolicy(object):
     recurrent = False

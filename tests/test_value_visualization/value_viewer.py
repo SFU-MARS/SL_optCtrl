@@ -1,16 +1,13 @@
 import tensorflow as tf
 import os
 import multiprocessing
-from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoint_file
 from tensorflow.python import pywrap_tensorflow
 import pickle
-import numpy as np
 import pandas as pd
 from gym import spaces
 import shutil
 import seaborn as sns
 
-from keras.models import load_model
 import matplotlib.pyplot as plt
 
 def Extract_model_weights(loadir):
@@ -88,7 +85,7 @@ def Value_distribution_viz(agent):
         # define tensor graph
         import sys
         sys.path.append(os.environ["PROJ_HOME_3"])
-        import baselines.common.tf_util as U
+        import ppo1.common.tf_util as U
 
         ob_space = None
         if agent == 'quad':
@@ -165,31 +162,26 @@ if __name__ == "__main__":
     # Value_distribution_viz(agent='quad')
 
 
-    # # loaded model path; real test data path; and normalization-base data path
+    # loaded model path; real test data path; and normalization-base data path
     # vf_model = load_model(os.environ['PROJ_HOME_3'] + '/tf_model/quad/old_model_old_reward_trained_valNN/vf_mpc.h5')
     # realdata_path = os.environ['PROJ_HOME_3'] + '/tests/test_value_visualization/src_data.csv'
     # normbasedata_path = os.environ['PROJ_HOME_3'] + '/data/quad/old_model_old_reward_training_data/valFunc_mpc_filled_final.csv'
+
+    # vf_model = load_model(os.environ['PROJ_HOME_3'] + '/tf_model/quad/vf_vi.h5')
+    # realdata_path = os.environ['PROJ_HOME_3'] + '/tests/test_value_visualization/src_data.csv'
+    # normbasedata_path = os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_vi_filled_cleaned.csv'
     #
     # # construct normalization base data
-    # normbase_colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'reward', 'value',
-    #             'cost', 'collision_in_future', 'collision_current', 'col_trajectory_flag']
+    # normbase_colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
     # normbase_df = pd.read_csv(normbasedata_path, names=normbase_colnames, na_values="?", comment='\t', sep=",",
     #                          skipinitialspace=True, skiprows=1)
     # stats_source = normbase_df.copy()
     # stats_source.dropna()
     # print("stats:", stats_source)
     # stats = stats_source.describe()
-    # stats.pop("reward")
     # stats.pop("value")
-    # stats.pop("cost")
-    # stats.pop("collision_in_future")
-    # stats.pop("collision_current")
-    # stats.pop("col_trajectory_flag")
     # stats = stats.transpose()
     #
-    #
-    # # real_colnames = ['x', 'vz', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
-    # #             'ppo_valpred_itself', 'atarg', 'tdlamret', 'rews', 'events']
     #
     # real_df = pd.read_csv(realdata_path)
     # # drop the colunm of additional index
@@ -257,8 +249,8 @@ if __name__ == "__main__":
     cols = real_df.columns.tolist()
     print("real df cols: ", cols)
 
-
-
+    import sys
+    sys.path.append(os.environ['PROJ_HOME_3'])
     from value_iteration.helper_function import *
 
     val_interp_f_quad = value_interpolation_function_quad()
