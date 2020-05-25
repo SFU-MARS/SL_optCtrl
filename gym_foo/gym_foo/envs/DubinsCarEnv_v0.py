@@ -12,6 +12,7 @@ from std_srvs.srv import Empty
 from gazebo_msgs.srv import GetModelState, SetModelState
 from gazebo_msgs.msg import ContactsState
 
+import subprocess
 import rospy
 import sys
 print(sys.path)
@@ -38,28 +39,31 @@ theta_dot = w
 print("I'm running DubinsCarEnv with subscriber ...")
 class DubinsCarEnv_v0(gym.Env):
     def __init__(self, reward_type="hand_craft", set_additional_goal="angle"):
-
+        # ROS and Gazebo environment variables setting
         self.port = "11311"
         self.port_gazebo = "11345"
+
+        # self.port = "11411"
+        # self.port_gazebo = "11445"
         os.environ["ROS_MASTER_URI"] = "http://localhost:" + self.port
         os.environ["GAZEBO_MASTER_URI"] = "http://localhost:" + self.port_gazebo
         rospy.init_node('DubinsCarEnv', anonymous=True)
 
+        # Define necessary ros services
         self.vel_pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=5)
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
         self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
-        self.reset_proxy = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
+        self.reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
         self.get_model_state = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
         self.set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
 
+        # Define ros subscriber for receiving sensor readings. Note: this ways is more stable than using "wait_for_message"
         rospy.Subscriber("/scan", LaserScan, self._laser_scan_callback)
         rospy.Subscriber("/gazebo_ros_bumper", ContactsState, self._contact_callback)
         self.laser_data = LaserScan()
         self.contact_data = ContactsState()
 
-        # cancel additional seed, because we already have it in train_ppo.py
-        # self._seed()
-
+        # Task-specific settings
         self.num_lasers = 8
         self.state_dim  = 3  # x,y,theta
         self.action_dim = 2  # v,w
@@ -75,10 +79,9 @@ class DubinsCarEnv_v0(gym.Env):
         high_action = np.array([2.0, 2.0])
         low_action  = np.array([-2.0, -2.0])
 
-
-        self.state_space  = spaces.Box(low=-high_state, high=high_state)
+        self.state_space  = spaces.Box(low=low_state, high=high_state)
         self.observation_space = spaces.Box(low=low_obsrv, high=high_obsrv)
-        self.action_space = spaces.Box(low=-high_action, high=high_action)
+        self.action_space = spaces.Box(low=low_action, high=high_action)
 
         self.goal_state  = GOAL_STATE
         self.start_state = START_STATE
@@ -97,7 +100,7 @@ class DubinsCarEnv_v0(gym.Env):
 
         self.step_counter = 0
         self._max_episode_steps = 300
-        print("successfully initialized!!")
+        logger.log("successfully initialized!!")
 
     def _laser_scan_callback(self, laser_msg):
         self.laser_data = laser_msg
@@ -137,7 +140,7 @@ class DubinsCarEnv_v0(gym.Env):
     #     return False
 
 
-    # AMEND: also temporally for DDPG.
+    # added by XLV: temporally for DDPG.
     def _in_obst(self, contact_data):
         if len(contact_data.states) != 0:
             if contact_data.states[0].collision1_name != "" and contact_data.states[0].collision2_name != "":
@@ -193,61 +196,54 @@ class DubinsCarEnv_v0(gym.Env):
         ow = dynamic_data.pose.orientation.w
         _, _, theta = euler_from_quaternion([ox, oy, oz, ow])  # heading angle, which == yaw
 
-        # # velocity, just linear velocity along x-axis
-        # v = dynamic_data.twist.linear.x
-        # # angular velocity, just angular velocity along z-axis
-        # w = dynamic_data.twist.angular.z
-
         obsrv = [x, y, theta] + discretized_laser_data
 
-        # if any(np.isnan(np.array(obsrv))):
-        #     logger.record_tabular("found nan in observation:", obsrv)
-        #     obsrv = self.reset()
 
         return obsrv
 
     def reset(self, spec=None):
         self.laser_data = LaserScan()
         self.contact_data = ContactsState()
-        # Resets the state of the environment and returns an initial observation.
-        rospy.wait_for_service('/gazebo/reset_simulation')
+
+        # Resets the simulation
+        rospy.wait_for_service('/gazebo/reset_world')
         try:
-            self.reset_proxy()
-            if spec is not None:
-                pose = Pose()
-                pose.position.x = spec[0]
-                pose.position.y = spec[1]
-                pose.position.z = self.get_model_state(model_name="mobile_base").pose.position.z
-                theta = spec[2]
-                ox, oy, oz, ow = quaternion_from_euler(0.0, 0.0, theta)
-                pose.orientation.x = ox
-                pose.orientation.y = oy
-                pose.orientation.z = oz
-                pose.orientation.w = ow
-            else:
-                pose = Pose()
-                pose.position.x = np.random.uniform(low=START_STATE[0]-0.5, high=START_STATE[0]+0.5)
-                pose.position.y = np.random.uniform(low=START_STATE[1]-0.5, high=START_STATE[1]+0.5)
-                pose.position.z = self.get_model_state(model_name="mobile_base").pose.position.z
-                theta = np.random.uniform(low=START_STATE[2], high=START_STATE[2]+np.pi)
-                ox, oy, oz, ow = quaternion_from_euler(0.0, 0.0, theta)
-                pose.orientation.x = ox
-                pose.orientation.y = oy
-                pose.orientation.z = oz
-                pose.orientation.w = ow
-
-            reset_state = ModelState()
-            reset_state.model_name = "mobile_base"
-            reset_state.pose = pose
-            self.set_model_state(reset_state)
+            self.reset_world()
         except rospy.ServiceException as e:
-            print("# Resets the state of the environment and returns an initial observation.")
+            print("# Reset simulation fails!")
 
+        # Set robot to random starting point
+        if spec is not None:
+            pose = Pose()
+            pose.position.x = spec[0]
+            pose.position.y = spec[1]
+            pose.position.z = self.get_model_state(model_name="mobile_base").pose.position.z
+            theta = spec[2]
+            ox, oy, oz, ow = quaternion_from_euler(0.0, 0.0, theta)
+            pose.orientation.x = ox
+            pose.orientation.y = oy
+            pose.orientation.z = oz
+            pose.orientation.w = ow
+        else:
+            pose = Pose()
+            pose.position.x = np.random.uniform(low=START_STATE[0] - 0.5, high=START_STATE[0] + 0.5)
+            pose.position.y = np.random.uniform(low=START_STATE[1] - 0.5, high=START_STATE[1] + 0.5)
+            pose.position.z = self.get_model_state(model_name="mobile_base").pose.position.z
+            theta = np.random.uniform(low=START_STATE[2], high=START_STATE[2] + np.pi)
+            ox, oy, oz, ow = quaternion_from_euler(0.0, 0.0, theta)
+            pose.orientation.x = ox
+            pose.orientation.y = oy
+            pose.orientation.z = oz
+            pose.orientation.w = ow
 
+        reset_state = ModelState()
+        reset_state.model_name = "mobile_base"
+        reset_state.pose = pose
+        self.set_model_state(reset_state)
+
+        # Prepare receive sensor readings
         laser_data = self.get_laser()
-        contact_data = self.get_contact()
         new_laser_data = laser_data
-        new_contact_data = contact_data
 
         # Unpause simulation only for obtaining observation
         rospy.wait_for_service('/gazebo/unpause_physics')
@@ -258,13 +254,6 @@ class DubinsCarEnv_v0(gym.Env):
 
         while new_laser_data.header.stamp <= laser_data.header.stamp:
             new_laser_data = self.get_laser()
-            new_contact_data = self.get_contact()
-
-        # # read laser data
-        # laser_data = None
-        # while laser_data is None:
-        #     # laser_data = rospy.wait_for_message('/scan', LaserScan, timeout=50)
-        #     laser_data = self.get_laser()
 
         # Pause simulator to do other operations
         rospy.wait_for_service('/gazebo/pause_physics')
@@ -285,52 +274,39 @@ class DubinsCarEnv_v0(gym.Env):
         return np.asarray(obsrv)
 
     def step(self, action):
-        # print("step:", self.step_counter)
+
+        # Check for possible nan action
         if sum(np.isnan(action)) > 0:
             raise ValueError("Passed in nan to step! Action: " + str(action))
 
         action = np.clip(action, -2, 2)
 
-        # [-2, 2] --> [-0.8, 2]
+        # For linear vel, [-2, 2] --> [-0.8, 2]
         linear_vel = -0.8 + (2 - (-0.8)) * (action[0] - (-2)) / (2 - (-2))
-
-        # For ppo, do nothing to ang_vel
-        # angular_vel = action[1]
-
-        # For ddpg, [-2, 2] --> [-0.8, 0.8]
+        # For angular vel, [-2, 2] --> [-0.8, 0.8]. If something wrong happens, check old code to specify for PPO, DDPG or TRPO
         angular_vel = -0.8 + (0.8 - (-0.8)) * (action[1] - (-2)) / (2 - (-2))
 
-        # For trpo, clip to [-1,1], then [-1,1] --> [-0.5,0.5]
-        # angular_vel = np.clip(action[1], -1, 1)
-        # angular_vel = -0.5 + (0.5 - (-0.5)) * (angular_vel - (-1)) / (1 - (-1))
-
-
+        # Publish control command
         vel_cmd = Twist()
         vel_cmd.linear.x = linear_vel
         vel_cmd.angular.z = angular_vel
-        # print("vel_cmd",vel_cmd)
-        # print("angvel:", angular_vel)
         self.vel_pub.publish(vel_cmd)
 
+        # Prepare for receive sensor readings. Laser data as part of obs; contact data used for collision detection
         contact_data = self.get_contact()
         laser_data   = self.get_laser()
-
         new_contact_data = contact_data
         new_laser_data   = laser_data
 
-        # Unpause simulation only for obtaining observation
+        # Unpause simulation only for obtaining valid data streaming
         rospy.wait_for_service('/gazebo/unpause_physics')
         try:
             self.unpause()
         except rospy.ServiceException as e:
             print("/gazebo/unpause_physics service call failed")
 
-
-        while new_contact_data.header.stamp <= contact_data.header.stamp and \
+        while new_contact_data.header.stamp <= contact_data.header.stamp or \
                 new_laser_data.header.stamp <= laser_data.header.stamp:
-            # contact_data = rospy.wait_for_message('/gazebo_ros_bumper', ContactsState, timeout=50)
-            # laser_data = rospy.wait_for_message('/scan', LaserScan, timeout=50)
-
             new_contact_data = self.get_contact()
             new_laser_data   = self.get_laser()
 
@@ -341,6 +317,7 @@ class DubinsCarEnv_v0(gym.Env):
         except rospy.ServiceException as e:
             print("/gazebo/pause_physics service call failed")
 
+        # Call a service to get model state
         dynamic_data = None
         rospy.wait_for_service("/gazebo/get_model_state")
         while dynamic_data is None:
@@ -348,7 +325,7 @@ class DubinsCarEnv_v0(gym.Env):
 
         obsrv = self.get_obsrv(new_laser_data, dynamic_data)
 
-        # --- special solution for nan/inf observation (especially in case of any invalid sensor readings) --- #
+        # special solution for nan/inf observation (especially in case of any invalid sensor readings)
         if any(np.isnan(np.array(obsrv))) or any(np.isinf(np.array(obsrv))):
             logger.record_tabular("found nan or inf in observation:", obsrv)
             obsrv = self.pre_obsrv
@@ -361,7 +338,6 @@ class DubinsCarEnv_v0(gym.Env):
         reward = 0
 
         if self.reward_type == 'hand_craft':
-            # reward = 1
             reward += 0
         else:
             raise ValueError("reward type is invalid!")
@@ -369,24 +345,14 @@ class DubinsCarEnv_v0(gym.Env):
         done = False
         suc  = False
         self.step_counter += 1
+        event_flag = None  # {'collision', 'safe', 'goal', 'steps exceeding'}
 
-        event_flag = None # {'collision', 'safe', 'goal', 'steps exceeding', 'fast rotation'}
-
-
-        # 1. when collision happens, done = True
-        # if self._in_obst(laser_data):
-        #     reward += self.collision_reward
-        #     done = True
-        #     self.step_counter = 0
-        #     event_flag = 'collision'
-
-        # temporary change for ddpg only. For PPO, use things above.
+        # 1. Check collision. If something is wrong, go check old code to specify another _in_obst function
         if self._in_obst(new_contact_data):
             reward += self.collision_reward
             done = True
             self.step_counter = 0
             event_flag = 'collision'
-            # print("in collision ...")
 
         # 2. In the neighbor of goal state, done is True as well. Only considering velocity and pos
         if self._in_goal(np.array(obsrv[:3])):
@@ -396,27 +362,20 @@ class DubinsCarEnv_v0(gym.Env):
             self.step_counter = 0
             event_flag = 'goal'
 
+        # 3. If reaching maximum episode step, then we reset and give penalty.
         if self.step_counter >= 300:
             reward += self.collision_reward
             done = True
             self.step_counter = 0
             event_flag = 'steps exceeding'
 
-        # cur_w = dynamic_data.twist.angular.z
-        # if cur_w > np.pi:
-        #     done = True
-        #     reward += self.collision_reward / 2
-        #     event_flag = 'fast rotation'
-
         if event_flag is None:
             event_flag = 'safe'
 
         return np.asarray(obsrv), reward, done, {'suc':suc, 'event':event_flag}
 
-    def _seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
 
+# small test code
 if __name__ == "__main__":
     env = DubinsCarEnv_v0(reward_type='hand_craft', set_additional_goal="angle")
     obs = env.reset()

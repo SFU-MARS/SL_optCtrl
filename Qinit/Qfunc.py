@@ -18,10 +18,10 @@ class PrintDot(keras.callbacks.Callback):
 
 
 class QNN(object):
-    def __init__(self, input_dim):
+    def __init__(self, input_dim, hidden=None):
         self.model = keras.Sequential([
-            keras.layers.Dense(400, activation=tf.nn.relu, input_shape=[input_dim]),
-            keras.layers.Dense(300, activation=tf.nn.relu),
+            keras.layers.Dense(hidden[0], activation=tf.nn.relu, input_shape=[input_dim]),
+            keras.layers.Dense(hidden[1], activation=tf.nn.relu),
             keras.layers.Dense(1)
         ])
         self.optimizer = tf.keras.optimizers.Adadelta()
@@ -45,7 +45,7 @@ class QNN(object):
         model.summary()
 
 
-        EPOCHS = 1000  # too many iterations cause over-fitting
+        EPOCHS = 400  # too many iterations cause over-fitting
         history = model.fit(
             train_dataset, train_labels, batch_size=128,
             epochs=EPOCHS, validation_split=0.2, verbose=1,
@@ -100,12 +100,14 @@ if __name__ == "__main__":
     from value_iteration.value_iteration_6d_xubo_version_1.value_iteration_6d_xubo_version_1_boltzmann import \
         env_quad_6d
     from value_iteration.value_iteration_3d.value_iteration_car_3d import env_dubin_car_3d
-
+    # hidden = [400, 300]
+    hidden = [256, 256]
     user_config = {'agent': 'dubinsCar',
                    'input_dim': 13,
+                   'hidden': hidden,
                    'data_loadpath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/train_data/Qval.csv",
-                   'model_savepath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/trained_model/Qf.h5",
-                   'history_savepath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/trained_model/Qf_history.csv",
+                   'model_savepath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/trained_model/{}*{}/Qf.h5".format(hidden[0], hidden[1]),
+                   'history_savepath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/trained_model/{}*{}/Qf_history.csv".format(hidden[0], hidden[1]),
                    'column_names': ['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'a1', 'a2', 'Q'],
                    'valM_loadpath': "/local-scratch/xlv/SL_optCtrl/value_iteration/value_boltzmann_angle.npy",
                    'env_id': "DubinsCarEnv-v0",
@@ -168,14 +170,14 @@ if __name__ == "__main__":
     # Qdf.to_csv(user_config['data_loadpath'])
 
     # Load this Q data file and use it to train the Q network
-    q_net = QNN(input_dim=user_config['input_dim'])
+    q_net = QNN(input_dim=user_config['input_dim'], hidden=user_config['hidden'])
     q_net.train(data_loadpath=user_config['data_loadpath'],
                 model_savepath=user_config['model_savepath'],
                 history_savepath=user_config['history_savepath'],
                 colnames=user_config['column_names'])
 
     # Save the weight of trained Q model
-    q_net = QNN(input_dim=user_config['input_dim'])
+    q_net = QNN(input_dim=user_config['input_dim'], hidden=user_config['hidden'])
     q_net.save_model_weights(user_config['model_savepath'])
 
 

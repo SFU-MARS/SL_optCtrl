@@ -1,0 +1,2 @@
+global debug_info
+global RUN_ROOT

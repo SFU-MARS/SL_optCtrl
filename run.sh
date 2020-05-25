@@ -5,17 +5,10 @@ BASEDIR=$(dirname "$0")
 
 
 # ------- training agent using ddpg algorithm ------ #
-/local-scratch/xlv/miniconda3/envs/py35_no_specific/bin/python $BASEDIR/train_ourddpg.py --policy OurDDPG --env DubinsCarEnv-v0 \
---initQ=no --save_model
+#/local-scratch/xlv/miniconda3/envs/py35_no_specific/bin/python $BASEDIR/train_ourddpg.py --policy OurDDPG --env DubinsCarEnv-v0 \
+#--initQ=no --save_model
 
-/local-scratch/xlv/miniconda3/envs/py35_no_specific/bin/python $BASEDIR/train_ourddpg.py --policy OurDDPG --env DubinsCarEnv-v0 \
---initQ=no --save_model
 
-/local-scratch/xlv/miniconda3/envs/py35_no_specific/bin/python $BASEDIR/train_ourddpg.py --policy OurDDPG --env DubinsCarEnv-v0 \
---initQ=yes --save_model
-
-/local-scratch/xlv/miniconda3/envs/py35_no_specific/bin/python $BASEDIR/train_ourddpg.py --policy OurDDPG --env DubinsCarEnv-v0 \
---initQ=yes --save_model
 
 
 # ------- training agent using PPO algorithm ------- #
