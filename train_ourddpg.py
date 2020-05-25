@@ -7,16 +7,17 @@ import argparse
 import os
 import time
 from collections import *
-
+import pandas as pd
 
 from TD3 import utils
-import TD3
 from TD3 import OurDDPG
 from TD3 import DDPG
+from TD3 import TD3
 
 from gym_foo import gym_foo
 from utils import logger
 from utils.tools import *
+import config
 
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
@@ -33,7 +34,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=50):
 			action = policy.select_action(np.array(state))
 			state, reward, done, info = eval_env.step(action)
 			avg_reward += reward
-			if info['suc']:
+			if env_name in ['DubinsCarEnv-v0', 'PlanarQuadEnv-v0'] and info['suc']:
 				suc_episode_num += 1
 	avg_reward /= eval_episodes
 	suc_rate = suc_episode_num * 1.0 / eval_episodes
@@ -46,10 +47,10 @@ def eval_policy(policy, env_name, seed, eval_episodes=50):
 if __name__ == "__main__":
 	
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--policy", default="TD3")                   # Policy name (TD3, DDPG or OurDDPG)
-	parser.add_argument("--env", default="HalfCheetah-v2")           # OpenAI gym environment name
+	parser.add_argument("--policy", default="OurDDPG")                   # Policy name (TD3, DDPG or OurDDPG)
+	parser.add_argument("--env", default="DubinsCarEnv-v0")          # OpenAI gym environment name
 	parser.add_argument("--seed", default=0, type=int)               # Sets Gym, PyTorch and Numpy seeds
-	parser.add_argument("--start_timesteps", default=10e3, type=int) # Time steps initial random policy is used
+	parser.add_argument("--start_timesteps", default=25e3, type=int) # Time steps initial random policy is used
 	parser.add_argument("--eval_freq", default=5e3, type=int)        # How often (time steps) we evaluate
 	parser.add_argument("--max_timesteps", default=300e3, type=int)  # Max time steps to run environment
 	parser.add_argument("--expl_noise", default=0.1)                 # Std of Gaussian exploration noise
@@ -72,9 +73,11 @@ if __name__ == "__main__":
 	else:
 		initQ = False
 
+	# added by XLV: set a global pandas dataframe to save running statistics for further debug
+	config.debug_info = pd.DataFrame(columns=['QtargPred','reward', 'a1', 'a2', 'x','y','theta','d1','d2','d3','d4','d5','d6','d7','d8','nx','ny','ntheta','nd1','nd2','nd3','nd4','nd5','nd6','nd7','nd8'])
 
-	file_name = "{}_{}_{}_{}".format( time.strftime('%d-%b-%Y_%H-%M-%S'), args.policy, args.env, args.seed)
-	RUN_DIR = os.path.join("runs_log_ddpg", file_name)
+	file_name = "{}_{}_{}_{}_{}".format( time.strftime('%d-%b-%Y_%H-%M-%S'), args.policy, args.env, args.seed, args.initQ)
+	config.RUN_ROOT = RUN_DIR = os.path.join("runs_log_ddpg", file_name)
 	MODEL_DIR = os.path.join(RUN_DIR, 'model')
 	FIGURE_DIR = os.path.join(RUN_DIR, 'figure')
 	RESULT_DIR = os.path.join(RUN_DIR, 'result')
@@ -137,7 +140,9 @@ if __name__ == "__main__":
 	total_train_rews = []
 	
 	# Evaluate untrained policy
+	logger.log("start evaluating untrained policy ...")
 	evaluations = [eval_policy(policy, args.env, args.seed)]
+	logger.log("evaluating untrained policy finished ...")
 
 	state, done = env.reset(), False
 	episode_reward = 0
@@ -150,6 +155,7 @@ if __name__ == "__main__":
 
 		# Select action randomly or according to policy
 		if t < args.start_timesteps:
+			print("we are randomly sampling action ...")
 			action = env.action_space.sample()
 		else:
 			action = (
@@ -159,24 +165,24 @@ if __name__ == "__main__":
 
 
 		# Perform action
-
 		next_state, reward, done, _ = env.step(action) 
 		done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
 
 		# Store data in replay buffer
 		replay_buffer.add(state, action, next_state, reward, done_bool)
-		rewbuffer.append(reward)
 
 		state = next_state
 		episode_reward += reward
 
 		# Train agent after collecting sufficient data
-		if t >= args.start_timesteps:
+		if t >= args.start_timesteps and t % 50 == 0:
 			policy.train(replay_buffer, args.batch_size)
 
 		if done: 
 			# +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
 			logger.log("Total T: {} Episode Num: {} Episode T: {} Reward: {}".format(t+1, episode_num+1, episode_timesteps, episode_reward))
+			# added by XLV: store episodic reward to a buffer for rolling-average
+			rewbuffer.append(episode_reward)
 			# Reset environment
 			state, done = env.reset(), False
 			episode_reward = 0
@@ -185,6 +191,7 @@ if __name__ == "__main__":
 
 		# Collect training reward every 1e3 steps
 		if (t + 1) % 1e3 == 0:
+			# print("rewbuffer mean:", np.mean(rewbuffer))
 			total_train_rews.append(np.mean(rewbuffer))
 
 		# Evaluate episode and save and plot statistics
