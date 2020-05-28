@@ -31,6 +31,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=50):
 	for _ in range(eval_episodes):
 		state, done = eval_env.reset(), False
 		while not done:
+			# print("state: {}".format(state))
 			action = policy.select_action(np.array(state))
 			state, reward, done, info = eval_env.step(action)
 			avg_reward += reward
@@ -45,12 +46,13 @@ def eval_policy(policy, env_name, seed, eval_episodes=50):
 
 
 if __name__ == "__main__":
-	
+	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--policy", default="OurDDPG")                   # Policy name (TD3, DDPG or OurDDPG)
-	parser.add_argument("--env", default="DubinsCarEnv-v0")          # OpenAI gym environment name
+	parser.add_argument("--policy", default="OurDDPG")               # Policy name (TD3, DDPG or OurDDPG)
+	parser.add_argument("--env", default="PlanarQuadEnv-v0")          # OpenAI gym environment name
 	parser.add_argument("--seed", default=0, type=int)               # Sets Gym, PyTorch and Numpy seeds
-	parser.add_argument("--start_timesteps", default=25e3, type=int) # Time steps initial random policy is used
+	parser.add_argument("--start_timesteps", default=25e3, type=int)    # Time steps initial random policy is used
 	parser.add_argument("--eval_freq", default=5e3, type=int)        # How often (time steps) we evaluate
 	parser.add_argument("--max_timesteps", default=300e3, type=int)  # Max time steps to run environment
 	parser.add_argument("--expl_noise", default=0.1)                 # Std of Gaussian exploration noise
@@ -63,20 +65,41 @@ if __name__ == "__main__":
 	parser.add_argument("--save_model", action="store_true")         # Save model and optimizer parameters
 	parser.add_argument("--load_model", default="")                  # Model load file name, "" doesn't load, "default" uses file_name
 
-	# added by XLV: one more option for initialize Q network
+	# added by XLV: more options for initialize Q network
 	parser.add_argument("--initQ", default="no", type=str)
-
+	parser.add_argument("--fixed", default="yes", type=str)
+	parser.add_argument("--useGD", action="store_true")
+	parser.add_argument("--save_debug_info", action="store_true")
 	args = parser.parse_args()
 
 	if args.initQ == "yes":
-		initQ = True
+		args.initQ = True
+		if args.fixed == "yes":
+			args.fixed = True
+			logger.log("You initialize Q target and want to keep it always fixed, thus Q target is never updated ...")
+		else:
+			args.fixed = False
+			logger.log("You are initializing Q and want to update it accordingly ...")
 	else:
-		initQ = False
+		args.initQ = False
+		args.fixed = False
+		logger.log("not initializing Q, update Q target every train call ...")
+
+	if args.useGD:
+		args.initQ = False
+		args.fixed = True
 
 	# added by XLV: set a global pandas dataframe to save running statistics for further debug
-	config.debug_info = pd.DataFrame(columns=['QtargPred','reward', 'a1', 'a2', 'x','y','theta','d1','d2','d3','d4','d5','d6','d7','d8','nx','ny','ntheta','nd1','nd2','nd3','nd4','nd5','nd6','nd7','nd8'])
+	if args.env == "DubinsCarEnv-v0":
+		config.debug_info = pd.DataFrame(columns=['QtargPred','reward', 'a1', 'a2', 'x','y','theta','d1','d2','d3','d4','d5','d6','d7','d8','nx','ny','ntheta','nd1','nd2','nd3','nd4','nd5','nd6','nd7','nd8'])
+	elif args.env == "PlanarQuadEnv-v0":
+		config.debug_info = pd.DataFrame(columns=['QtargPred', 'reward', 'a1', 'a2', 'x', 'vx', 'z', 'vz', 'theta', 'w', 'd1', 'd2', 'd3',
+							  'd4', 'd5', 'd6', 'd7', 'd8', 'nx', 'nvx', 'nz', 'nvz', 'ntheta', 'nw', 'nd1', 'nd2', 'nd3', 'nd4', 'nd5', 'nd6', 'nd7','nd8'])
 
-	file_name = "{}_{}_{}_{}_{}".format( time.strftime('%d-%b-%Y_%H-%M-%S'), args.policy, args.env, args.seed, args.initQ)
+
+	file_name = "{}_{}_{}_{}_{}_{}".format(time.strftime('%d-%b-%Y_%H-%M-%S'), args.policy, args.env, args.seed, "yes" if args.initQ else "no", "fixed" if args.fixed else "non-fixed")
+	file_name = file_name + "_{}".format("gd") if args.useGD else file_name
+
 	config.RUN_ROOT = RUN_DIR = os.path.join("runs_log_ddpg", file_name)
 	MODEL_DIR = os.path.join(RUN_DIR, 'model')
 	FIGURE_DIR = os.path.join(RUN_DIR, 'figure')
@@ -86,11 +109,12 @@ if __name__ == "__main__":
 		os.makedirs(MODEL_DIR)
 		os.makedirs(FIGURE_DIR)
 		os.makedirs(RESULT_DIR)
+
 	# logger initialize and configuration
 	logger.configure(dir=RUN_DIR)
 
 	logger.log("---------------------------------------")
-	logger.log("Policy: {}, Env: {}, Seed: {}".format(args.policy, args.env, args.seed))
+	logger.log("Policy: {}, Env: {}, Seed: {}, Qinit: {}, Fixed: {}, UseGD: {}, Save debug info: {}".format(args.policy, args.env, args.seed, args.initQ, args.fixed, args.useGD, args.save_debug_info))
 	logger.log("---------------------------------------")
 
 	env = gym.make(args.env)
@@ -111,8 +135,12 @@ if __name__ == "__main__":
 		"max_action": max_action,
 		"discount": args.discount,
 		"tau": args.tau,
-		# added by XLV: add initQ as a new kwarg
-		"initQ": initQ
+
+		# added by XLV: add a few more new kwargs
+		"initQ": args.initQ,
+		"fixed": args.fixed,
+		"useGD": args.useGD,
+		"save_debug_info": args.save_debug_info
 	}
 
 	# Initialize policy
@@ -144,6 +172,9 @@ if __name__ == "__main__":
 	evaluations = [eval_policy(policy, args.env, args.seed)]
 	logger.log("evaluating untrained policy finished ...")
 
+	# Segment to hold consecutive episodes
+	seg = {'obs':[], 'rews':[], 'news':[]}
+
 	state, done = env.reset(), False
 	episode_reward = 0
 	episode_timesteps = 0
@@ -158,6 +189,7 @@ if __name__ == "__main__":
 			print("we are randomly sampling action ...")
 			action = env.action_space.sample()
 		else:
+			# print("state: {}".format(state))
 			action = (
 				policy.select_action(np.array(state))
 				+ np.random.normal(0, max_action * args.expl_noise, size=action_dim)
@@ -171,11 +203,32 @@ if __name__ == "__main__":
 		# Store data in replay buffer
 		replay_buffer.add(state, action, next_state, reward, done_bool)
 
+		# TODO
+		# Store consecutive episodes (up to 1000 steps)
+		# seg['obs'].append(state)
+		# seg['next_obs'].append(next_state)
+		# seg['rews'].append(reward)
+		# seg['news'].append(done_bool)
+		# if len(seg['rews']) == 1000:
+		# 	news = seg['news'].append(0).deepcopy()
+		# 	rews = seg['rews'].deepcopy()
+		# 	G    = seg['rews'].append(0).deepcopy()
+		# 	next_state = seg['next_obs'].deepcopy()
+		#
+		# 	target_Q = policy.critic_target(torch.FloatTensor(next_state).to(device), policy.actor_target(torch.FloatTensor(next_state)))
+		# 	target_Q = reward + (news * args.discount * target_Q).detach()
+		# 	for t in reversed(range(1000)):
+		# 		nonterminal = 1 - news[t + 1]
+		# 		G[t] = seg['rews'][t] + args.discount * G[t + 1] * nonterminal
+
+
 		state = next_state
 		episode_reward += reward
 
 		# Train agent after collecting sufficient data
-		if t >= args.start_timesteps and t % 50 == 0:
+		# if t >= args.start_timesteps and t % 50 == 0:
+		# 	policy.train(replay_buffer, args.batch_size)
+		if t >= args.start_timesteps:
 			policy.train(replay_buffer, args.batch_size)
 
 		if done: 
@@ -191,7 +244,6 @@ if __name__ == "__main__":
 
 		# Collect training reward every 1e3 steps
 		if (t + 1) % 1e3 == 0:
-			# print("rewbuffer mean:", np.mean(rewbuffer))
 			total_train_rews.append(np.mean(rewbuffer))
 
 		# Evaluate episode and save and plot statistics

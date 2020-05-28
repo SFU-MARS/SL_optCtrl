@@ -634,6 +634,17 @@ class env_quad_6d(object):
         dataset = dataset[['x', 'vx', 'z', 'vz', 'theta', 'w', 'value']]
         dataset.to_csv("./quad_6D_value_iteration_samples_boltzmann.csv")
 
+    def set_interpolation(self, valM):
+        interploating_function = RegularGridInterpolator((self.state_grid[0],
+                                                          self.state_grid[1],
+                                                          self.state_grid[2],
+                                                          self.state_grid[3],
+                                                          self.state_grid[4],
+                                                          self.state_grid[5]),
+                                                         valM,
+                                                         bounds_error=False,
+                                                         fill_value=self.reward_list[2])
+        return interploating_function
 
 # env = env_quad_6d()
 # env.algorithm_init()

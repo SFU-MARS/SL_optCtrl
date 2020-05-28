@@ -26,30 +26,37 @@ logger.log("goal angle center: {}".format(GOAL_ANGLE_CENTER * 180 / np.pi))
 logger.log("goal angle radius: {}".format(GOAL_ANGLE_RADIUS * 180 / np.pi))
 
 # goal and start state definitions
-START_STATE = np.array([3.75, 0, 2, 0, 0, 0])
+# START_STATE = np.array([3.75, 0, 2, 0, 0, 0])  # air_space_202002_Francis
+START_STATE = np.array([3, 0, 2, 0, 0, 0])       # air_space_2021910_ddpg
 GOAL_STATE = np.array([4.0, 0.0, 9.0, 0.0, GOAL_ANGLE_CENTER, 0.0])
 GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
 
 
 # obstacle definitions from air_space_202002_Francis
+# OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
+#                  (1, 8.5, 1.5/2, 1.0/2),
+#                  (3.5+0.25, 5, 3/2, 1.5/2),
+#                  (0, 1, 0.5/2, 2/2)]
+
+# obstacle definitions from air_space_2021910_ddpg (A simpler env designed for DDPG comparison)
 OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
-                 (1, 8.5, 1.5/2, 1.0/2),
-                 (3.5+0.25, 5, 3/2, 1.5/2),
+                 (0, 8.5, 1.5/2, 1.0/2),
+                 (3.5, 5, 3/2, 1.5/2),
                  (0, 1, 0.5/2, 2/2)]
 
 # wall 0,1,2,3
 WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.0)]
 
-
+logger.log("I'm running PlanarQuadEnv with subscriber ...")
 class PlanarQuadEnv_v0(gym.Env):
-    def __init__(self, reward_type='hand_craft', set_additional_goal='goal', **kwargs):
-        self.port = "11311"
-        self.port_gazebo = "11345"
+    def __init__(self, reward_type='hand_craft', set_additional_goal='None'):
+        # self.port = "11311"
+        # self.port_gazebo = "11345"
 
         # self.port = "11411"
         # self.port_gazebo = "11445"
-        os.environ["ROS_MASTER_URI"] = "http://localhost:" + self.port
-        os.environ["GAZEBO_MASTER_URI"] = "http://localhost:" + self.port_gazebo
+        # os.environ["ROS_MASTER_URI"] = "http://localhost:" + self.port
+        # os.environ["GAZEBO_MASTER_URI"] = "http://localhost:" + self.port_gazebo
         rospy.init_node('PlanarQuadEnv', anonymous=True)
 
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
@@ -104,6 +111,7 @@ class PlanarQuadEnv_v0(gym.Env):
 
         # used to monitor episode steps
         self.step_counter = 0
+        self._max_episode_steps = 100
 
     def _laser_scan_callback(self, laser_msg):
         self.laser_data = laser_msg
@@ -130,7 +138,7 @@ class PlanarQuadEnv_v0(gym.Env):
         return discretized_ranges
 
 
-    def _in_obst(self, laser_data, dynamic_data):
+    def _in_obst(self, dynamic_data):
         laser_min_range = 0.6
         tmp_x = dynamic_data.pose.position.x
         tmp_y = dynamic_data.pose.position.y
@@ -294,9 +302,9 @@ class PlanarQuadEnv_v0(gym.Env):
         dynamic_data = None
         rospy.wait_for_service("/gazebo/get_model_state")
         while dynamic_data is None:
-            dynamic_data = self.get_model_state(model_name="mobile_base")
+            dynamic_data = self.get_model_state(model_name="quadrotor")
 
-        obsrv = self.get_obsrv(laser_data, dynamic_data)
+        obsrv = self.get_obsrv(new_laser_data, dynamic_data)
         self.pre_obsrv = obsrv
 
         return np.asarray(obsrv)
@@ -350,14 +358,14 @@ class PlanarQuadEnv_v0(gym.Env):
         dynamic_data = None
         rospy.wait_for_service("/gazebo/get_model_state")
         while dynamic_data is None:
-            dynamic_data = self.get_model_state(model_name="mobile_base")
+            dynamic_data = self.get_model_state(model_name="quadrotor")
 
         done = False
         suc = False
         self.step_counter += 1
         event_flag = None  # {'collision', 'safe', 'goal', 'steps exceeding', 'highly tilt'}
 
-        obsrv = self.get_obsrv(laser_data, dynamic_data)
+        obsrv = self.get_obsrv(new_laser_data, dynamic_data)
         # special solution for nan/inf observation (especially in case of any invalid sensor readings)
         if any(np.isnan(np.array(obsrv))) or any(np.isinf(np.array(obsrv))):
             logger.record_tabular("found nan or inf in observation:", obsrv)
@@ -376,7 +384,7 @@ class PlanarQuadEnv_v0(gym.Env):
             raise ValueError("no option for step reward!")
 
         # 1. when collision happens, done = True
-        if self._in_obst(laser_data, dynamic_data):
+        if self._in_obst(dynamic_data):
             reward += self.collision_reward
             done = True
             self.step_counter = 0

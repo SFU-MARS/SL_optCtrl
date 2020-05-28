@@ -40,13 +40,16 @@ print("I'm running DubinsCarEnv with subscriber ...")
 class DubinsCarEnv_v0(gym.Env):
     def __init__(self, reward_type="hand_craft", set_additional_goal="angle"):
         # ROS and Gazebo environment variables setting
-        self.port = "11311"
-        self.port_gazebo = "11345"
+        # self.port = "11311"
+        # self.port_gazebo = "11345"
 
         # self.port = "11411"
         # self.port_gazebo = "11445"
-        os.environ["ROS_MASTER_URI"] = "http://localhost:" + self.port
-        os.environ["GAZEBO_MASTER_URI"] = "http://localhost:" + self.port_gazebo
+
+        # os.environ["ROS_MASTER_URI"] = "http://localhost:" + self.port
+        # os.environ["GAZEBO_MASTER_URI"] = "http://localhost:" + self.port_gazebo
+        print(os.environ["ROS_MASTER_URI"])
+        print(os.environ["GAZEBO_MASTER_URI"])
         rospy.init_node('DubinsCarEnv', anonymous=True)
 
         # Define necessary ros services
