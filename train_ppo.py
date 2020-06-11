@@ -1,6 +1,7 @@
 import gym
 import tensorflow as tf
 import numpy as np
+import pickle
 
 from ppo1 import ppo
 from utils import logger
@@ -13,19 +14,10 @@ import argparse
 import json
 
 
-
-
-# Set random seed in hope to reproductability
-np.random.seed(0)
-tf.set_random_seed(1)
-
-
-
-
 def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=None, save_obs=False):
 
     assert algorithm == ppo
-    assert args['gym_env'] in ["PlanarQuadEnv-v0", "DubinsCarEnv-v0"]
+    assert args['gym_env'] in ["PlanarQuadEnv-v0", "DubinsCarEnv-v0", "DubinsCarEnv-v1"]
 
     # Initialize policy
     ppo.create_session()
@@ -70,6 +62,11 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
     else:
         logger.log("invalid run_type!")
     env.close()
+
+    # save global ggl in config.py
+    from config import ggl
+    pickle.dump(ggl, open(args['RUN_DIR'] + "/ggl.pkl", "wb"))
+    logger.log("saving ggl done!")
     return pi
 
 if __name__ == "__main__":
@@ -89,6 +86,7 @@ if __name__ == "__main__":
         parser.add_argument("--lam", type=float, default=0.95)
         parser.add_argument("--grad_norm", type=float, default=0.5)
         parser.add_argument("--adv_shift", type=str, default="no")
+        parser.add_argument("--seed", type=int, default=0)
         args = parser.parse_args()
         args = vars(args)
 
@@ -125,11 +123,17 @@ if __name__ == "__main__":
         # Initialize environment and reward type
         env = gym.make(args['gym_env'], reward_type=args['reward_type'], set_additional_goal=args['set_additional_goal'])
 
+
+        # Set random seed in hope to reproductability
+        env.seed(args['seed'])
+        np.random.seed(args['seed'])
+        tf.set_random_seed(args['seed'])
+
+
         logger.record_tabular("algo", args['algo'])
         logger.record_tabular("env", args['gym_env'])
         logger.record_tabular("env.set_additional_goal", env.set_additional_goal)
         logger.record_tabular("env.reward_type", env.reward_type)
-
         logger.dump_tabular()
 
         if args['algo'] == "ppo":

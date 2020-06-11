@@ -11,12 +11,18 @@ register(
     # More arguments here
 )
 
-# DubinsCar
+# DubinsCar-v0
 register(
     id='DubinsCarEnv-v0',
     entry_point='gym_foo.gym_foo.envs:DubinsCarEnv_v0',
     # More arguments here
 )
 
+# DubinsCar-v1
+register(
+    id='DubinsCarEnv-v1',
+    entry_point='gym_foo.gym_foo.envs:DubinsCarEnv_v1',
+    # More arguments here
+)
 
 

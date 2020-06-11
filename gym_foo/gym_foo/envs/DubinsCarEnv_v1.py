@@ -15,41 +15,28 @@ from gazebo_msgs.msg import ContactsState
 import subprocess
 import rospy
 import sys
-print(sys.path)
 import tf
-print(tf.__file__)
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
-# same as the goal and start area definition in "playground.world" file
-# GOAL_STATE = np.array([3.41924, 3.6939, 0])
 
-GOAL_STATE = np.array([3.5, 3.5, np.pi*11/18]) # around 110 degrees as angle
-# GOAL_STATE = np.array([3.5, 3.5, 0])
-# GOAL_STATE = np.array([3.5, 3.5, np.pi*3/4])
-START_STATE = np.array([-0.222404, -3.27274, 0])
+
+GOAL_STATE = np.array([3.5, 3.5, np.pi*11/18, 0, 0])    # around 110 degrees as angle
+START_STATE = np.array([-0.222404, -3.27274, 0, 0, 0])
 
 
 """
-dubins' car 3d model:
+dubins' car 5d model:
 x_dot = v * cos(theta)
 y_dot = v * sin(theta)
 theta_dot = w
-
+v_dot = a_v
+w_dot = a_w
 """
-print("I'm running DubinsCarEnv with subscriber ...")
-class DubinsCarEnv_v0(gym.Env):
+
+print("I'm running DubinsCarEnv_v1 (5d dynamics) with subscriber ...")
+class DubinsCarEnv_v1(gym.Env):
     def __init__(self, reward_type="hand_craft", set_additional_goal="None"):
-        # ROS and Gazebo environment variables setting
-        # self.port = "11311"
-        # self.port_gazebo = "11345"
-
-        # self.port = "11411"
-        # self.port_gazebo = "11445"
-
-        # os.environ["ROS_MASTER_URI"] = "http://localhost:" + self.port
-        # os.environ["GAZEBO_MASTER_URI"] = "http://localhost:" + self.port_gazebo
-        # print(os.environ["ROS_MASTER_URI"])
-        # print(os.environ["GAZEBO_MASTER_URI"])
+        # Build a ros node
         rospy.init_node('DubinsCarEnv', anonymous=True)
 
         # Define necessary ros services
@@ -68,11 +55,11 @@ class DubinsCarEnv_v0(gym.Env):
 
         # Task-specific settings
         self.num_lasers = 8
-        self.state_dim  = 3  # x,y,theta
-        self.action_dim = 2  # v,w
+        self.state_dim  = 5  # x,y,theta,v,w
+        self.action_dim = 2  # vel_acc, ang_acc
 
-        high_state = np.array([5.0, 5.0, np.pi])
-        low_state  = np.array([-5.0, -5.0, -np.pi])
+        high_state = np.array([5.0, 5.0, np.pi, 5.0, np.pi*5])
+        low_state  = np.array([-5.0, -5.0, -np.pi, -5.0, -np.pi*5])
 
         high_obsrv = np.concatenate((high_state, np.array([5 * 2] * self.num_lasers)), axis=0)
         low_obsrv  = np.concatenate((low_state,  np.array([0] * self.num_lasers)), axis=0)
@@ -97,13 +84,15 @@ class DubinsCarEnv_v0(gym.Env):
         self.collision_reward = -2 * 200 * self.control_reward_coff*(10**2)
         self.goal_reward = 1000
 
-        self.pre_obsrv = None
+        self.pre_obsrv  = None
+        self.pre_vel    = None
+        self.pre_angvel = None
         self.reward_type = reward_type
         self.set_additional_goal = set_additional_goal
 
         self.step_counter = 0
         self._max_episode_steps = 300
-        logger.log("successfully initialized!!")
+        logger.log("DubinsCarEnv-v1 is successfully initialized!!")
 
     def _laser_scan_callback(self, laser_msg):
         self.laser_data = laser_msg
@@ -199,8 +188,10 @@ class DubinsCarEnv_v0(gym.Env):
         ow = dynamic_data.pose.orientation.w
         _, _, theta = euler_from_quaternion([ox, oy, oz, ow])  # heading angle, which == yaw
 
-        obsrv = [x, y, theta] + discretized_laser_data
+        v = dynamic_data.twist.linear.x
+        w = dynamic_data.twist.angular.z
 
+        obsrv = [x, y, theta, v, w] + discretized_laser_data
 
         return obsrv
 
@@ -273,6 +264,8 @@ class DubinsCarEnv_v0(gym.Env):
 
         obsrv = self.get_obsrv(new_laser_data, dynamic_data)
         self.pre_obsrv = obsrv
+        self.pre_vel = obsrv[3]     # linear_vel
+        self.pre_angvel = obsrv[4]  # ang_vel
 
         return np.asarray(obsrv)
 
@@ -284,15 +277,15 @@ class DubinsCarEnv_v0(gym.Env):
 
         action = np.clip(action, -2, 2)
 
-        # For linear vel, [-2, 2] --> [-0.8, 2]
-        linear_vel = -0.8 + (2 - (-0.8)) * (action[0] - (-2)) / (2 - (-2))
-        # For angular vel, [-2, 2] --> [-0.8, 0.8]. If something wrong happens, check old code to specify for PPO, DDPG or TRPO
-        angular_vel = -0.8 + (0.8 - (-0.8)) * (action[1] - (-2)) / (2 - (-2))
+        # For linear acc, [-2, 2] --> [-0.8, 0.8]
+        linear_acc = -0.8 + (0.8 - (-0.8)) * (action[0] - (-2)) / (2 - (-2))
+        # For angular acc, [-2, 2] --> [-0.1, 0.1]
+        angular_acc = -0.1 + (0.1 - (-0.1)) * (action[1] - (-2)) / (2 - (-2))
 
         # Publish control command
         vel_cmd = Twist()
-        vel_cmd.linear.x = linear_vel
-        vel_cmd.angular.z = angular_vel
+        vel_cmd.linear.x = self.pre_vel + linear_acc
+        vel_cmd.angular.z = self.pre_angvel + angular_acc
         self.vel_pub.publish(vel_cmd)
 
         # Prepare for receive sensor readings. Laser data as part of obs; contact data used for collision detection
@@ -336,6 +329,8 @@ class DubinsCarEnv_v0(gym.Env):
             self.step_counter = 0
 
         self.pre_obsrv = obsrv
+        self.pre_vel   = obsrv[3]
+        self.pre_angvel= obsrv[4]
 
         assert self.reward_type is not None
         reward = 0
@@ -358,7 +353,7 @@ class DubinsCarEnv_v0(gym.Env):
             event_flag = 'collision'
 
         # 2. In the neighbor of goal state, done is True as well. Only considering velocity and pos
-        if self._in_goal(np.array(obsrv[:3])):
+        if self._in_goal(np.array(obsrv[:5])):
             reward += self.goal_reward
             done = True
             suc  = True

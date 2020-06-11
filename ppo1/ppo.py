@@ -212,7 +212,10 @@ def ppo_learn(env, policy,
     loss_names = ["pol_surr", "pol_entpen", "vf_loss", "kl", "ent", "vf_ghost_loss"]
 
     var_list = pi.get_trainable_variables()
-    print("trainable variables:", var_list)
+    # print("trainable variables:", var_list)
+
+    pol_var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='pi/pol')
+    get_pol_surr_grads = U.function([ob, ac, atarg, ret, lrmult], U.flatgrad(pol_surr, pol_var_list))
 
     if cond_val_update:
         lossandgrad = U.function([ob, ac, atarg, ret, lrmult, criteron], losses + [U.flatgrad(total_loss, var_list)])
@@ -347,6 +350,9 @@ def ppo_learn(env, policy,
             elif args['gym_env'] == 'DubinsCarEnv-v0':
                 log_df = pd.DataFrame(log_data,
                                             columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'tdtarget', 'rews', 'events'])
+            elif args['gym_env'] == 'DubinsCarEnv-v1':
+                log_df = pd.DataFrame(log_data,
+                                            columns=['x', 'y', 'theta', 'v', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'tdtarget', 'rews', 'events'])
             else:
                 raise ValueError("invalid env !!!")
             log_df.to_csv(f, header=True)
@@ -366,8 +372,9 @@ def ppo_learn(env, policy,
         logger.log(fmt_row(13, loss_names))
 
         # Here we do a bunch of optimization epochs over the data
-        start_clip_grad = True # we also use clip_norm for gradient
-        kl_threshold = 0.5 # kl update limit
+        start_clip_grad = True  # we also use clip_norm for gradient
+        kl_threshold = 0.5  # kl update limit
+        from config import ggl  # global ggl from config.py
         for _ in range(optim_epochs):
             losses = []  # list of sublists, each of which gives the loss based on a set of samples with size "optim_batchsize"
             grads = []   # list of sublists, each of which gives the gradients w.r.t all variables based on a set of samples with size "optim_batchsize"
@@ -378,12 +385,16 @@ def ppo_learn(env, policy,
                     else:
                         *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
                                                          cur_lrmult, val_update_criteron)
+                    pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+                    # print("gradient:", pol_surr_grads)
+                    # print("shape of gradient:", pol_surr_grads.shape)
                 else:
                     if not cond_val_update:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                     else:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
                                                     cur_lrmult, val_update_criteron)
+                    pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                 if any(np.isnan(g)):
                     logger.log("there are nan in gradients, skip further updating!")
                     break
@@ -395,6 +406,7 @@ def ppo_learn(env, policy,
                     break # break only jump out of the inner loop
                 grads.append(g)
                 losses.append(newlosses)
+                ggl.append(pol_surr_grads.reshape(-1,1))
             # logger.log(fmt_row(13, np.mean(losses, axis=0)))
 
             grads_shape = np.array(grads).shape

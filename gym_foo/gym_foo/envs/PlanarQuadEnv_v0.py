@@ -18,7 +18,8 @@ from utils.tools import *
 from utils import logger
 
 
-GOAL_ANGLE_RANGE = [0, np.pi/3]
+# GOAL_ANGLE_RANGE = [0, np.pi/3]   # for both air_space_202002_Francis and air_space_201910_ddpg
+GOAL_ANGLE_RANGE = [-np.pi/3, np.pi/3]  # test_for_Francis
 GOAL_ANGLE_CENTER = GOAL_ANGLE_RANGE[0] + abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 GOAL_ANGLE_RADIUS = abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 logger.log("goal angle range: from {} to {}".format(GOAL_ANGLE_RANGE[0] * 180 / np.pi, GOAL_ANGLE_RANGE[1] * 180 / np.pi))
@@ -26,8 +27,9 @@ logger.log("goal angle center: {}".format(GOAL_ANGLE_CENTER * 180 / np.pi))
 logger.log("goal angle radius: {}".format(GOAL_ANGLE_RADIUS * 180 / np.pi))
 
 # goal and start state definitions
-# START_STATE = np.array([3.75, 0, 2, 0, 0, 0])  # air_space_202002_Francis
-START_STATE = np.array([3, 0, 2, 0, 0, 0])       # air_space_2021910_ddpg
+# START_STATE = np.array([3.75, 0, 2, 0, 0, 0])    # air_space_202002_Francis
+# START_STATE = np.array([3, 0, 2, 0, 0, 0])       # air_space_201910_ddpg
+START_STATE = np.array([2.75, 0, 2, 0, 0,0])       # test_for_Francis
 GOAL_STATE = np.array([4.0, 0.0, 9.0, 0.0, GOAL_ANGLE_CENTER, 0.0])
 GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
 
@@ -38,10 +40,15 @@ GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
 #                  (3.5+0.25, 5, 3/2, 1.5/2),
 #                  (0, 1, 0.5/2, 2/2)]
 
-# obstacle definitions from air_space_2021910_ddpg (A simpler env designed for DDPG comparison)
+# obstacle definitions from air_space_201910_ddpg (A simpler env designed for DDPG comparison)
+# OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
+#                  (0, 8.5, 1.5/2, 1.0/2),
+#                  (3.5+0.25, 5, 3/2, 1.5/2),
+#                  (0, 1, 0.5/2, 2/2)]
+
+# obstacle definitions from test_for_Francis
 OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
-                 (0, 8.5, 1.5/2, 1.0/2),
-                 (3.5, 5, 3/2, 1.5/2),
+                 (1, 8.5, 1.5/2, 1.0/2),
                  (0, 1, 0.5/2, 2/2)]
 
 # wall 0,1,2,3
@@ -129,9 +136,11 @@ class PlanarQuadEnv_v0(gym.Env):
         for i in range(new_ranges):
             new_i = int(i * full_ranges // new_ranges + full_ranges // (2 * new_ranges))
             if laser_data.ranges[new_i] == float('Inf') or np.isinf(laser_data.ranges[new_i]):
-                discretized_ranges.append(float('Inf'))
+                # discretized_ranges.append(float('Inf'))
+                discretized_ranges.append(31.0)  # max_range: 30m, use max_range+1
             elif np.isnan(laser_data.ranges[new_i]):
-                discretized_ranges.append(float('Nan'))
+                # discretized_ranges.append(float('Nan'))
+                discretized_ranges.append(0.0)
             else:
                 discretized_ranges.append(laser_data.ranges[new_i])
 
@@ -366,9 +375,10 @@ class PlanarQuadEnv_v0(gym.Env):
         event_flag = None  # {'collision', 'safe', 'goal', 'steps exceeding', 'highly tilt'}
 
         obsrv = self.get_obsrv(new_laser_data, dynamic_data)
+
         # special solution for nan/inf observation (especially in case of any invalid sensor readings)
         if any(np.isnan(np.array(obsrv))) or any(np.isinf(np.array(obsrv))):
-            logger.record_tabular("found nan or inf in observation:", obsrv)
+            logger.log("found nan or inf in observation in step function:", obsrv)
             obsrv = self.pre_obsrv
             done = True
             self.step_counter = 0

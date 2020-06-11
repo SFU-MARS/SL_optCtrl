@@ -166,12 +166,17 @@ import numpy as np
 stats = []
 iterations = []
 hues = []
+# setting = "train"
+setting = "eval"
 
-plotting_config = [{'path':'runs_log_ddpg/22-May-2020_18-03-19_OurDDPG_DubinsCarEnv-v0_0_no', 'hue':'DDPG_baseline'},
-                   {'path':'runs_log_ddpg/22-May-2020_18-04-54_TD3_DubinsCarEnv-v0_0_no', 'hue':'TD3_baseline'},
-                   {'path':'runs_log_ddpg/23-May-2020_14-37-56_OurDDPG_DubinsCarEnv-v0_0_yes_fixed', 'hue': 'DDPG_init_fixed'},
-                   {'path':'runs_log_ddpg/23-May-2020_23-57-10_OurDDPG_DubinsCarEnv-v0_0_yes_fixed', 'hue': 'DDPG_init_fixed'},
-                   {'path':'runs_log_ddpg/24-May-2020_23-35-27_TD3_DubinsCarEnv-v0_0_yes_fixed', 'hue': 'TD3_init_fixed'}]
+plotting_config = [{'path':'runs_log_ddpg/22-May-2020_18-04-54_TD3_DubinsCarEnv-v0_0_no', 'hue':'TD3_baseline'},
+                   {'path':'runs_log_ddpg/25-May-2020_13-39-56_TD3_DubinsCarEnv-v0_0_yes_fixed', 'hue':'TD3_init_fixed'},
+                   {'path':'runs_log_ddpg/27-May-2020_22-59-00_TD3_DubinsCarEnv-v0_0_yes_fixed', 'hue':'TD3_init_fixed'},
+                   {'path':'runs_log_ddpg/27-May-2020_14-44-40_TD3_DubinsCarEnv-v0_0_no_fixed_gd', 'hue':'TD3_vi_gd'}]
+
+# plotting_config = [{'path':'/local-scratch/xlv/SL_optCtrl/runs_log_ddpg/28-May-2020_23-07-55_TD3_PlanarQuadEnv-v0_0_no_non-fixed', 'hue':'TD3_baseline'},
+#                    {'path':'/local-scratch/xlv/SL_optCtrl/runs_log_ddpg/04-Jun-2020_12-55-34_TD3_PlanarQuadEnv-v0_0_no_fixed_gd', 'hue':'TD3_vi_gd'},
+#                    {'path':'/local-scratch/xlv/SL_optCtrl/runs_log_ddpg/07-Jun-2020_09-27-06_TD3_PlanarQuadEnv-v0_0_no_fixed_gd', 'hue':'TD3_valinit_fixed'}]
 
 for it in plotting_config:
     if os.path.isfile(it['path']):
@@ -179,7 +184,11 @@ for it in plotting_config:
     fullpath = it['path']
     cur_hue = it['hue']
 
-    cur_stats = np.load(os.path.join(fullpath, 'result', 'train_result.npy'))
+    if setting == "train":
+        cur_stats = np.load(os.path.join(fullpath, 'result', 'train_result.npy'))
+    elif setting == "eval":
+        cur_stats = np.load(os.path.join(fullpath, 'result', 'eval_result.npy'))
+        cur_stats = [x[1] for x in cur_stats]    # eval success rate
 
     stats.extend(cur_stats)
     iterations.extend(range(len(cur_stats)))

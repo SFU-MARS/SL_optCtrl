@@ -91,12 +91,18 @@ class env_quad_6d(object):
         self.action_init()
 
     def add_obstacles(self):
-        self.obstacles = np.array([[-2.75, -1.25, 4.25, 5.75],  # [x0, x1, y0, y1]
-                                   [0.25, 1.75, 8.0, 9.0],
-                                   [2.25, 5.25, 4.25, 5.75],
-                                   [-0.25, 0.25, 0, 2]], dtype=float)
+        # this is for airspace_202002_Francis
+        # self.obstacles = np.array([[-2.75, -1.25, 4.25, 5.75],  # [x0, x1, y0, y1]
+        #                            [0.25, 1.75, 8.0, 9.0],
+        #                            [2.25, 5.25, 4.25, 5.75],
+        #                            [-0.25, 0.25, 0, 2]], dtype=float)
 
-        print(self.obstacles)
+        # this is for airspace_201910_ddpg
+        self.obstacles = np.array([[-2.75, -1.25, 4.25, 5.75],  # [x0, x1, y0, y1]
+                                   [-0.75, 0.75, 8.0, 9.0],     # only this one changed
+                                   [2.25, 5.25, 4.25, 5.75],    
+                                   [-0.25, 0.25, 0, 2]], dtype=float)
+        print(self.obstacles) 
 
     def state_discretization(self):
         state_dim_num = len(self.state_step_num)
@@ -427,7 +433,8 @@ class env_quad_6d(object):
                r[5][0]:r[5][1]], sub_states
 
     def value_output(self, iteration_number, readable_file=False):
-        dir_path = "./value_matrix_quad_6D_boltzmann/"
+        # dir_path = "./value_matrix_quad_6D_boltzmann/"
+        dir_path = "./value_matrix_quad_6D_boltzmann_airspace_201910_ddpg/"
         try:
             os.mkdir(dir_path)
         except:
@@ -452,7 +459,7 @@ class env_quad_6d(object):
 
     def plot_2D_result(self, mode="max"):
         # file = "./value_matrix_quad_6D/value_matrix_7.npy"
-        file = "./value_matrix_quad_6D_boltzmann/value_matrix_8.npy"
+        file = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann_airspace_201910_ddpg/value_matrix_8.npy"
 
         data = np.load(file)
 
@@ -646,13 +653,13 @@ class env_quad_6d(object):
                                                          fill_value=self.reward_list[2])
         return interploating_function
 
-# env = env_quad_6d()
-# env.algorithm_init()
+env = env_quad_6d()
+env.algorithm_init()
 # env.generate_samples_interpolate(100000)
 
 
-# env.value_iteration(mode="boltzmann")
-# env.plot_2D_result(mode = "max")
+#env.value_iteration(mode="boltzmann")
+env.plot_2D_result(mode = "max")
 # s = np.array([0.3, 8.05, -4, 5, 0, -5.236], dtype = float)
 # s_ = np.array([0.2, 7.95, -4, 5, 0, -5.236], dtype = float)
 # print(env.check_cross(s, s_))

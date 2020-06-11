@@ -43,7 +43,7 @@ class value_interpolation_function_car(object):
 
 
 class value_interpolation_function_quad(object):
-	def __init__(self):
+	def __init__(self, value_file_path):
 		self.x = (-5, 5)
 		self.vx = (-4, 5)
 		self.z = (0, 10)
@@ -57,9 +57,9 @@ class value_interpolation_function_quad(object):
 		self.ranges = np.array([self.x,  self.vx, self.z, self.vz, self.theta, self.w])
 		self.state_step_num = np.array([11, 9, 11, 9, 11, 11])
 
-		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_matrix_quad_6D/value_matrix_7.npy"
-		self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy"
-
+		self.value_file_path = value_file_path
+		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy"  # This one is what we previously used
+		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann/transferred_value_matrix_8.npy"
 
 		# print("using value file:", self.value_file_path)
 		self.fill_value = -400
@@ -85,15 +85,21 @@ class value_interpolation_function_quad(object):
 																self.state_grid[4],
 																self.state_grid[5]),
 																self.value,
-																bounds_error = False,
-																fill_value = self.fill_value)
-
+																bounds_error=False,
+																fill_value=self.fill_value)
+		return self.interpolating_function
 	def interpolate_value(self, v):
 		return self.interpolating_function(v).astype(np.float32)
 
+if __name__ == "__main__":
 
-# test = value_interpolation_function_quad()
-#
-# test.setup()
-#
-# print(test.interpolate_value(np.zeros([10,6])))
+	test = value_interpolation_function_quad("/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann_airspace_201910_ddpg/transferred_value_matrix_8.npy")
+	test.setup()
+	
+	print(test.interpolate_value(np.asarray([1.8, 0, 6.0, 0, 0.34, 0])))
+
+	# print(test.interpolate_value(
+	# 	np.asarray([1.8724435818, 3.240509963, 6.9533269887, 2.7651834356, 0.4899471015, -0.8570942991])))
+
+
+	# print(test.interpolate_value(np.asarray([0.7592926406,0.8031082973,5.3316669254,2.4626363745,0.2890502571,0.5051721474])))
