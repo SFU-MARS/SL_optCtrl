@@ -1,10 +1,11 @@
 <launch>
 
   <!-- this part is for world launching -->
-  <!--<arg name="world_file"  default="$(env QUADROTOR_WORLD_AIR_SPACE_SL_OPTCTRL)"/>-->
-  <arg name="world_file"  default="/local-scratch/xlv/SL_optCtrl/worlds/air_space_201910_ddpg.world"/>
-  <!--<arg name="gui" default="true"/>-->
-  <arg name="gui" default="false"/>
+  <!-- <arg name="world_file"  default="$(env QUADROTOR_WORLD_AIR_SPACE_SL_OPTCTRL)"/> -->
+  <!-- <arg name="world_file"  default="/local-scratch/xlv/SL_optCtrl/worlds/air_space_201910_ddpg.world"/> -->
+  <arg name="world_file"  default="/local-scratch/xlv/SL_optCtrl/worlds/test_for_Francis.world"/>
+  <arg name="gui" default="true"/>
+  <!--<arg name="gui" default="false"/>-->
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="use_sim_time" value="true"/>
@@ -17,18 +18,24 @@
 
   <param name="robot_description" command="$(find xacro)/xacro.py --inorder $(env PROJ_HOME_3)/urdfs/quadrotor.urdf.xacro"/>
 
-  <!--&lt;!&ndash;For task env air_space_202002_Francis&ndash;&gt;-->
-  <!--<node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 3.75 -y -3.33973 -z 2.0 -model quadrotor"-->
-  <!--output="screen">-->
-  <!--</node>-->
+  <!-- For task env air_space_202002_Francis-->
+  <!-- <node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 3.75 -y -3.33973 -z 2.0 -model quadrotor"
+  output="screen">
+  </node> -->
 
   <!--For task env air_space_201910_ddpg-->
-  <node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 3.0 -y -3.33973 -z 2.0 -model quadrotor"
+  <!-- <node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 3.0 -y -3.33973 -z 2.0 -model quadrotor"
   output="screen">
-  </node>
+  </node> -->
 
+  
   <!--For task env air_space_202002-->
   <!--<node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 0 -y -3.33973 -z 2.0 -model quadrotor"-->
   <!--output="screen">-->
   <!--</node>-->
+
+  <!-- For task env test_for_Francis -->
+  <node name="spawn_quadrotor" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x 2.75 -y -3.33973 -z 2.0 -model quadrotor"
+  output="screen">
+  </node>
 </launch>

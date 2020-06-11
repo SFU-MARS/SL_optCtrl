@@ -1,6 +1,7 @@
 # added by XLV: This file is modified for our project based on the main.py from TD3 folder: "/TD3/main.py"
 
 import numpy as np
+import tensorflow as tf  # first load tensorflow and then load pytorch
 import torch
 import gym
 import argparse
@@ -49,8 +50,8 @@ if __name__ == "__main__":
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--policy", default="OurDDPG")               # Policy name (TD3, DDPG or OurDDPG)
-	parser.add_argument("--env", default="PlanarQuadEnv-v0")          # OpenAI gym environment name
+	parser.add_argument("--policy", default="TD3")               # Policy name (TD3, DDPG or OurDDPG)
+	parser.add_argument("--env", default="PlanarQuadEnv-v0")         # OpenAI gym environment name
 	parser.add_argument("--seed", default=0, type=int)               # Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--start_timesteps", default=25e3, type=int)    # Time steps initial random policy is used
 	parser.add_argument("--eval_freq", default=5e3, type=int)        # How often (time steps) we evaluate
@@ -67,10 +68,13 @@ if __name__ == "__main__":
 
 	# added by XLV: more options for initialize Q network
 	parser.add_argument("--initQ", default="no", type=str)
-	parser.add_argument("--fixed", default="yes", type=str)
+	parser.add_argument("--fixed", default="", type=str, help="only need to be set when --initQ is yes")
 	parser.add_argument("--useGD", action="store_true")
+	parser.add_argument("--useValInterp", action="store_true")
 	parser.add_argument("--save_debug_info", action="store_true")
 	args = parser.parse_args()
+
+	assert not (args.useGD and args.useValInterp)  # make sure useGD and useValInterp are not true at same time
 
 	if args.initQ == "yes":
 		args.initQ = True
@@ -89,6 +93,10 @@ if __name__ == "__main__":
 		args.initQ = False
 		args.fixed = True
 
+	if args.useValInterp:
+		args.initQ = False
+		args.fixed = True
+
 	# added by XLV: set a global pandas dataframe to save running statistics for further debug
 	if args.env == "DubinsCarEnv-v0":
 		config.debug_info = pd.DataFrame(columns=['QtargPred','reward', 'a1', 'a2', 'x','y','theta','d1','d2','d3','d4','d5','d6','d7','d8','nx','ny','ntheta','nd1','nd2','nd3','nd4','nd5','nd6','nd7','nd8'])
@@ -99,6 +107,7 @@ if __name__ == "__main__":
 
 	file_name = "{}_{}_{}_{}_{}_{}".format(time.strftime('%d-%b-%Y_%H-%M-%S'), args.policy, args.env, args.seed, "yes" if args.initQ else "no", "fixed" if args.fixed else "non-fixed")
 	file_name = file_name + "_{}".format("gd") if args.useGD else file_name
+	file_name = file_name + "_{}".format("valinterp") if args.useValInterp else file_name
 
 	config.RUN_ROOT = RUN_DIR = os.path.join("runs_log_ddpg", file_name)
 	MODEL_DIR = os.path.join(RUN_DIR, 'model')
@@ -114,7 +123,7 @@ if __name__ == "__main__":
 	logger.configure(dir=RUN_DIR)
 
 	logger.log("---------------------------------------")
-	logger.log("Policy: {}, Env: {}, Seed: {}, Qinit: {}, Fixed: {}, UseGD: {}, Save debug info: {}".format(args.policy, args.env, args.seed, args.initQ, args.fixed, args.useGD, args.save_debug_info))
+	logger.log("Policy: {}, Env: {}, Seed: {}, Qinit: {}, Fixed: {}, UseGD: {}, UseValInterp: {}, Save debug info: {}".format(args.policy, args.env, args.seed, args.initQ, args.fixed, args.useGD, args.useValInterp, args.save_debug_info))
 	logger.log("---------------------------------------")
 
 	env = gym.make(args.env)
@@ -140,6 +149,7 @@ if __name__ == "__main__":
 		"initQ": args.initQ,
 		"fixed": args.fixed,
 		"useGD": args.useGD,
+		"useValInterp": args.useValInterp,
 		"save_debug_info": args.save_debug_info
 	}
 

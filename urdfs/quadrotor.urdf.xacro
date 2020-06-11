@@ -12,7 +12,7 @@
 
     <!-- Hokuyo UTM-30LX sensor -->
     <xacro:include filename="$(find hector_sensors_description)/urdf/hokuyo_utm30lx.urdf.xacro" />
-    <xacro:hokuyo_utm30lx name="laser0" parent="base_link" ros_topic="scan" update_rate="40" ray_count="1081" min_angle="-80" max_angle="80">
+    <xacro:hokuyo_utm30lx name="laser0" parent="base_link" ros_topic="scan" update_rate="40" ray_count="1081" min_angle="-75" max_angle="75">
       <origin xyz="0.0 0.0 0.15" rpy="-${M_PI} -${M_PI_2} ${M_PI_2}"/>
     </xacro:hokuyo_utm30lx>
 

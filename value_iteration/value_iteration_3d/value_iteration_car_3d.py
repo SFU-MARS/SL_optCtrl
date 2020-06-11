@@ -480,6 +480,8 @@ class env_dubin_car_3d(object):
                                                         fill_value=self.reward_list[2])
         return interploating_function
 
+
+
 if __name__ == "__main__":
     env = env_dubin_car_3d()
     # env.add_obstacle(-0.35, 0.35, -0.35, 0.35)

@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from keras.models import load_model
 
 import pickle
 import pandas as pd
@@ -115,6 +116,7 @@ class TD3(object):
 		initQ=False,
 		fixed=True,
 		useGD=False,
+		useValInterp=False,
 		save_debug_info=False
 	):
 
@@ -139,7 +141,11 @@ class TD3(object):
 		self.initQ = initQ
 		self.fixed = fixed
 		self.useGD = useGD
+		self.useValInterp = useValInterp
 		self.save_debug_info = save_debug_info
+
+		# assert these two variables are not set as true at same time
+		assert not (self.useGD and self.useValInterp)
 
 		# Use Q ground truth to check the performance
 		if self.useGD:
@@ -150,13 +156,24 @@ class TD3(object):
 				self.subenv.algorithm_init()
 				self.interp = self.subenv.set_interpolation(valM)
 			elif self.state_dim == 14:
-				from value_iteration.value_iteration_6d_xubo_version_1.value_iteration_6d_xubo_version_1_boltzmann import \
-					env_quad_6d
-				valM = np.load(
-					"/local-scratch/xlv/SL_optCtrl/value_iteration/value_matrix_quad_6D_boltzmann/value_matrix_8.npy")
-				self.subenv = env_quad_6d()
-				self.subenv.algorithm_init()
-				self.interp = self.subenv.set_interpolation(valM)
+				from value_iteration.helper_function import value_interpolation_function_quad
+				# valM_path = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy"
+				# valM_path = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann/transferred_value_matrix_8.npy"
+				# valM_path = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann_airspace_201910_ddpg/transferred_value_matrix_8.npy"
+				# valM_path = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann_fast_airspace_201910_ddpg/transferred_value_matrix_9.npy"
+				valM_path = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann_fast_airspace_201910_ddpg/trial_3/transferred_value_matrix_9.npy"
+				self.subenv = value_interpolation_function_quad(valM_path)
+				self.interp = self.subenv.setup()
+			logger.log("You are using useGD, the Q target is calculated via interpolation ...")
+			logger.log("The useGD comes from the file: {}".format(valM_path))
+
+		if self.useValInterp:
+			assert self.state_dim == 14
+			valinterp_path = "/local-scratch/xlv/SL_optCtrl/Qinit/quad/trained_model/nn_interp.h5"
+			self.valinterp = load_model(valinterp_path)
+			logger.log("You are using useValInterp, the Q target is calculated via interpolation ...")
+			logger.log("The useValInterp comes from the file: {}".format(valinterp_path))
+
 
 		self.total_it = 0
 
@@ -174,7 +191,7 @@ class TD3(object):
 
 		# Compute the target Q value
 		target_Q = None
-		if not self.useGD:
+		if not self.useGD and not self.useValInterp:
 			with torch.no_grad():
 				# Select action according to policy and add clipped noise
 				noise = (
@@ -189,16 +206,23 @@ class TD3(object):
 				target_Q1, target_Q2 = self.critic_target(next_state, next_action)
 				target_Q = torch.min(target_Q1, target_Q2)
 				target_Q = reward + not_done * self.discount * target_Q
-		else:
+		elif self.useGD:
 			if self.state_dim == 11:
 				val_s_prime = self.interp(next_state[:, :3])
 				val_s_prime = val_s_prime.reshape(-1,1)
 				target_Q    = reward + not_done * self.discount * torch.FloatTensor(val_s_prime)
 			elif self.state_dim == 14:
-				# TODO: the input order should be consistent with interpolator
+				# check to use transferred matrix
 				val_s_prime = self.interp(next_state[:, :6])
 				val_s_prime = val_s_prime.reshape(-1, 1)
 				target_Q    = reward + not_done * self.discount * torch.FloatTensor(val_s_prime)
+		elif self.useValInterp:
+			input = next_state.detach().numpy()[:, :6]
+			val_s_prime = self.valinterp.predict(input)
+			val_s_prime = val_s_prime.reshape(-1, 1)
+			target_Q	= reward + not_done * self.discount * torch.FloatTensor(val_s_prime)
+		else:
+			raise ValueError("invalid setting !")
 
 		# Get current Q estimates
 		current_Q1, current_Q2 = self.critic(state, action)

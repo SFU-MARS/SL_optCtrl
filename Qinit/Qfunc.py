@@ -6,11 +6,6 @@ import pickle
 from tensorflow import keras
 import tensorflow as tf
 
-
-
-
-
-
 class PrintDot(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs):
         if epoch % 100 == 0: print('')
@@ -100,21 +95,7 @@ if __name__ == "__main__":
     from value_iteration.value_iteration_6d_xubo_version_1.value_iteration_6d_xubo_version_1_boltzmann import \
         env_quad_6d
     from value_iteration.value_iteration_3d.value_iteration_car_3d import env_dubin_car_3d
-    # hidden = [400, 300]
-    hidden = [256, 256]
-    user_config = {'agent': 'dubinsCar',
-                   'input_dim': 13,
-                   'hidden': hidden,
-                   'data_loadpath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/train_data/Qval.csv",
-                   'model_savepath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/trained_model/{}*{}/Qf.h5".format(hidden[0], hidden[1]),
-                   'history_savepath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/trained_model/{}*{}/Qf_history.csv".format(hidden[0], hidden[1]),
-                   'column_names': ['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'a1', 'a2', 'Q'],
-                   'valM_loadpath': "/local-scratch/xlv/SL_optCtrl/value_iteration/value_boltzmann_angle.npy",
-                   'env_id': "DubinsCarEnv-v0",
-                   'rew_type': "hand_craft",
-                   'set_additional_goal': "angle",
-                   'gamma': 0.998}
-
+    
 
     # # Load offline value matrix
     # valM = LoadValMatrix(datapath=user_config['valM_loadpath'])
@@ -168,6 +149,24 @@ if __name__ == "__main__":
     # Qdf = Qdf.replace([np.inf, -np.inf], np.nan)
     # Qdf = Qdf.dropna()
     # Qdf.to_csv(user_config['data_loadpath'])
+
+
+
+    # Configuration
+    # hidden = [400, 300]
+    hidden = [256, 256]
+    user_config = {'agent': 'dubinsCar',
+                   'input_dim': 13,
+                   'hidden': hidden,
+                   'data_loadpath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/train_data/Qval.csv",
+                   'model_savepath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/trained_model/{}*{}/Qf.h5".format(hidden[0], hidden[1]),
+                   'history_savepath': "/local-scratch/xlv/SL_optCtrl/Qinit/dubinsCar/trained_model/{}*{}/Qf_history.csv".format(hidden[0], hidden[1]),
+                   'column_names': ['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'a1', 'a2', 'Q'],
+                   'valM_loadpath': "/local-scratch/xlv/SL_optCtrl/value_iteration/value_boltzmann_angle.npy",
+                   'env_id': "DubinsCarEnv-v0",
+                   'rew_type': "hand_craft",
+                   'set_additional_goal': "angle",
+                   'gamma': 0.998}
 
     # Load this Q data file and use it to train the Q network
     q_net = QNN(input_dim=user_config['input_dim'], hidden=user_config['hidden'])

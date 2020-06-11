@@ -102,11 +102,14 @@ class DDPG(object):
 				self.subenv.algorithm_init()
 				self.interp = self.subenv.set_interpolation(valM)
 			elif self.state_dim == 14:
-				from value_iteration.value_iteration_6d_xubo_version_1.value_iteration_6d_xubo_version_1_boltzmann import env_quad_6d
-				valM = np.load("/local-scratch/xlv/SL_optCtrl/value_iteration/value_matrix_quad_6D_boltzmann/value_matrix_8.npy")
-				self.subenv = env_quad_6d()
-				self.subenv.algorithm_init()
-				self.interp = self.subenv.set_interpolation(valM)
+				from value_iteration.helper_function import value_interpolation_function_quad
+				# valM_path = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy"
+				# valM_path = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann/transferred_value_matrix_8.npy"
+				valM_path = "/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann_airspace_201910_ddpg/transferred_value_matrix_8.npy"
+				self.subenv = value_interpolation_function_quad(valM_path)
+				self.interp = self.subenv.setup()
+			logger.log("You are using useGD, the Q target is calculated via interpolation ...")
+			logger.log("The useGD comes from the file: {}".format(valM_path))
 
 
 	def select_action(self, state):
@@ -129,7 +132,7 @@ class DDPG(object):
 				val_s_prime = val_s_prime.reshape(-1,1)
 				target_Q    = reward + not_done * self.discount * torch.FloatTensor(val_s_prime)
 			elif self.state_dim == 14:
-				# TODO: the input order should be consistent with interpolator
+				# check to use transferred matrix
 				val_s_prime = self.interp(next_state[:, :6])
 				val_s_prime = val_s_prime.reshape(-1, 1)
 				target_Q    = reward + not_done * self.discount * torch.FloatTensor(val_s_prime)
