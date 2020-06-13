@@ -3,7 +3,7 @@
   <!-- this part is for world launching -->
   <!-- <arg name="world_file"  default="$(env QUADROTOR_WORLD_AIR_SPACE_SL_OPTCTRL)"/> -->
   <!-- <arg name="world_file"  default="/local-scratch/xlv/SL_optCtrl/worlds/air_space_201910_ddpg.world"/> -->
-  <arg name="world_file"  default="/local-scratch/xlv/SL_optCtrl/worlds/test_for_Francis.world"/>
+  <arg name="world_file"  default="/media/anjian/Data/Francis/SL_optCtrl/worlds/air_space_medium.world"/>
   <arg name="gui" default="true"/>
   <!--<arg name="gui" default="false"/>-->
 

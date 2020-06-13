@@ -146,10 +146,18 @@ def ppo_learn(env, policy,
     meanent = tf.reduce_mean(ent)
     pol_entpen = (-entcoeff) * meanent
 
-    ratio = tf.exp(pi.pd.logp(ac) - oldpi.pd.logp(ac)) # pnew / pold
-    surr1 = ratio * atarg # surrogate from conservative policy iteration
-    surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
-    pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
+    ###################### For PPO version #############################
+    # ratio = tf.exp(pi.pd.logp(ac) - oldpi.pd.logp(ac)) # pnew / pold
+    # surr1 = ratio * atarg # surrogate from conservative policy iteration
+    # surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
+    # pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
+    ####################################################################
+
+    ###################### For A2C version######################################
+    neglogpac = pi.pd.neglogp(ac)
+    pg_loss = tf.reduce_mean(atarg * neglogpac)
+    pol_surr = pg_loss
+    #################################################
 
     # Default we do not use single value NN
     criteron = tf.placeholder(name='criteron', dtype=tf.bool, shape=[])

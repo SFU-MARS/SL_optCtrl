@@ -120,17 +120,33 @@ def add_vtarg_and_adv(seg, gamma, lam):
     # AMEND: added by xlv for computing Mento-Carlo Return
     G = np.append(seg["rew"], 0)
     tdtarget = np.empty(T, 'float32')
+    ######## PPO Version ########################################    
+    # for t in reversed(range(T)):
+    #     nonterminal = 1-new[t+1]
+    #     delta = rew[t] + gamma * vpred[t+1] * nonterminal - vpred[t]
+    #     gaelam[t] = lastgaelam = delta + gamma * lam * nonterminal * lastgaelam
+    #     # AMEND: added by xlv, update each timestep of G and tdtarget
+    #     G[t] = rew[t] + gamma * G[t+1] * nonterminal
+    #     tdtarget[t] = rew[t] + gamma * vpred[t+1] * nonterminal
+    # seg["tdlamret"] = seg["adv"] + seg["vpred"]
+    # # AMEND: added by xlv, return G except the last element, and tdtarget
+    # seg["mcreturn"] = G[:-1]
+    # seg["tdtarget"] = tdtarget
+    #############################################################
+
+    ######## A2C Version ########################################
+    tdtarget = np.append(tdtarget, 0)
     for t in reversed(range(T)):
-        nonterminal = 1-new[t+1]
-        delta = rew[t] + gamma * vpred[t+1] * nonterminal - vpred[t]
-        gaelam[t] = lastgaelam = delta + gamma * lam * nonterminal * lastgaelam
-        # AMEND: added by xlv, update each timestep of G and tdtarget
-        G[t] = rew[t] + gamma * G[t+1] * nonterminal
-        tdtarget[t] = rew[t] + gamma * vpred[t+1] * nonterminal
-    seg["tdlamret"] = seg["adv"] + seg["vpred"]
-    # AMEND: added by xlv, return G except the last element, and tdtarget
-    seg["mcreturn"] = G[:-1]
+        nonterminal = 1 - new[t+1]
+        tdtarget[t] = rew[t] + gamma * tdtarget[t+1] * nonterminal
+        gaelam[t] = lastgaelam = tdtarget[t] - vpred[t]
+        G[t] = gaelam[t]
+    tdtarget = tdtarget[:-1]
+
     seg["tdtarget"] = tdtarget
+    seg["mcreturn"] = G[:-1]
+    seg["tdlamret"] = tdtarget
+    ##############################################################
 
 def add_vtarg_and_adv_ghost(seg, gamma, lam):
     """

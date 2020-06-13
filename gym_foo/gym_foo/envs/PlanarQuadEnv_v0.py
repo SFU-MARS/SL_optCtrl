@@ -19,7 +19,7 @@ from utils import logger
 
 
 # GOAL_ANGLE_RANGE = [0, np.pi/3]   # for both air_space_202002_Francis and air_space_201910_ddpg
-GOAL_ANGLE_RANGE = [-np.pi/3, np.pi/3]  # test_for_Francis
+GOAL_ANGLE_RANGE = [-np.pi/3, np.pi/3]
 GOAL_ANGLE_CENTER = GOAL_ANGLE_RANGE[0] + abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 GOAL_ANGLE_RADIUS = abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 logger.log("goal angle range: from {} to {}".format(GOAL_ANGLE_RANGE[0] * 180 / np.pi, GOAL_ANGLE_RANGE[1] * 180 / np.pi))
