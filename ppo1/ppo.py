@@ -146,18 +146,25 @@ def ppo_learn(env, policy,
     meanent = tf.reduce_mean(ent)
     pol_entpen = (-entcoeff) * meanent
 
+
+
+    method = args['method']
     ###################### For PPO version #############################
-    # ratio = tf.exp(pi.pd.logp(ac) - oldpi.pd.logp(ac)) # pnew / pold
-    # surr1 = ratio * atarg # surrogate from conservative policy iteration
-    # surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
-    # pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
+    if (method == 'ppo'):
+        print(method)
+        ratio = tf.exp(pi.pd.logp(ac) - oldpi.pd.logp(ac)) # pnew / pold
+        surr1 = ratio * atarg # surrogate from conservative policy iteration
+        surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
+        pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
     ####################################################################
 
-    ###################### For A2C version######################################
-    neglogpac = pi.pd.neglogp(ac)
-    pg_loss = tf.reduce_mean(atarg * neglogpac)
-    pol_surr = pg_loss
-    #################################################
+    ###################### For A2C version #############################
+    elif (method == 'a2c'):
+        print(method)
+        neglogpac = pi.pd.neglogp(ac)
+        pg_loss = tf.reduce_mean(atarg * neglogpac)
+        pol_surr = pg_loss
+    ####################################################################
 
     # Default we do not use single value NN
     criteron = tf.placeholder(name='criteron', dtype=tf.bool, shape=[])
@@ -301,7 +308,7 @@ def ppo_learn(env, policy,
         logger.log("********** Iteration %i ************" % (iters_so_far + 1)) # Current iteration index
 
         seg = seg_gen.__next__()
-        add_vtarg_and_adv(seg, gamma, lam)
+        add_vtarg_and_adv(seg, gamma, lam, method)
 
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
         if args['adv_shift'] == "yes":
@@ -382,6 +389,7 @@ def ppo_learn(env, policy,
         # Here we do a bunch of optimization epochs over the data
         start_clip_grad = True  # we also use clip_norm for gradient
         kl_threshold = 0.5  # kl update limit
+        
         from config import ggl  # global ggl from config.py
         for _ in range(optim_epochs):
             losses = []  # list of sublists, each of which gives the loss based on a set of samples with size "optim_batchsize"
