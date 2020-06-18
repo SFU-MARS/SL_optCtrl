@@ -43,7 +43,8 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
         clip_param = d.get('clip_param')
         entcoeff = d.get('entcoeff')
         optim_epochs = d.get('optim_epochs')
-        optim_stepsize = d.get('optim_stepsize')
+        # optim_stepsize = d.get('optim_stepsize')
+        optim_stepsize = args['optim_stepsize']
         optim_batchsize = d.get('optim_batchsize')
         gamma = d.get('gamma')
         lam = d.get('lam')
@@ -51,6 +52,7 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
 
         lam = args['lam']
         logger.log("running lam is:", lam)
+        logger.log("optim_stepsize: ", optim_stepsize)
 
     if args['run_type'] == "train":
         pi = algorithm.ppo_learn(env=env, policy=pi, timesteps_per_actorbatch=timesteps_per_actorbatch,
@@ -85,10 +87,15 @@ if __name__ == "__main__":
 
         parser.add_argument("--lam", type=float, default=0.95)
         parser.add_argument("--grad_norm", type=float, default=0.5)
+        parser.add_argument("--optim_stepsize", type=float, default=3e-4)
         parser.add_argument("--adv_shift", type=str, default="no")
         parser.add_argument("--seed", type=int, default=0)
+        parser.add_argument("--method", type=str, default="ppo")
+
         args = parser.parse_args()
         args = vars(args)
+
+        print(args['method'])
 
         RUN_DIR = MODEL_DIR = FIGURE_DIR = RESULT_DIR = None
         if args['algo'] == "ppo":
