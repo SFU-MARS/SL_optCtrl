@@ -38,21 +38,34 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
     with open(params) as params_file:
         d = json.load(params_file)
         # num_iters = d.get('num_iters')  // no longer required to avoid possible performance peak from re-loading model
-        num_ppo_iters = d.get('num_ppo_iters')
-        timesteps_per_actorbatch = d.get('timesteps_per_actorbatch')
+
+        # num_ppo_iters = d.get('num_ppo_iters')
+        # optim_epochs = d.get('optim_epochs')
+        # optim_stepsize = d.get('optim_stepsize')
+        # gamma = d.get('gamma')
+
+        
+        num_ppo_iters = args['num_ppo_iters']
+        optim_epochs = args['optim_epochs']
+        optim_stepsize = args['optim_stepsize']
+        timesteps_per_actorbatch = args['timesteps_per_actorbatch']
+        gamma = args['gamma']
+
+
+        # timesteps_per_actorbatch = d.get('timesteps_per_actorbatch')
         clip_param = d.get('clip_param')
         entcoeff = d.get('entcoeff')
-        optim_epochs = d.get('optim_epochs')
-        # optim_stepsize = d.get('optim_stepsize')
-        optim_stepsize = args['optim_stepsize']
         optim_batchsize = d.get('optim_batchsize')
-        gamma = d.get('gamma')
         lam = d.get('lam')
         max_iters = num_ppo_iters
 
         lam = args['lam']
         logger.log("running lam is:", lam)
         logger.log("optim_stepsize: ", optim_stepsize)
+        logger.log("optim_epochs: ", optim_epochs)
+        logger.log("num_ppo_iters: ", num_ppo_iters)
+        logger.log("kl threshold: ", args['kl'])
+
 
     if args['run_type'] == "train":
         pi = algorithm.ppo_learn(env=env, policy=pi, timesteps_per_actorbatch=timesteps_per_actorbatch,
@@ -88,6 +101,15 @@ if __name__ == "__main__":
         parser.add_argument("--lam", type=float, default=0.95)
         parser.add_argument("--grad_norm", type=float, default=0.5)
         parser.add_argument("--optim_stepsize", type=float, default=3e-4)
+        parser.add_argument("--num_ppo_iters", type=int, default=300)
+        parser.add_argument("--optim_epochs", type=int, default=10)
+        parser.add_argument("--timesteps_per_actorbatch", type=int, default=256)
+        parser.add_argument("--kl", type=float, default=0.5)
+        parser.add_argument("--gamma", type=float, default=0.99)
+
+
+
+
         parser.add_argument("--adv_shift", type=str, default="no")
         parser.add_argument("--seed", type=int, default=0)
         parser.add_argument("--method", type=str, default="ppo")

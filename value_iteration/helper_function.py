@@ -43,7 +43,7 @@ class value_interpolation_function_car(object):
 
 
 class value_interpolation_function_quad(object):
-	def __init__(self, value_file_path):
+	def __init__(self):
 		self.x = (-5, 5)
 		self.vx = (-4, 5)
 		self.z = (0, 10)
@@ -57,8 +57,8 @@ class value_interpolation_function_quad(object):
 		self.ranges = np.array([self.x,  self.vx, self.z, self.vz, self.theta, self.w])
 		self.state_step_num = np.array([11, 9, 11, 9, 11, 11])
 
-		self.value_file_path = value_file_path
-		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy"  # This one is what we previously used
+		# self.value_file_path = value_file_path
+		self.value_file_path = os.environ['PROJ_HOME_3'] + "/data/quad/transfered_value_matrix_7.npy"  # This one is what we previously used
 		# self.value_file_path = os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann/transferred_value_matrix_8.npy"
 
 		# print("using value file:", self.value_file_path)
@@ -93,7 +93,7 @@ class value_interpolation_function_quad(object):
 
 if __name__ == "__main__":
 
-	test = value_interpolation_function_quad("/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann_airspace_201910_ddpg/transferred_value_matrix_8.npy")
+	test = value_interpolation_function_quad("/media/anjian/Data/Francis/SL_optCtrl/data/quad/valFunc_vi_filled_cleaned.csv")
 	test.setup()
 	
 	print(test.interpolate_value(np.asarray([1.8, 0, 6.0, 0, 0.34, 0])))

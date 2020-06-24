@@ -184,7 +184,7 @@ class Trainer(object):
         model.summary()
         normed_train_data = self.norm(train_dataset, stats)
 
-        EPOCHS = 2000
+        EPOCHS = 500
         history = model.fit(
             normed_train_data, train_labels, batch_size=64,
             epochs=EPOCHS, validation_split=0.2, verbose=1,

@@ -236,11 +236,9 @@ class MlpPolicy_mod(object):
                         colnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
 
                     elif args['gym_env'] == 'PlanarQuadEnv-v0':
-                        # wt_filename = "/tf_model/quad/vf_vi_weights.pkl"
-                        wt_filename = "/tf_model/test_for_Francis/vf_vi_weights.pkl"
+                        wt_filename = "/tf_model/quad/vf_vi_weights.pkl"
                         logging = "We are loading external value weights for quadrotor trained by value iteration"
-                        # val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_vi_filled_cleaned.csv"
-                        val_filled_path = os.environ['PROJ_HOME_3'] + "/tf_model/test_for_Francis/valFunc_vi_filled_cleaned.csv"
+                        val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_vi_filled_cleaned.csv"
                         colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
 
                     with open(os.environ['PROJ_HOME_3'] + wt_filename, 'rb') as f:

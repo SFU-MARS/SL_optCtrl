@@ -562,4 +562,4 @@ class Data_Generator(object):
 if __name__ == "__main__":
     data_gen = Data_Generator()
     data_gen.gen_data(data_form='valFunc_vi', agent='quad')
-    csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_vi_filled.csv')
+    csv_clean(os.path.join(os.environ['PROJ_HOME_3'], 'data/quad/valFunc_vi_filled.csv'))
