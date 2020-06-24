@@ -10,7 +10,7 @@ from mpi4py import MPI
 from collections import deque
 
 
-def traj_segment_generator(pi, env, horizon, stochastic):
+def traj_segment_generator(pi, env, horizon, stochastic, difficulty):
     t = 0
     ac = env.action_space.sample() # not used, just so we have the datatype
     new = True # marks if we're on first timestep of an episode
@@ -42,6 +42,15 @@ def traj_segment_generator(pi, env, horizon, stochastic):
     event_flags = [None] * horizon
     # XLV: add vpred_ghost
     vpreds_ghost = np.zeros(horizon, 'float32')
+
+    if (diffculty == "trap"):
+        prior = False
+        multiple_goal = True
+    else:
+        prior = True
+        multiple_goal = False
+
+
     while True:
         prevac = ac
         # ac, vpred = pi.act(stochastic, ob)
@@ -89,7 +98,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         # XLV: added for maintain vpred_ghost
         vpreds_ghost[i] = vpred_ghost
 
-        ob, rew, new, info = env.step(ac)
+        ob, rew, new, info = env.step(ac, prior, multiple_goal)
         suc = info['suc']
         event_flag = info['event']
         rews[i] = rew
@@ -121,7 +130,7 @@ def add_vtarg_and_adv(seg, gamma, lam, method):
     G = np.append(seg["rew"], 0)
     tdtarget = np.empty(T, 'float32')
     ######## PPO Version ########################################
-    if (method == 'ppo'):    
+    if (method == 'ppo'):
         print(method)
         for t in reversed(range(T)):
             nonterminal = 1-new[t+1]

@@ -259,7 +259,11 @@ def ppo_learn(env, policy,
     assign_old_eq_new()
 
     # Prepare for rollouts
-    seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True)
+    if (args['difficulty'] == "trap"):
+        seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True, args["diffculty"])
+    else:
+        seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True)
+
 
     episodes_so_far = 0
     timesteps_so_far = 0
@@ -388,8 +392,8 @@ def ppo_learn(env, policy,
 
         # Here we do a bunch of optimization epochs over the data
         start_clip_grad = True  # we also use clip_norm for gradient
-        kl_threshold = 0.5  # kl update limit
-        
+        kl_threshold = args['kl']  # kl update limit
+
         from config import ggl  # global ggl from config.py
         for _ in range(optim_epochs):
             losses = []  # list of sublists, each of which gives the loss based on a set of samples with size "optim_batchsize"
@@ -478,7 +482,7 @@ def ppo_learn(env, policy,
         EVALUATION_FREQUENCY = 10  # 10
         if iters_so_far % EVALUATION_FREQUENCY == 0:
 
-            eval_max_iters = 5
+            eval_max_iters = 2
             eval_iters_so_far = 0
             eval_timesteps_per_actorbatch = timesteps_per_actorbatch
 

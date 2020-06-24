@@ -19,7 +19,7 @@ from utils import logger
 
 
 # GOAL_ANGLE_RANGE = [0, np.pi/3]   # for both air_space_202002_Francis and air_space_201910_ddpg
-GOAL_ANGLE_RANGE = [-np.pi/3, np.pi/3]
+GOAL_ANGLE_RANGE = [0, np.pi/3]
 GOAL_ANGLE_CENTER = GOAL_ANGLE_RANGE[0] + abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 GOAL_ANGLE_RADIUS = abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 logger.log("goal angle range: from {} to {}".format(GOAL_ANGLE_RANGE[0] * 180 / np.pi, GOAL_ANGLE_RANGE[1] * 180 / np.pi))
@@ -29,9 +29,19 @@ logger.log("goal angle radius: {}".format(GOAL_ANGLE_RADIUS * 180 / np.pi))
 # goal and start state definitions
 # START_STATE = np.array([3.75, 0, 2, 0, 0, 0])    # air_space_202002_Francis
 # START_STATE = np.array([3, 0, 2, 0, 0, 0])       # air_space_201910_ddpg
-START_STATE = np.array([2.75, 0, 2, 0, 0,0])       # test_for_Francis
+START_STATE = np.array([3.75, 0, 2, 0, 0,0])       # test_for_Francis
 GOAL_STATE = np.array([4.0, 0.0, 9.0, 0.0, GOAL_ANGLE_CENTER, 0.0])
 GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
+
+
+##################### Trap Env #########################
+# This is trap is added by Francis, which is for trap #!/usr/bin/env python
+# The format is different from previous format
+# The current format is [x_left, x_right, z_bottom, z_top, angle_left, angle_right]
+TRAP_STATE = np.array([-4, -1, 0, 1, -np.pi/3, np.pi/3])
+########################################################
+
+
 
 
 # obstacle definitions from air_space_202002_Francis
@@ -46,10 +56,24 @@ GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
 #                  (3.5+0.25, 5, 3/2, 1.5/2),
 #                  (0, 1, 0.5/2, 2/2)]
 
-# obstacle definitions from test_for_Francis
+# obstacle definitions for easy environment
+# OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
+#                  (1, 8.5, 1.5/2, 1.0/2),
+#                  (0, 1, 0.5/2, 2/2)]
+
+
+# obstacle definitions for medium environment
+# OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
+#                  (0, 9, 1.5/2, 1.0/2),
+#                  (3.75, 5, 3/2, 1.5/2),
+#                  (0, 1, 0.5/2, 2/2)]
+
+# obstacle definitions for hard environment
 OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
                  (1, 8.5, 1.5/2, 1.0/2),
+                 (3.75, 5, 3/2, 1.5/2),
                  (0, 1, 0.5/2, 2/2)]
+
 
 # wall 0,1,2,3
 WALLS_POS = [(-5., 5.), (5., 5.), (0.0, 9.85), (0.0, 5.0)]
@@ -84,10 +108,11 @@ class PlanarQuadEnv_v0(gym.Env):
         self.Thrustmin = 0
         self.control_reward_coff = 0.01
         self.collision_reward = -400
-        self.goal_reward = 1000
+        self.goal_reward = [0, 1000, 100] #
 
         self.start_state = START_STATE
         self.goal_state = GOAL_STATE
+        self.trap_state = TRAP_STATE
 
         # state space and action space (MlpPolicy needs these params for input)
         high_state = np.array([5., 2., 10., 2., np.pi, np.pi/3])
@@ -195,7 +220,11 @@ class PlanarQuadEnv_v0(gym.Env):
                     and (abs(phi - self.goal_state[4]) <= self.goal_phi_limit):  # 0.30 before
                 logger.log("in goal with special angle!!")
                 logger.log("x:{}, z:{}, phi:{}".format(x, z, phi))
-                return True
+                return 1
+            elif (self.trap_state[0] <= x <= self.trap_state[1]) and \
+                (self.trap_state[2] <= z <= self.trap_state[3]) and \
+                (self.trap_state[4] <= phi <= self.trap_state[5]):
+                return 2
             else:
                 return False
 
@@ -318,14 +347,18 @@ class PlanarQuadEnv_v0(gym.Env):
 
         return np.asarray(obsrv)
 
-    def step(self, action):
+    def step(self, action, prior = True, multiple_goal = False):
         # Check for possible nan action
         if sum(np.isnan(action)) > 0:
             raise ValueError("Passed in nan to step! Action: " + str(action))
 
         # do some action transoformation
         action = np.clip(action, -2, 2)
-        action = [7 + (10 - 7) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
+        if (prior = False):
+            action = [5 + (10 - 5) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
+        else:
+            action = [7 + (10 - 7) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
+
 
         pre_phi = self.pre_obsrv[4]
         wrench = Wrench()
@@ -401,8 +434,17 @@ class PlanarQuadEnv_v0(gym.Env):
             event_flag = 'collision'
 
         # 2. In the neighbor of goal state, done is True as well. Only considering velocity and pos
-        if self._in_goal(np.array(obsrv[:6])):
-            reward += self.goal_reward
+        # if (multiple_goal == False):
+        #     if self._in_goal(np.array(obsrv[:6])):
+        #         reward += self.goal_reward
+        #         done = True
+        #         suc = True
+        #         self.step_counter = 0
+        #         event_flag = 'goal'
+        # else:
+        flag_goal = self._in_goal(np.array(obsrv[:6]))
+        if (flag_goal > 0):
+            reward += self.goal_reward[flag_goal]
             done = True
             suc = True
             self.step_counter = 0
@@ -436,9 +478,3 @@ if __name__ == "__main__":
         print("enter while loop!")
         # rospy.sleep(0.1)
         print(quadEnv.step([8, 8]))
-
-
-
-
-
-
