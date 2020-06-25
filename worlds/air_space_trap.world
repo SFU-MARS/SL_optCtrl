@@ -341,30 +341,6 @@
         <kinematic>0</kinematic>
       </link>
 
-      <link name='target'>
-        <pose frame=''>4 0 9 0 -0 0</pose>
-        <visual name='visual'>
-          <transparency>0.5</transparency>
-          <geometry>
-            <box>
-              <size>2 10 2</size>
-            </box>
-          </geometry>
-          <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/YellowTransparent</name>
-            </script>
-            <ambient>1 1 1 1</ambient>
-          </material>
-          <cast_shadows>0</cast_shadows>
-          <transparency>0</transparency>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-
       <link name='trap'>
         <pose frame=''>-2 0 0.5 0 -0 0</pose>
         <visual name='visual'>
@@ -389,9 +365,31 @@
         <kinematic>0</kinematic>
       </link>
 
-
+      <link name='target'>
+        <pose frame=''>4 0 9 0 -0 0</pose>
+        <visual name='visual'>
+          <transparency>0.5</transparency>
+          <geometry>
+            <box>
+              <size>2 10 2</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/YellowTransparent</name>
+            </script>
+            <ambient>1 1 1 1</ambient>
+          </material>
+          <cast_shadows>0</cast_shadows>
+          <transparency>0</transparency>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
       <link name='start'>
-        <pose frame=''>3.75 -3.33973 2 0 -0 0</pose>
+        <pose frame=''>-1 -3.33973 4 0 -0 0</pose>
         <visual name='visual'>
           <transparency>0.5</transparency>
           <geometry>
@@ -423,6 +421,7 @@
       <model name='air_space'>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
+
         <link name='cube_1'>
           <pose frame=''>1 0 9 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -437,20 +436,24 @@
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
+
+        <link name='trap'>
+          <pose frame=''>-2 0 0.5 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+
+
         <link name='start'>
           <pose frame=''>-1 -3.33973 4 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
+
         <link name='target'>
           <pose frame=''>4 0 9 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-        <link name='trap'>
-          <pose frame=''>-2 0 0.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
