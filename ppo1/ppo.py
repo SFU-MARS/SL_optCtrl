@@ -259,10 +259,8 @@ def ppo_learn(env, policy,
     assign_old_eq_new()
 
     # Prepare for rollouts
-    if (args['difficulty'] == "trap"):
-        seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True, args["diffculty"])
-    else:
-        seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True)
+    seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True, difficulty = args['difficulty'])
+
 
 
     episodes_so_far = 0
@@ -270,6 +268,7 @@ def ppo_learn(env, policy,
     iters_so_far = 0
 
     ep_suc_so_far = 0 # success episodes num so far during training
+    ep_trap_so_far = 0
     tstart = time.time()
     lenbuffer = deque(maxlen=100) # rolling buffer for episode lengths
     rewbuffer = deque(maxlen=100) # rolling buffer for episode rewards
@@ -322,6 +321,7 @@ def ppo_learn(env, policy,
         ep_rets = seg['ep_rets']
         event_flags = seg['event_flag']
         train_sucs = seg['suc']
+        train_trap = seg['trap']
         mc_rets = seg['mcreturn']
         vpredbefore = seg['vpred']
         tdtarget = seg['tdtarget']
@@ -464,14 +464,18 @@ def ppo_learn(env, policy,
         logger.record_tabular("EpThisIter", len(lens))
         logger.record_tabular("EpRewMeanThisIter", np.mean(seg["ep_rets"]))
         logger.record_tabular("EpSuccessThisIter", Counter(train_sucs)[True])
+        logger.record_tabular("EpTrapThisIter", Counter(train_trap)[True])
         logger.record_tabular("SucRateThisIter", Counter(train_sucs)[True] / len(lens))
         episodes_so_far += len(lens)
         timesteps_so_far += sum(lens)
         iters_so_far += 1
         ep_suc_so_far += Counter(train_sucs)[True]
+        ep_trap_so_far += Counter(train_trap)[True]
         logger.record_tabular("EpisodesSoFar", episodes_so_far)
         logger.record_tabular("EpSuccessSoFar", ep_suc_so_far)
+        logger.record_tabular("EpTrapSoFar", ep_trap_so_far)
         logger.record_tabular("SucRateSoFar", ep_suc_so_far / episodes_so_far)
+        logger.record_tabular("TrapRateSoFar", ep_trap_so_far / episodes_so_far)
         logger.record_tabular("TimestepsSoFar", timesteps_so_far)
         logger.record_tabular("TimeElapsed", time.time() - tstart)
 

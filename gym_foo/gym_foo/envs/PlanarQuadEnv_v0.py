@@ -29,7 +29,9 @@ logger.log("goal angle radius: {}".format(GOAL_ANGLE_RADIUS * 180 / np.pi))
 # goal and start state definitions
 # START_STATE = np.array([3.75, 0, 2, 0, 0, 0])    # air_space_202002_Francis
 # START_STATE = np.array([3, 0, 2, 0, 0, 0])       # air_space_201910_ddpg
-START_STATE = np.array([3.75, 0, 2, 0, 0,0])       # test_for_Francis
+# START_STATE = np.array([3.75, 0, 2, 0, 0,0])       # air_space_hard
+START_STATE = np.array([2, 0, 3, 0, 0,0])       # air_space_trap
+
 GOAL_STATE = np.array([4.0, 0.0, 9.0, 0.0, GOAL_ANGLE_CENTER, 0.0])
 GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
 
@@ -38,7 +40,7 @@ GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
 # This is trap is added by Francis, which is for trap #!/usr/bin/env python
 # The format is different from previous format
 # The current format is [x_left, x_right, z_bottom, z_top, angle_left, angle_right]
-TRAP_STATE = np.array([-4, -1, 0, 1, -np.pi/3, np.pi/3])
+TRAP_STATE = np.array([-5, 5, 0, 1, -np.pi/3, np.pi/3])
 ########################################################
 
 
@@ -69,10 +71,15 @@ TRAP_STATE = np.array([-4, -1, 0, 1, -np.pi/3, np.pi/3])
 #                  (0, 1, 0.5/2, 2/2)]
 
 # obstacle definitions for hard environment
-OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
-                 (1, 8.5, 1.5/2, 1.0/2),
-                 (3.75, 5, 3/2, 1.5/2),
-                 (0, 1, 0.5/2, 2/2)]
+# OBSTACLES_POS = [(-2, 5, 1.5/2, 1.5/2),
+#                  (1, 8.5, 1.5/2, 1.0/2),
+#                  (3.75, 5, 3/2, 1.5/2),
+#                  (0, 1, 0.5/2, 2/2)]
+
+# obstacle definitions for trap environment
+OBSTACLES_POS = [(1, 9, 0.5/2, 2/2),
+                 (3.5, 6, 3/2, 0.5/2)]
+
 
 
 # wall 0,1,2,3
@@ -108,7 +115,7 @@ class PlanarQuadEnv_v0(gym.Env):
         self.Thrustmin = 0
         self.control_reward_coff = 0.01
         self.collision_reward = -400
-        self.goal_reward = [0, 1000, 100] #
+        self.goal_reward = [0, 1000, 200] #
 
         self.start_state = START_STATE
         self.goal_state = GOAL_STATE
@@ -185,11 +192,13 @@ class PlanarQuadEnv_v0(gym.Env):
         for i, obs in enumerate(OBSTACLES_POS):
             if obs[0] - obs[2] - quad_r <= tmp_x <= obs[0] + obs[2] + quad_r and \
                     obs[1] - obs[3] - quad_r <= tmp_z <= obs[1] + obs[3] + quad_r:
+                # print("obstacles collides: ", tmp_x, tmp_z)
                 return True
 
         if np.abs(tmp_x - WALLS_POS[0][0]) < laser_min_range \
             or np.abs(tmp_x - WALLS_POS[1][0]) < laser_min_range \
             or np.abs(tmp_z - WALLS_POS[2][1]) < laser_min_range:
+            # print("Walls collides: ", tmp_x, tmp_z)
             return True
 
         return False
@@ -224,6 +233,8 @@ class PlanarQuadEnv_v0(gym.Env):
             elif (self.trap_state[0] <= x <= self.trap_state[1]) and \
                 (self.trap_state[2] <= z <= self.trap_state[3]) and \
                 (self.trap_state[4] <= phi <= self.trap_state[5]):
+                logger.log("in trap")
+                logger.log("x:{}, z:{}, phi:{}".format(x, z, phi))
                 return 2
             else:
                 return False
@@ -354,7 +365,7 @@ class PlanarQuadEnv_v0(gym.Env):
 
         # do some action transoformation
         action = np.clip(action, -2, 2)
-        if (prior = False):
+        if (prior == False):
             action = [5 + (10 - 5) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
         else:
             action = [7 + (10 - 7) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
@@ -404,6 +415,7 @@ class PlanarQuadEnv_v0(gym.Env):
 
         done = False
         suc = False
+        trap = False
         self.step_counter += 1
         event_flag = None  # {'collision', 'safe', 'goal', 'steps exceeding', 'highly tilt'}
 
@@ -428,7 +440,7 @@ class PlanarQuadEnv_v0(gym.Env):
 
         # 1. when collision happens, done = True
         if self._in_obst(dynamic_data):
-            reward += self.collision_reward
+            reward = self.collision_reward
             done = True
             self.step_counter = 0
             event_flag = 'collision'
@@ -444,15 +456,16 @@ class PlanarQuadEnv_v0(gym.Env):
         # else:
         flag_goal = self._in_goal(np.array(obsrv[:6]))
         if (flag_goal > 0):
-            reward += self.goal_reward[flag_goal]
+            reward = self.goal_reward[flag_goal]
             done = True
             suc = True
+            trap = (flag_goal == 2)
             self.step_counter = 0
             event_flag = 'goal'
 
         # 3. When higly tilt happens
         if obsrv[4] > 1.4 or obsrv[4] < -1.4:
-            reward += self.collision_reward * 2
+            reward = self.collision_reward * 2
             done = True
             self.step_counter = 0
             event_flag = 'highly tilt'
@@ -466,7 +479,7 @@ class PlanarQuadEnv_v0(gym.Env):
         if event_flag is None:
             event_flag = 'safe'
 
-        return np.asarray(obsrv), reward, done, {'suc':suc, 'event':event_flag}
+        return np.asarray(obsrv), reward, done, {'suc':suc, 'event':event_flag, 'trap': trap}
 
 
 

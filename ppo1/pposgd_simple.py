@@ -10,7 +10,7 @@ from mpi4py import MPI
 from collections import deque
 
 
-def traj_segment_generator(pi, env, horizon, stochastic, difficulty):
+def traj_segment_generator(pi, env, horizon, stochastic, difficulty = "hard"):
     t = 0
     ac = env.action_space.sample() # not used, just so we have the datatype
     new = True # marks if we're on first timestep of an episode
@@ -36,14 +36,16 @@ def traj_segment_generator(pi, env, horizon, stochastic, difficulty):
     prevacs = acs.copy()
     # XLV: add success percentage
     suc = False
+    trap = False
     sucs = np.zeros(horizon, 'int32')
+    traps = np.zeros(horizon, 'int32')
     # XLV: add event flag
     event_flag = 'safe'
     event_flags = [None] * horizon
     # XLV: add vpred_ghost
     vpreds_ghost = np.zeros(horizon, 'float32')
 
-    if (diffculty == "trap"):
+    if (difficulty == "trap"):
         prior = False
         multiple_goal = True
     else:
@@ -74,9 +76,21 @@ def traj_segment_generator(pi, env, horizon, stochastic, difficulty):
             #         "ac" : acs, "prevac" : prevacs, "nextvpred": vpred * (1 - new),
             #         "ep_rets" : ep_rets, "ep_lens" : ep_lens}
 
-            yield {"ob": obs, "rew": rews, "vpred": vpreds, "vpred_ghost":vpreds_ghost, "new": news, "suc": sucs, "event_flag": event_flags,
-                   "ac": acs, "prevac": prevacs, "nextvpred": vpred * (1 - new), "nextvpred_ghost": vpred_ghost * (1 - new),
-                   "ep_rets": ep_rets, "ep_lens": ep_lens}
+            yield {"ob": obs,
+                   "rew": rews, 
+                   "vpred": vpreds, 
+                   "vpred_ghost":vpreds_ghost, 
+                   "new": news, 
+                   "suc": sucs,
+                   "trap": traps, 
+                   "event_flag": event_flags,
+                   "ac": acs, 
+                   "prevac": prevacs, 
+                   "nextvpred": vpred * (1 - new), 
+                   "nextvpred_ghost": vpred_ghost * (1 - new),
+                   "ep_rets": ep_rets, 
+                   "ep_lens": ep_lens
+                   }
 
                     # BI: Added this for our work.
                     #"start_rews": start_rews}
@@ -93,6 +107,7 @@ def traj_segment_generator(pi, env, horizon, stochastic, difficulty):
         prevacs[i] = prevac
         # XLV: added for collect success rate
         sucs[i] = suc
+        traps[i] = trap
         # XLV: added for collect event type
         event_flags[i] = event_flag
         # XLV: added for maintain vpred_ghost
@@ -101,6 +116,7 @@ def traj_segment_generator(pi, env, horizon, stochastic, difficulty):
         ob, rew, new, info = env.step(ac, prior, multiple_goal)
         suc = info['suc']
         event_flag = info['event']
+        trap = info['trap']
         rews[i] = rew
 
         cur_ep_ret += rew
