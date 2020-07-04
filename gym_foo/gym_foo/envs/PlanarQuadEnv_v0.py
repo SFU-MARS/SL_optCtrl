@@ -19,7 +19,7 @@ from utils import logger
 
 
 # GOAL_ANGLE_RANGE = [0, np.pi/3]   # for both air_space_202002_Francis and air_space_201910_ddpg
-GOAL_ANGLE_RANGE = [0, np.pi/3]
+GOAL_ANGLE_RANGE = [-np.pi/6, np.pi/3]
 GOAL_ANGLE_CENTER = GOAL_ANGLE_RANGE[0] + abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 GOAL_ANGLE_RADIUS = abs(GOAL_ANGLE_RANGE[1]-GOAL_ANGLE_RANGE[0])/2
 logger.log("goal angle range: from {} to {}".format(GOAL_ANGLE_RANGE[0] * 180 / np.pi, GOAL_ANGLE_RANGE[1] * 180 / np.pi))
@@ -30,7 +30,7 @@ logger.log("goal angle radius: {}".format(GOAL_ANGLE_RADIUS * 180 / np.pi))
 # START_STATE = np.array([3.75, 0, 2, 0, 0, 0])    # air_space_202002_Francis
 # START_STATE = np.array([3, 0, 2, 0, 0, 0])       # air_space_201910_ddpg
 # START_STATE = np.array([3.75, 0, 2, 0, 0,0])       # air_space_hard
-START_STATE = np.array([2, 0, 3, 0, 0,0])       # air_space_trap
+START_STATE = np.array([0, 0, 4, 0, 0,0])       # air_space_trap
 
 GOAL_STATE = np.array([4.0, 0.0, 9.0, 0.0, GOAL_ANGLE_CENTER, 0.0])
 GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
@@ -40,7 +40,7 @@ GOAL_PHI_LIMIT = GOAL_ANGLE_RADIUS
 # This is trap is added by Francis, which is for trap #!/usr/bin/env python
 # The format is different from previous format
 # The current format is [x_left, x_right, z_bottom, z_top, angle_left, angle_right]
-TRAP_STATE = np.array([-5, 5, 0, 1, -np.pi/3, np.pi/3])
+TRAP_STATE = np.array([-5, 0, 0, 1, -np.pi/3, np.pi/3])
 ########################################################
 
 
@@ -78,7 +78,8 @@ TRAP_STATE = np.array([-5, 5, 0, 1, -np.pi/3, np.pi/3])
 
 # obstacle definitions for trap environment
 OBSTACLES_POS = [(1, 9, 0.5/2, 2/2),
-                 (3.5, 6, 3/2, 0.5/2)]
+                 # (3.5, 6, 3/2, 0.5/2)
+                 (4, 6, 2/2, 0.5/2)]
 
 
 
@@ -115,7 +116,7 @@ class PlanarQuadEnv_v0(gym.Env):
         self.Thrustmin = 0
         self.control_reward_coff = 0.01
         self.collision_reward = -400
-        self.goal_reward = [0, 1000, 200] #
+        self.goal_reward = [0, 1000, 100] #
 
         self.start_state = START_STATE
         self.goal_state = GOAL_STATE
@@ -227,14 +228,14 @@ class PlanarQuadEnv_v0(gym.Env):
             # angle region from 0.4 to 0.3. increase difficulty
             if np.sqrt((x - self.goal_state[0]) ** 2 + (z - self.goal_state[2]) ** 2) <= self.goal_pos_tolerance \
                     and (abs(phi - self.goal_state[4]) <= self.goal_phi_limit):  # 0.30 before
-                logger.log("in goal with special angle!!")
-                logger.log("x:{}, z:{}, phi:{}".format(x, z, phi))
+                # logger.log("in goal with special angle!!")
+                # logger.log("x:{}, z:{}, phi:{}".format(x, z, phi))
                 return 1
             elif (self.trap_state[0] <= x <= self.trap_state[1]) and \
                 (self.trap_state[2] <= z <= self.trap_state[3]) and \
                 (self.trap_state[4] <= phi <= self.trap_state[5]):
-                logger.log("in trap")
-                logger.log("x:{}, z:{}, phi:{}".format(x, z, phi))
+                # logger.log("in trap")
+                # logger.log("x:{}, z:{}, phi:{}".format(x, z, phi))
                 return 2
             else:
                 return False
@@ -364,9 +365,10 @@ class PlanarQuadEnv_v0(gym.Env):
             raise ValueError("Passed in nan to step! Action: " + str(action))
 
         # do some action transoformation
+        # force 7.45 is the balance force which can let the drone suspend on the air.
         action = np.clip(action, -2, 2)
         if (prior == False):
-            action = [5 + (10 - 5) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
+            action = [6.4 + (9.0 - 6.4) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
         else:
             action = [7 + (10 - 7) * (a_i - (-2)) / (2 - (-2)) for a_i in action]
 
@@ -462,6 +464,9 @@ class PlanarQuadEnv_v0(gym.Env):
             trap = (flag_goal == 2)
             self.step_counter = 0
             event_flag = 'goal'
+            if (flag_goal == 2):
+                event_flag = 'trap'
+                suc = False
 
         # 3. When higly tilt happens
         if obsrv[4] > 1.4 or obsrv[4] < -1.4:
@@ -474,6 +479,7 @@ class PlanarQuadEnv_v0(gym.Env):
         if self.step_counter >= 100:
             done = True
             self.step_counter = 0
+            reward = -1000
             event_flag = 'steps exceeding'
 
         if event_flag is None:

@@ -44,7 +44,7 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
         # optim_stepsize = d.get('optim_stepsize')
         # gamma = d.get('gamma')
 
-        
+
         num_ppo_iters = args['num_ppo_iters']
         optim_epochs = args['optim_epochs']
         optim_stepsize = args['optim_stepsize']
@@ -106,6 +106,8 @@ if __name__ == "__main__":
         parser.add_argument("--timesteps_per_actorbatch", type=int, default=256)
         parser.add_argument("--kl", type=float, default=0.5)
         parser.add_argument("--gamma", type=float, default=0.99)
+        parser.add_argument("--difficulty", type=str, default="hard")
+
 
 
 
@@ -203,15 +205,3 @@ if __name__ == "__main__":
 #     with tf.Session() as sess:
 #         sess.run(tf.global_variables_initializer())
 #         print("tensorflow generate a random number:", sess.run(tf_rand))
-
-
-
-
-
-
-
-
-
-
-
-

@@ -273,6 +273,13 @@ def ppo_learn(env, policy,
     lenbuffer = deque(maxlen=100) # rolling buffer for episode lengths
     rewbuffer = deque(maxlen=100) # rolling buffer for episode rewards
 
+    train_trap_counter = []
+    train_succ_counter = []
+    train_trap_rate = []
+    train_succ_rate = []
+    eval_trap_rate = []
+    eval_succ_rate = []
+
     assert sum([max_iters>0, max_timesteps>0, max_episodes>0, max_seconds>0])==1, "Only one time constraint permitted"
 
     ep_mean_rews = list()
@@ -459,18 +466,27 @@ def ppo_learn(env, policy,
         ep_mean_lens.append(np.mean(lenbuffer))
         ep_mean_rews.append(np.mean(rewbuffer))
 
+        current_trap = Counter(train_trap)[True]
+        current_succ = Counter(train_sucs)[True]
+
+
         logger.record_tabular("EpLenMean", np.mean(lenbuffer))
         logger.record_tabular("EpRewMean", np.mean(rewbuffer))
         logger.record_tabular("EpThisIter", len(lens))
         logger.record_tabular("EpRewMeanThisIter", np.mean(seg["ep_rets"]))
-        logger.record_tabular("EpSuccessThisIter", Counter(train_sucs)[True])
-        logger.record_tabular("EpTrapThisIter", Counter(train_trap)[True])
-        logger.record_tabular("SucRateThisIter", Counter(train_sucs)[True] / len(lens))
+        logger.record_tabular("EpSuccessThisIter", current_succ)
+        logger.record_tabular("EpTrapThisIter", current_trap)
+        logger.record_tabular("SucRateThisIter", current_succ / len(lens))
         episodes_so_far += len(lens)
         timesteps_so_far += sum(lens)
         iters_so_far += 1
-        ep_suc_so_far += Counter(train_sucs)[True]
-        ep_trap_so_far += Counter(train_trap)[True]
+        ep_suc_so_far += current_succ
+        ep_trap_so_far += current_trap
+        train_succ_counter.append(current_succ)
+        train_trap_counter.append(current_trap)
+        train_succ_rate.append(current_succ / len(lens))
+        train_trap_rate.append(current_trap / len(lens))
+
         logger.record_tabular("EpisodesSoFar", episodes_so_far)
         logger.record_tabular("EpSuccessSoFar", ep_suc_so_far)
         logger.record_tabular("EpTrapSoFar", ep_trap_so_far)
@@ -483,7 +499,7 @@ def ppo_learn(env, policy,
             logger.dump_tabular()
 
         """ Evaluation """
-        EVALUATION_FREQUENCY = 10  # 10
+        EVALUATION_FREQUENCY = 1  # 10
         if iters_so_far % EVALUATION_FREQUENCY == 0:
 
             eval_max_iters = 2
@@ -496,6 +512,7 @@ def ppo_learn(env, policy,
             eval_episodes_so_far = 0
             eval_timesteps_so_far = 0
             eval_success_episodes_so_far = 0
+            eval_trap_episodes_so_far = 0
 
             # prepare eval episode generator
             eval_seg_gen = traj_segment_generator(pi, env, eval_timesteps_per_actorbatch, stochastic=False)
@@ -518,16 +535,24 @@ def ppo_learn(env, policy,
                 logger.record_tabular("EpRewMean", np.mean(eval_rewbuffer))
                 logger.record_tabular("EpThisIter", len(eval_lens))
                 eval_sucs = eval_seg["suc"]
-                logger.record_tabular("EpSuccessThisIter", Counter(eval_sucs)[True])
+                eval_trap = eval_seg["trap"]
+                eval_succ_number = Counter(eval_sucs)[True]
+                eval_trap_number = Counter(eval_trap)[True]
+
+                logger.record_tabular("EpSuccessThisIter", eval_succ_number)
+                logger.record_tabular("EpTrapThisIter", eval_trap_number)
 
 
                 eval_episodes_so_far += len(eval_lens)
                 eval_timesteps_so_far += sum(eval_lens)
-                eval_success_episodes_so_far += Counter(eval_sucs)[True]
+                eval_success_episodes_so_far += eval_succ_number
+                eval_trap_episodes_so_far += eval_trap_number
                 logger.record_tabular("EpisodesSoFar", eval_episodes_so_far)
                 logger.record_tabular("TimestepsSoFar", eval_timesteps_so_far)
                 logger.record_tabular("EpisodesSuccessSoFar", eval_success_episodes_so_far)
+                logger.record_tabular("EpisodesTrapSoFar", eval_trap_episodes_so_far)
                 logger.record_tabular("SuccessRateSoFar", eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
+                logger.record_tabular("TrapRateSoFar", eval_trap_episodes_so_far * 1.0 / eval_episodes_so_far)
 
                 eval_iters_so_far += 1
                 if MPI.COMM_WORLD.Get_rank() == 0:
@@ -535,6 +560,7 @@ def ppo_learn(env, policy,
             # save success rate from each evaluation into global list
             eval_success_rates.append(eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
             eval_suc_buffer.append(eval_success_episodes_so_far * 1.0 / eval_episodes_so_far)
+            eval_trap_rate.append(eval_trap_episodes_so_far * 1.0 / eval_episodes_so_far)
 
 
         """ Saving model and statistics """
@@ -550,8 +576,13 @@ def ppo_learn(env, policy,
             with open(args['RESULT_DIR'] + '/eval_success_rate_' + 'iter_' + str(iters_so_far) + '.pkl', 'wb') as f_eval:
                 pickle.dump(eval_success_rates, f_eval)
 
+            np.save(args['RESULT_DIR'] + '/train_goal_rate_' + 'iter_' + str(iters_so_far) + '.npy', np.array(train_succ_rate))
+            np.save(args['RESULT_DIR'] + '/train_trap_rate_' + 'iter_' + str(iters_so_far) + '.npy', np.array(train_trap_rate))
+            np.save(args['RESULT_DIR'] + '/train_trap_rate_' + 'iter_' + str(iters_so_far) + '.npy', np.array(eval_trap_rate))
+
+
         """ Plotting and saving statistics """
-        PLOT_FREQUENCY = 10 # 10
+        PLOT_FREQUENCY = 30 # 10
         if iters_so_far % PLOT_FREQUENCY == 0:
             # plot training reward performance
             train_plot_x = np.arange(len(ep_mean_rews)) + 1
@@ -559,6 +590,23 @@ def ppo_learn(env, policy,
             train_plot_y = np.insert(ep_mean_rews, 0, ep_mean_rews[0])
             plot_performance(x=train_plot_x, y=train_plot_y, ylabel=r'episode mean reward at each iteration',
                              xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'train_reward'), title='TRAIN')
+
+            # plot training succ rate
+            train_plot_x = np.arange(len(ep_mean_rews)) + 1
+            train_plot_x = np.insert(train_plot_x, 0, 0)
+            train_plot_y = np.array(train_succ_rate) 
+            train_plot_y = np.insert(train_plot_y, 0, 0)           
+            plot_performance(x=train_plot_x, y=train_plot_y, ylabel=r'episode goal rate at each iteration',
+                             xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'train_goal_rate'), title='TRAIN')
+
+
+           # plot training trap rate
+            train_plot_x = np.arange(len(ep_mean_rews)) + 1
+            train_plot_x = np.insert(train_plot_x, 0, 0)
+            train_plot_y = np.array(train_trap_rate) 
+            train_plot_y = np.insert(train_plot_y, 0, 0)           
+            plot_performance(x=train_plot_x, y=train_plot_y, ylabel=r'episode trap rate at each iteration',
+                             xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'train_trap_rate'), title='TRAIN')
 
 
             # plot evaluation success rate
@@ -570,7 +618,14 @@ def ppo_learn(env, policy,
                              xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'eval_success_rate'),
                              title="EVAL")
 
-
+            # plot evaluation trap rate
+            eval_plot_x = (np.arange(len(eval_trap_rate)) + 1) * EVALUATION_FREQUENCY
+            eval_plot_x = np.insert(eval_plot_x, 0, 0)
+            eval_plot_y = np.insert(eval_trap_rate, 0, 0)
+            plot_performance(x=eval_plot_x, y = eval_plot_y,
+                             ylabel=r'eval trap rate',
+                             xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'eval_trap_rate'),
+                             title="EVAL")
 
 
     return pi
