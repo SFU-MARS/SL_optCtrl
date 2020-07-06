@@ -154,7 +154,8 @@ if __name__ == "__main__":
 
     # Configuration
     # hidden = [400, 300]
-    hidden = [256, 256]
+    # hidden = [256, 256]
+    hidden = [64, 64]
     user_config = {'agent': 'dubinsCar',
                    'input_dim': 13,
                    'hidden': hidden,

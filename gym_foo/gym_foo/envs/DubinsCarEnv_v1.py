@@ -191,7 +191,7 @@ class DubinsCarEnv_v1(gym.Env):
         v = dynamic_data.twist.linear.x
         w = dynamic_data.twist.angular.z
 
-        obsrv = [x, y, theta, v, w] + discretized_laser_data
+        obsrv = [x, y, theta] + discretized_laser_data + [v, w]
 
         return obsrv
 
@@ -264,8 +264,8 @@ class DubinsCarEnv_v1(gym.Env):
 
         obsrv = self.get_obsrv(new_laser_data, dynamic_data)
         self.pre_obsrv = obsrv
-        self.pre_vel = obsrv[3]     # linear_vel
-        self.pre_angvel = obsrv[4]  # ang_vel
+        self.pre_vel = obsrv[-2]     # linear_vel
+        self.pre_angvel = obsrv[-1]  # ang_vel
 
         return np.asarray(obsrv)
 
@@ -277,15 +277,20 @@ class DubinsCarEnv_v1(gym.Env):
 
         action = np.clip(action, -2, 2)
 
-        # For linear acc, [-2, 2] --> [-0.8, 0.8]
-        linear_acc = -0.8 + (0.8 - (-0.8)) * (action[0] - (-2)) / (2 - (-2))
+        # For linear acc, [-2, 2] --> [-0.5, 0.5]
+        linear_acc = -0.5 + (0.5 - (-0.5)) * (action[0] - (-2)) / (2 - (-2))
         # For angular acc, [-2, 2] --> [-0.1, 0.1]
         angular_acc = -0.1 + (0.1 - (-0.1)) * (action[1] - (-2)) / (2 - (-2))
 
+
+
         # Publish control command
         vel_cmd = Twist()
-        vel_cmd.linear.x = self.pre_vel + linear_acc
+        vel_cmd.linear.x  = self.pre_vel + linear_acc
         vel_cmd.angular.z = self.pre_angvel + angular_acc
+
+
+        print("before send cmd, linear_acc: {}; angular_acc: {}; pre_vel: {}, pre_angvel: {}, linear_vel: {}; angular_vel: {}".format(linear_acc, angular_acc, self.pre_vel, self.pre_angvel, vel_cmd.linear.x, vel_cmd.angular.z))
         self.vel_pub.publish(vel_cmd)
 
         # Prepare for receive sensor readings. Laser data as part of obs; contact data used for collision detection
@@ -329,8 +334,8 @@ class DubinsCarEnv_v1(gym.Env):
             self.step_counter = 0
 
         self.pre_obsrv = obsrv
-        self.pre_vel   = obsrv[3]
-        self.pre_angvel= obsrv[4]
+        self.pre_vel   = obsrv[-2]
+        self.pre_angvel= obsrv[-1]
 
         assert self.reward_type is not None
         reward = 0
@@ -353,7 +358,7 @@ class DubinsCarEnv_v1(gym.Env):
             event_flag = 'collision'
 
         # 2. In the neighbor of goal state, done is True as well. Only considering velocity and pos
-        if self._in_goal(np.array(obsrv[:5])):
+        if self._in_goal(np.array(obsrv[:3] + obsrv[-2:])):
             reward += self.goal_reward
             done = True
             suc  = True

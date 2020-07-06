@@ -1,7 +1,7 @@
 {
   "num_iters":0,
   "num_ppo_iters":300,
-  "timesteps_per_actorbatch":1024,
+  "timesteps_per_actorbatch":102400,
   "clip_param":0.2,
   "entcoeff":0.0,
   "optim_epochs":10,

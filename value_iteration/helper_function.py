@@ -93,13 +93,6 @@ class value_interpolation_function_quad(object):
 
 if __name__ == "__main__":
 
-	test = value_interpolation_function_quad("/local-scratch/xlv/SL_optCtrl/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D_boltzmann_airspace_201910_ddpg/transferred_value_matrix_8.npy")
+	test = value_interpolation_function_quad(os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy")
 	test.setup()
-	
-	print(test.interpolate_value(np.asarray([1.8, 0, 6.0, 0, 0.34, 0])))
-
-	# print(test.interpolate_value(
-	# 	np.asarray([1.8724435818, 3.240509963, 6.9533269887, 2.7651834356, 0.4899471015, -0.8570942991])))
-
-
-	# print(test.interpolate_value(np.asarray([0.7592926406,0.8031082973,5.3316669254,2.4626363745,0.2890502571,0.5051721474])))
+	print(test.interpolate_value([4.151992857635124,-0.0928983121586221,1.4402404781111031,-1.3819927685469908,-0.04574813639082511,0.14224414376364491]))

@@ -64,9 +64,12 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
     env.close()
 
     # save global ggl in config.py
-    from config import ggl
+    from config import ggl, ggl_ghost
     pickle.dump(ggl, open(args['RUN_DIR'] + "/ggl.pkl", "wb"))
+    pickle.dump(ggl_ghost, open(args['RUN_DIR'] + "/ggl_ghost.pkl", "wb"))
     logger.log("saving ggl done!")
+    logger.log("saving ggl_ghost done!")
+
     return pi
 
 if __name__ == "__main__":
@@ -104,6 +107,7 @@ if __name__ == "__main__":
             if args['vf_switch'] == "yes":
                 RUN_DIR = RUN_DIR + '_' + 'switch'
 
+            RUN_DIR += '_' + 'lam' + '_' + str(args['lam'])  # to ifentify which lambda is getting used.
             MODEL_DIR = os.path.join(RUN_DIR, 'model')
             FIGURE_DIR = os.path.join(RUN_DIR, 'figure')
             RESULT_DIR = os.path.join(RUN_DIR, 'result')
@@ -145,21 +149,20 @@ if __name__ == "__main__":
             ppo_params_json = os.environ['PROJ_HOME_3']+'/ppo1/ppo_params.json'
 
             # Start to train the policy from scratch
-            trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, args=args)
-            trained_policy.save_model(args['MODEL_DIR'])
+            # trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, args=args)
+            # trained_policy.save_model(args['MODEL_DIR'])
 
             # Load model and continue training
             # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/quad_task_exploration/quad_task_air_space_202002_Francis_goal_angle_0_60/baseline_fixed/09-May-2020_20-33-16PlanarQuadEnv-v0_hand_craft_ppo/model'
-            # trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=0, args=args)
-            # trained_policy.save_model(args['MODEL_DIR'])
+            LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/22-Jun-2020_15-10-53DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/model'
+            trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=30, args=args)
+            trained_policy.save_model(args['MODEL_DIR'])
 
             # Load pre-trained model for evaluation
             # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/grad_norm_0.5_kl_0.015_std_0.5_baseline/27-Jan-2020_01-44-06DubinsCarEnv-v0_hand_craft_ppo/model'
             # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/grad_norm_0.5_kl_0.015_std_0.5_fixed_value_vi/23-Jan-2020_00-13-24DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/model'
-            # LOAD_DIR = os.environ[
-            #                'PROJ_HOME_3'] + '/runs_log_tests/quad_task_exploration/quad_task_air_space_202002_Francis_goal_angle_0_60/baseline/29-Apr-2020_21-12-34PlanarQuadEnv-v0_hand_craft_ppo/model'
-            # LOAD_DIR = os.environ[
-            #                'PROJ_HOME_3'] + '/runs_log_tests/quad_task_exploration/quad_task_air_space_202002_Francis_goal_angle_0_60/vi_fixed/25-Apr-2020_01-53-24PlanarQuadEnv-v0_hand_craft_ppo_vf_boltzmann/model'
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/quad_task_exploration/quad_task_air_space_202002_Francis_goal_angle_0_60/baseline/29-Apr-2020_21-12-34PlanarQuadEnv-v0_hand_craft_ppo/model'
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/quad_task_exploration/quad_task_air_space_202002_Francis_goal_angle_0_60/vi_fixed/25-Apr-2020_01-53-24PlanarQuadEnv-v0_hand_craft_ppo_vf_boltzmann/model'
             # eval_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=180, args=args)
 
         else:

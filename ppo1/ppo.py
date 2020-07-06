@@ -123,6 +123,7 @@ def ppo_learn(env, policy,
     grad_norm = args['grad_norm']
     logger.log("running grad norm:", grad_norm)
 
+
     # Setup losses and stuff
     # ----------------------------------------
     pi = policy
@@ -146,10 +147,17 @@ def ppo_learn(env, policy,
     meanent = tf.reduce_mean(ent)
     pol_entpen = (-entcoeff) * meanent
 
+    # Uncomment this if you use PPO
     ratio = tf.exp(pi.pd.logp(ac) - oldpi.pd.logp(ac)) # pnew / pold
     surr1 = ratio * atarg # surrogate from conservative policy iteration
     surr2 = tf.clip_by_value(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
     pol_surr = - tf.reduce_mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
+
+    # Uncomment this if you use A2C. Remeber to check the optim_stepsize
+    # logger.log("trying to use A2C update this time ...")
+    # neglogpac = pi.pd.neglogp(ac)
+    # pg_loss = tf.reduce_mean(neglogpac * atarg)
+    # pol_surr = pg_loss
 
     # Default we do not use single value NN
     criteron = tf.placeholder(name='criteron', dtype=tf.bool, shape=[])
@@ -306,6 +314,8 @@ def ppo_learn(env, policy,
         mc_rets = seg['mcreturn']
         vpredbefore = seg['vpred']
         tdtarget = seg['tdtarget']
+        adv_ghost = seg['adv_ghost']
+
 
         print(len(mc_rets))
         print(len(vpredbefore))
@@ -360,9 +370,11 @@ def ppo_learn(env, policy,
 
         """ Optimization """
         atarg = (atarg - atarg.mean()) / atarg.std() # standardized advantage function estimate
-        d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)
+        adv_ghost = (adv_ghost - adv_ghost.mean()) / adv_ghost.std() # standardized advantage function estimate for adv_ghost
+        d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret, atarg_ghost=adv_ghost), shuffle=not pi.recurrent)
         optim_batchsize = optim_batchsize or ob.shape[0]
 
+    
         # update pi.ob_rms based on the most recent ob
         if hasattr(pi, "ob_rms"): pi.ob_rms.update(ob) # update running mean/std for policy
 
@@ -371,10 +383,24 @@ def ppo_learn(env, policy,
         logger.log("Optimizing...")
         logger.log(fmt_row(13, loss_names))
 
+
+        # Here we collect pol_surr gradients with fixed policy network (do not apply adam.update)
+        from config import ggl, ggl_ghost  # global ggl, ggl_ghost from config.py
+        logger.log("Start collecting policy gradients for variance analysis ...")
+        pga_batchsize = 1
+        for batch in d.iterate_once(pga_batchsize):
+            pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+            ggl.append(pol_surr_grads.reshape(-1,1))
+
+            pol_surr_grads_ghost = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost"], batch["vtarg"], cur_lrmult)
+            ggl_ghost.append(pol_surr_grads_ghost.reshape(-1,1))
+
+        logger.log("End collecting policy gradients ...")
+        return pi
+
         # Here we do a bunch of optimization epochs over the data
         start_clip_grad = True  # we also use clip_norm for gradient
         kl_threshold = 0.5  # kl update limit
-        from config import ggl  # global ggl from config.py
         for _ in range(optim_epochs):
             losses = []  # list of sublists, each of which gives the loss based on a set of samples with size "optim_batchsize"
             grads = []   # list of sublists, each of which gives the gradients w.r.t all variables based on a set of samples with size "optim_batchsize"
@@ -385,16 +411,12 @@ def ppo_learn(env, policy,
                     else:
                         *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
                                                          cur_lrmult, val_update_criteron)
-                    pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
-                    # print("gradient:", pol_surr_grads)
-                    # print("shape of gradient:", pol_surr_grads.shape)
                 else:
                     if not cond_val_update:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                     else:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
                                                     cur_lrmult, val_update_criteron)
-                    pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                 if any(np.isnan(g)):
                     logger.log("there are nan in gradients, skip further updating!")
                     break
@@ -406,8 +428,6 @@ def ppo_learn(env, policy,
                     break # break only jump out of the inner loop
                 grads.append(g)
                 losses.append(newlosses)
-                ggl.append(pol_surr_grads.reshape(-1,1))
-            # logger.log(fmt_row(13, np.mean(losses, axis=0)))
 
             grads_shape = np.array(grads).shape
             grad_norm_checking = np.less_equal(np.array(grads), np.ones(grads_shape) * (grad_norm+0.1))
@@ -550,4 +570,3 @@ def ppo_learn(env, policy,
 
 
     return pi
-    # return pi, ep_mean_lens, ep_mean_rews, suc_counter_list

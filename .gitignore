@@ -6,7 +6,7 @@
 *.npy
 *.txt
 
-
+theory_analysis_results/
 runs_log_tests/
 runs_log_ddpg/
 data/

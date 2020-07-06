@@ -133,22 +133,22 @@ class DubinsCarEnv_v0(gym.Env):
 
         return discretized_ranges
 
-    # This function normally gets used under PPO algorithm
-    # def _in_obst(self, laser_data):
-    #
-    #     min_range = 0.3
-    #     for idx, item in enumerate(laser_data.ranges):
-    #         if min_range > laser_data.ranges[idx] > 0:
-    #             return True
-    #     return False
-
-
-    # added by XLV: temporally for DDPG.
-    def _in_obst(self, contact_data):
-        if len(contact_data.states) != 0:
-            if contact_data.states[0].collision1_name != "" and contact_data.states[0].collision2_name != "":
+    # This function normally gets used under ppo algorithm
+    def _in_obst(self, laser_data):
+    
+        min_range = 0.3
+        for idx, item in enumerate(laser_data.ranges):
+            if min_range > laser_data.ranges[idx] > 0:
                 return True
         return False
+
+
+    # This function normally gets used under ddpg algorithm
+    # def _in_obst(self, contact_data):
+    #     if len(contact_data.states) != 0:
+    #         if contact_data.states[0].collision1_name != "" and contact_data.states[0].collision2_name != "":
+    #             return True
+    #     return False
 
 
     def _in_goal(self, state):
@@ -201,6 +201,9 @@ class DubinsCarEnv_v0(gym.Env):
 
         obsrv = [x, y, theta] + discretized_laser_data
 
+        # v = dynamic_data.twist.linear.x
+        # w = dynamic_data.twist.angular.z
+        # print("get model linear vel: {}, angular vel: {}".format(v,w))
 
         return obsrv
 
@@ -286,14 +289,17 @@ class DubinsCarEnv_v0(gym.Env):
 
         # For linear vel, [-2, 2] --> [-0.8, 2]
         linear_vel = -0.8 + (2 - (-0.8)) * (action[0] - (-2)) / (2 - (-2))
+        
         # For angular vel, [-2, 2] --> [-0.8, 0.8]. If something wrong happens, check old code to specify for PPO, DDPG or TRPO
-        angular_vel = -0.8 + (0.8 - (-0.8)) * (action[1] - (-2)) / (2 - (-2))
+        # angular_vel = -0.8 + (0.8 - (-0.8)) * (action[1] - (-2)) / (2 - (-2))   # if use ddpg (or TD3), use this line
+        angular_vel = action[1]    # if use ppo, use this line
 
         # Publish control command
         vel_cmd = Twist()
         vel_cmd.linear.x = linear_vel
         vel_cmd.angular.z = angular_vel
         self.vel_pub.publish(vel_cmd)
+        # print("before sending cmd, linear_vel: {}; angular_vel: {}".format(vel_cmd.linear.x, vel_cmd.angular.z))
 
         # Prepare for receive sensor readings. Laser data as part of obs; contact data used for collision detection
         contact_data = self.get_contact()
@@ -351,7 +357,13 @@ class DubinsCarEnv_v0(gym.Env):
         event_flag = None  # {'collision', 'safe', 'goal', 'steps exceeding'}
 
         # 1. Check collision. If something is wrong, go check old code to specify another _in_obst function
-        if self._in_obst(new_contact_data):
+        # if self._in_obst(new_contact_data):
+        #     reward += self.collision_reward
+        #     done = True
+        #     self.step_counter = 0
+        #     event_flag = 'collision'
+        
+        if self._in_obst(laser_data):
             reward += self.collision_reward
             done = True
             self.step_counter = 0

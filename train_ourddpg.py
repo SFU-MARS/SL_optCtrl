@@ -53,7 +53,7 @@ if __name__ == "__main__":
 	parser.add_argument("--policy", default="TD3")               # Policy name (TD3, DDPG or OurDDPG)
 	parser.add_argument("--env", default="PlanarQuadEnv-v0")         # OpenAI gym environment name
 	parser.add_argument("--seed", default=0, type=int)               # Sets Gym, PyTorch and Numpy seeds
-	parser.add_argument("--start_timesteps", default=25e3, type=int)    # Time steps initial random policy is used
+	parser.add_argument("--start_timesteps", default=25e3, type=int) # Time steps initial random policy is used
 	parser.add_argument("--eval_freq", default=5e3, type=int)        # How often (time steps) we evaluate
 	parser.add_argument("--max_timesteps", default=300e3, type=int)  # Max time steps to run environment
 	parser.add_argument("--expl_noise", default=0.1)                 # Std of Gaussian exploration noise
@@ -214,17 +214,17 @@ if __name__ == "__main__":
 		replay_buffer.add(state, action, next_state, reward, done_bool)
 
 		# TODO
-		# Store consecutive episodes (up to 1000 steps)
+		# Store consecutive episodes (up to 1024 steps)
 		# seg['obs'].append(state)
 		# seg['next_obs'].append(next_state)
 		# seg['rews'].append(reward)
 		# seg['news'].append(done_bool)
-		# if len(seg['rews']) == 1000:
+		# if len(seg['rews']) == 1024:
 		# 	news = seg['news'].append(0).deepcopy()
 		# 	rews = seg['rews'].deepcopy()
 		# 	G    = seg['rews'].append(0).deepcopy()
 		# 	next_state = seg['next_obs'].deepcopy()
-		#
+		
 		# 	target_Q = policy.critic_target(torch.FloatTensor(next_state).to(device), policy.actor_target(torch.FloatTensor(next_state)))
 		# 	target_Q = reward + (news * args.discount * target_Q).detach()
 		# 	for t in reversed(range(1000)):

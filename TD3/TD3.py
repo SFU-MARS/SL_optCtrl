@@ -7,6 +7,7 @@ from keras.models import load_model
 
 import pickle
 import pandas as pd
+import os
 
 import config
 from utils import logger
@@ -169,8 +170,26 @@ class TD3(object):
 
 		if self.useValInterp:
 			assert self.state_dim == 14
-			valinterp_path = "/local-scratch/xlv/SL_optCtrl/Qinit/quad/trained_model/nn_interp.h5"
-			self.valinterp = load_model(valinterp_path)
+			# valinterp_path = "/local-scratch/xlv/SL_optCtrl/Qinit/quad/trained_model/vnn_interp/nn_interp.h5"  # vnn with 6d input
+			# valinterp_path = "/local-scratch/xlv/SL_optCtrl/Qinit/quad/trained_model/qnn_interp/nn_interp.h5"  # qnn with 6d + 2d input
+			# self.valinterp = load_model(valinterp_path)
+			# logger.log("You are using useValInterp, the Q target is calculated via interpolation ...")
+			# logger.log("The useValInterp comes from the file: {}".format(valinterp_path))
+
+			valinterp_path = os.environ['PROJ_HOME_3'] + '/tf_model/quad/vf_vi.h5'  # vnn with 14d input (the one we use for PPO)
+			self.valinterp = load_model(valinterp_path)		
+			# apply normalization
+			normbasedata_path = os.environ['PROJ_HOME_3'] + '/data/quad/valFunc_vi_filled_cleaned.csv'
+			normbase_colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
+			normbase_df = pd.read_csv(normbasedata_path, names=normbase_colnames, na_values="?", comment='\t', sep=",",
+									skipinitialspace=True, skiprows=1)
+			stats_source = normbase_df.copy()
+			stats_source.dropna()
+			stats_source.pop("value")
+			stats = stats_source.describe()
+			stats = stats.transpose()
+			self.stats_mean = stats['mean'].to_numpy().reshape(1, -1)
+			self.stats_std  = stats['std'].to_numpy().reshape(1, -1)
 			logger.log("You are using useValInterp, the Q target is calculated via interpolation ...")
 			logger.log("The useValInterp comes from the file: {}".format(valinterp_path))
 
@@ -206,6 +225,7 @@ class TD3(object):
 				target_Q1, target_Q2 = self.critic_target(next_state, next_action)
 				target_Q = torch.min(target_Q1, target_Q2)
 				target_Q = reward + not_done * self.discount * target_Q
+		
 		elif self.useGD:
 			if self.state_dim == 11:
 				val_s_prime = self.interp(next_state[:, :3])
@@ -216,11 +236,31 @@ class TD3(object):
 				val_s_prime = self.interp(next_state[:, :6])
 				val_s_prime = val_s_prime.reshape(-1, 1)
 				target_Q    = reward + not_done * self.discount * torch.FloatTensor(val_s_prime)
+		
 		elif self.useValInterp:
-			input = next_state.detach().numpy()[:, :6]
+			# Uncomment this if you use vnn with 6d input (performance is not good)
+			# input = next_state.detach().numpy()[:, :6]   
+			# val_s_prime = self.valinterp.predict(input)
+			# val_s_prime = val_s_prime.reshape(-1, 1)
+			# target_Q	= reward + not_done * self.discount * torch.FloatTensor(val_s_prime)
+			
+
+			# Uncomment this if you use vnn with 14d input (the one we use on PPO)
+			input = next_state.detach().numpy()
+			input = (input - self.stats_mean) / self.stats_std
 			val_s_prime = self.valinterp.predict(input)
 			val_s_prime = val_s_prime.reshape(-1, 1)
 			target_Q	= reward + not_done * self.discount * torch.FloatTensor(val_s_prime)
+
+
+			# Uncomment here and the following if you use qnn to estimate target_Q
+			# input_s = state.detach().numpy()[:, :6]   
+			# input_a = action.detach().numpy()
+			# input_a = np.clip(input_a, -2, 2)
+			# input_a = 7 + (10 - 7) * (input_a - (-2)) / (2 - (-2))
+			# input_sa = np.concatenate((input_s, input_a), axis=1)
+			# target_Q = self.valinterp.predict(input_sa)
+			# target_Q = torch.FloatTensor(target_Q)
 		else:
 			raise ValueError("invalid setting !")
 

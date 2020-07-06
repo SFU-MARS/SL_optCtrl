@@ -208,10 +208,9 @@ class MlpPolicy_mod(object):
                         self.vpred = self.vpred - self.vpred + constant
 
                     elif args['gym_env'] == 'PlanarQuadEnv-v0':
-                        logger.log(
-                            "we are loading external value groundtruth computed by value iteration for quad example, but no weight transferring!")
+                        logger.log("we are loading external value groundtruth computed by value iteration for quad example, but no weight transferring!")
 
-                        val_interp_f = value_interpolation_function_quad()
+                        val_interp_f = value_interpolation_function_quad(value_file_path=os.environ['PROJ_HOME_3'] + "/value_iteration/value_iteration_6d_xubo_version_1/value_matrix_quad_6D/transfered_value_matrix_7.npy")
                         val_interp_f.setup()
 
                         constant = tf.py_func(val_interp_f.interpolate_value, [ob[:, :6]], tf.float32)
@@ -236,11 +235,11 @@ class MlpPolicy_mod(object):
                         colnames = ['x', 'y', 'theta', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
 
                     elif args['gym_env'] == 'PlanarQuadEnv-v0':
-                        # wt_filename = "/tf_model/quad/vf_vi_weights.pkl"
-                        wt_filename = "/tf_model/test_for_Francis/vf_vi_weights.pkl"
+                        wt_filename = "/tf_model/quad/vf_vi_weights.pkl"
+                        # wt_filename = "/tf_model/test_for_Francis/vf_vi_weights.pkl"
                         logging = "We are loading external value weights for quadrotor trained by value iteration"
-                        # val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_vi_filled_cleaned.csv"
-                        val_filled_path = os.environ['PROJ_HOME_3'] + "/tf_model/test_for_Francis/valFunc_vi_filled_cleaned.csv"
+                        val_filled_path = os.environ['PROJ_HOME_3'] + "/data/quad/valFunc_vi_filled_cleaned.csv"
+                        # val_filled_path = os.environ['PROJ_HOME_3'] + "/tf_model/test_for_Francis/valFunc_vi_filled_cleaned.csv"
                         colnames = ['x', 'vx', 'z', 'vz', 'phi', 'w', 'value', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8']
 
                     with open(os.environ['PROJ_HOME_3'] + wt_filename, 'rb') as f:
@@ -292,6 +291,38 @@ class MlpPolicy_mod(object):
                                                 use_bias=True)[:,0]
                         # self.vpred = tf.Print(self.vpred, [self.vpred], "xubo print vpred: ")
 
+                # Specially for DubinsCarEnv_v1 (5d car model), which uses a Q function from 3d car model
+                elif args['vf_type'] == "lowQ_highV":
+                    assert args['gym_env'] == 'DubinsCarEnv-v1'
+                    wt_filename = "/Qinit/dubinsCar/trained_model/64*64/Qf_weights.pkl"
+                    logging = "We are initializing 5d car model using Q function from 3d car model"
+                    with open(os.environ['PROJ_HOME_3'] + wt_filename, 'rb') as f:
+                        weights = pickle.load(f)
+                        logger.log(logging)
+                        obz = ob
+                        out_1 = tf.layers.dense(inputs=obz,
+                                                    units=64,
+                                                    name="fc1",
+                                                    kernel_initializer=tf.constant_initializer(weights[0][0]),
+                                                    bias_initializer=tf.constant_initializer(weights[0][1]),
+                                                    use_bias=True,
+                                                    activation=tf.nn.tanh)
+
+                        out_2 = tf.layers.dense(inputs=out_1,
+                                                    units=64,
+                                                    name="fc2",
+                                                    kernel_initializer=tf.constant_initializer(weights[1][0]),
+                                                    bias_initializer=tf.constant_initializer(weights[1][1]),
+                                                    use_bias=True,
+                                                    activation=tf.nn.tanh)
+
+                        self.vpred = tf.layers.dense(inputs=out_2,
+                                                    units=1,
+                                                    name="final",
+                                                    kernel_initializer=tf.constant_initializer(weights[2][0]),
+                                                    bias_initializer=tf.constant_initializer(weights[2][1]),
+                                                    use_bias=True)[:,0]
+                    
 
                 # Loading external value computed by mpc cost as initialization.
                 elif args['vf_type'] == "mpc":
@@ -389,14 +420,8 @@ class MlpPolicy_mod(object):
                     mean = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name='final',
                                            kernel_initializer=U.normc_initializer(0.01))
                     logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
-                                             initializer=tf.constant_initializer([-0.69]), trainable=True)
-
-                    # logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
-                    #                         initializer=tf.constant_initializer([-1.609]), trainable=True)
-
-                    # logstd = tf.get_variable(name="logstd", shape=[1, pdtype.param_shape()[0] // 2],
-                    #                         initializer=tf.constant_initializer([-1.04982]), trainable=True)
-                    print("we are using std=0.5")
+                                            initializer=tf.constant_initializer([-0.69]), trainable=True)
+                    print("we are using std={}".format(math.exp(-0.69)))
                     pdparam = tf.concat([mean, mean * 0.0 + logstd], axis=1)
                 else:
                     mean = tf.layers.dense(last_out, pdtype.param_shape()[0] // 2, name='final',

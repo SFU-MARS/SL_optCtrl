@@ -181,7 +181,7 @@ plotting_config = [{'path':'runs_log_ddpg/22-May-2020_18-04-54_TD3_DubinsCarEnv-
 for it in plotting_config:
     if os.path.isfile(it['path']):
         continue
-    fullpath = it['path']
+    fullpath = it['path']       
     cur_hue = it['hue']
 
     if setting == "train":

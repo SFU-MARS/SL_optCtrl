@@ -653,16 +653,17 @@ class env_quad_6d(object):
                                                          fill_value=self.reward_list[2])
         return interploating_function
 
-env = env_quad_6d()
-env.algorithm_init()
-# env.generate_samples_interpolate(100000)
+if __name__ == "__main__":
+    env = env_quad_6d()
+    env.algorithm_init()
+    # env.generate_samples_interpolate(100000)
 
 
-#env.value_iteration(mode="boltzmann")
-env.plot_2D_result(mode = "max")
-# s = np.array([0.3, 8.05, -4, 5, 0, -5.236], dtype = float)
-# s_ = np.array([0.2, 7.95, -4, 5, 0, -5.236], dtype = float)
-# print(env.check_cross(s, s_))
-# a = np.array([12, 12], dtype =float)
-# print(env.state_transition(s, a))
-# env.test_interpolation()
+    #env.value_iteration(mode="boltzmann")
+    env.plot_2D_result(mode = "max")
+    # s = np.array([0.3, 8.05, -4, 5, 0, -5.236], dtype = float)
+    # s_ = np.array([0.2, 7.95, -4, 5, 0, -5.236], dtype = float)
+    # print(env.check_cross(s, s_))
+    # a = np.array([12, 12], dtype =float)
+    # print(env.state_transition(s, a))
+    # env.test_interpolation()
