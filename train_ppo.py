@@ -63,13 +63,6 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
         logger.log("invalid run_type!")
     env.close()
 
-    # save global ggl in config.py
-    from config import ggl, ggl_ghost
-    pickle.dump(ggl, open(args['RUN_DIR'] + "/ggl.pkl", "wb"))
-    pickle.dump(ggl_ghost, open(args['RUN_DIR'] + "/ggl_ghost.pkl", "wb"))
-    logger.log("saving ggl done!")
-    logger.log("saving ggl_ghost done!")
-
     return pi
 
 if __name__ == "__main__":
@@ -155,7 +148,7 @@ if __name__ == "__main__":
             # Load model and continue training
             # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/quad_task_exploration/quad_task_air_space_202002_Francis_goal_angle_0_60/baseline_fixed/09-May-2020_20-33-16PlanarQuadEnv-v0_hand_craft_ppo/model'
             LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/22-Jun-2020_15-10-53DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/model'
-            trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=30, args=args)
+            trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=0, args=args)
             trained_policy.save_model(args['MODEL_DIR'])
 
             # Load pre-trained model for evaluation

@@ -1,4 +1,4 @@
-
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.linalg import norm
 import multiprocessing as mp
@@ -18,23 +18,12 @@ def sample_mean(samp_list, axis):
     return np.mean(m, axis=axis).reshape(-1,1)
 
 def sample_cov(samp_list, samp_mean):
-    # print("samp_list[0].shape:", samp_list[0].shape)
-    # print("samp mean shape:", samp_mean.shape)
     assert samp_list[0].shape == samp_mean.shape
     sigma = np.zeros((samp_mean.shape[0], samp_mean.shape[0]))
     for sp in samp_list:
         sigma += np.dot((sp - samp_mean), (sp - samp_mean).T)
     sigma = sigma / (len(samp_list)-1)
     return sigma
-
-# def matrix_norm(sigma):
-#     start_t = time.time()
-#     conj_sigma = np.conjugate(sigma)
-#     # print("conjugate operation tooks:", time.time()-start_t)
-#     res = np.dot(conj_sigma, sigma)
-#     # eig_vals, eig_vecs = np.linalg.eig(res)
-#     eig_vals = scipy.linalg.eigvals(res)
-#     return np.max(eig_vals)
 
 def matrix_norm(sigma):
     return norm(sigma, 2)
@@ -50,7 +39,7 @@ def f(name, ggl_seg):
     print("finshing {} seg ...".format(TOTAL))
     return {name: max_eigen_val}
 
-
+# This is for analysing the pg varaince
 class pgvar_analyser(object):
     def __init__(self, pg_loadpath, res_savepath, iters, bunch_size):
         self.num_cores = int(mp.cpu_count())
@@ -90,6 +79,142 @@ def Pearson(x1, x2):
 
 
 
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_17-10-43DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_1.0/ggl_ghost.pkl", "rb"))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_17-10-43DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_1.0/ggl.pkl", "rb"))
+
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_18-05-33DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.95/ggl_ghost.pkl", 'rb'))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_18-05-33DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.95/ggl.pkl", 'rb'))
+
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_18-59-28DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.8/ggl_ghost.pkl", 'rb'))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_18-59-28DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.8/ggl.pkl", 'rb'))
+
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_19-53-34DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.6/ggl_ghost.pkl", 'rb'))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_19-53-34DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.6/ggl.pkl", 'rb'))
+
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_20-47-36DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.4/ggl_ghost.pkl", 'rb'))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_20-47-36DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.4/ggl.pkl", 'rb'))
+
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_21-41-17DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.2/ggl_ghost.pkl", 'rb'))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_21-41-17DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.2/ggl.pkl", 'rb'))
+
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_22-36-06DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.0/ggl_ghost.pkl", 'rb'))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/05-Jul-2020_22-36-06DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann_lam_0.0/ggl.pkl", 'rb'))
+
+
+
+
+
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/ggl_ghost.pkl", "rb"))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/ggl.pkl", "rb"))
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/ggl_ghost_095.pkl", "rb"))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/ggl_095.pkl", "rb"))
+
+# pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/ggl_ghost_080.pkl", "rb"))
+# pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/ggl_080.pkl", "rb"))
+
+pg_bsl_all   = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/ggl_ghost_060.pkl", "rb"))
+pg_vinit_all = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/ggl_060.pkl", "rb"))
+
+
+
+pg_bsl_true = np.mean(pg_bsl_all, axis=0)  # true pg using bsl method
+pg_vinit_true = np.mean(pg_vinit_all, axis=0)  # true pg using vinit method
+
+batch_options = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 102400]
+res = []
+
+cosine_x = []
+cosine_y = []
+cosine_hue = []
+
+Eucliean_x = []
+Eucliean_y = []
+Eucliean_hue = []
+
+for i, batch_i in enumerate(batch_options):
+    pg_bsl_approx   = np.mean(pg_bsl_all[:batch_i], axis=0)
+    pg_vinit_approx = np.mean(pg_vinit_all[:batch_i], axis=0)
+
+
+    print("... Using Euclidean Distance ...")
+    Euclidean_bsl_bsl = Eucliean(pg_bsl_true, pg_bsl_approx)
+    Euclidean_vinit_vinit = Eucliean(pg_vinit_true, pg_vinit_approx)
+    Euclidean_bsl_vinit = Eucliean(pg_vinit_true, pg_bsl_approx)
+    Eucliean_vinit_bsl = Eucliean(pg_bsl_true, pg_vinit_approx)
+
+    print("... Using Manhattan Distance ...")
+    Manhattan_bsl_bsl = Manhattan(pg_bsl_true, pg_bsl_approx)
+    Manhattan_vinit_vinit = Manhattan(pg_vinit_true, pg_vinit_approx)
+    Manhattan_bsl_vinit = Manhattan(pg_vinit_true, pg_bsl_approx)
+    Manhattan_vinit_bsl = Manhattan(pg_bsl_true, pg_vinit_approx)
+
+    print("... Using Cosine ...")
+    Cosine_bsl_bsl = Cosine(pg_bsl_true, pg_bsl_approx)
+    Cosine_vinit_vinit = Cosine(pg_vinit_true, pg_vinit_approx)
+    Cosine_bsl_vinit = Cosine(pg_vinit_true, pg_bsl_approx)
+    Cosine_vinit_bsl = Cosine(pg_bsl_true, pg_vinit_approx)
+    
+
+    res.append({"Euclidean_bsl_bsl":Euclidean_bsl_bsl, 
+                "Euclidean_vinit_vinit":Euclidean_vinit_vinit, 
+                "Euclidean_bsl_vinit":Euclidean_bsl_vinit,
+                "Eucliean_vinit_bsl":Eucliean_vinit_bsl,  
+                "Manhattan_bsl_bsl":Manhattan_bsl_bsl, 
+                "Manhattan_vinit_vinit":Manhattan_vinit_vinit,
+                "Manhattan_bsl_vinit": Manhattan_bsl_vinit,
+                "Manhattan_vinit_bsl":Manhattan_vinit_bsl,
+                "Cosine_bsl_bsl":Cosine_bsl_bsl,
+                "Cosine_vinit_vinit":Cosine_vinit_vinit,
+                "Cosine_bsl_vinit":Cosine_bsl_vinit,
+                "Cosine_vinit_bsl":Cosine_vinit_bsl})
+
+    log_batch_i = np.log2(batch_i)
+    cosine_x.append(log_batch_i)
+    cosine_y.append(Cosine_bsl_bsl[0][0])
+    cosine_hue.append("Cosine_bsl_bsl")
+
+    cosine_x.append(log_batch_i)
+    cosine_y.append(Cosine_vinit_vinit[0][0])
+    cosine_hue.append("Cosine_vinit_vinit")
+
+    cosine_x.append(log_batch_i)
+    cosine_y.append(Cosine_bsl_vinit[0][0])
+    cosine_hue.append("Cosine_bsl_vinit")
+
+    cosine_x.append(log_batch_i)
+    cosine_y.append(Cosine_vinit_bsl[0][0])
+    cosine_hue.append("Cosine_vinit_bsl")
+
+
+    Eucliean_x.append(log_batch_i)
+    Eucliean_y.append(Euclidean_bsl_bsl)
+    Eucliean_hue.append("Euclidean_bsl_bsl")
+
+    Eucliean_x.append(log_batch_i)
+    Eucliean_y.append(Euclidean_vinit_vinit)
+    Eucliean_hue.append("Euclidean_vinit_vinit")
+
+    Eucliean_x.append(log_batch_i)
+    Eucliean_y.append(Euclidean_bsl_vinit)
+    Eucliean_hue.append("Euclidean_bsl_vinit")
+
+    Eucliean_x.append(log_batch_i)
+    Eucliean_y.append(Eucliean_vinit_bsl)
+    Eucliean_hue.append("Eucliean_vinit_bsl")
+
+sns.scatterplot(cosine_x,cosine_y,cosine_hue)
+sns.lineplot(cosine_x,cosine_y,cosine_hue)
+plt.savefig('ex2_0.60.pdf')
+plt.clf()
+sns.scatterplot(Eucliean_x, Eucliean_y, Eucliean_hue)
+sns.lineplot(Eucliean_x, Eucliean_y, Eucliean_hue)
+plt.savefig('ex2_0.2.pdf')
+plt.clf()
+
+
+
+
+
 # pg_true =  pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/29-Jun-2020_15-52-52DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/ggl_true.pkl", "rb"))
 # pg_bsl_approx = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/29-Jun-2020_15-52-52DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/ggl_ghost.pkl", "rb"))
 # pg_vinit_approx = pickle.load(open("/local-scratch/xlv/SL_optCtrl/runs_log_tests/29-Jun-2020_15-52-52DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/ggl.pkl", "rb"))
@@ -125,26 +250,25 @@ def Pearson(x1, x2):
 
 #     res.append({"Euclidean_bsl":Euclidean_bsl, "Euclidean_vinit":Euclidean_vinit, "Manhattan_bsl":Manhattan_bsl,"Manhattan_vinit":Manhattan_vinit,  "Cosine_bsl":Cosine_bsl, "Cosine_vinit":Cosine_vinit})
 # pickle.dump(res, open("res.pkl", "wb"))
+# import matplotlib.pyplot as plt
+# res = pickle.load(open("./res.pkl", "rb"))
+# # batch_options = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 102400]
+# batch_options = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]
+# x = []
+# y = []
+# hue = []
+# for i, b in enumerate(batch_options):
+#     x.append(np.log(b))
+#     y.append(res[i]["Cosine_bsl"][0][0])
+#     hue.append("Cosine_bsl")
 
+#     x.append(np.log(b))
+#     y.append(res[i]["Cosine_vinit"][0][0])
+#     hue.append("Cosine_vinit")
 
-import matplotlib.pyplot as plt
-res = pickle.load(open("./res.pkl", "rb"))
-batch_options = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 102400]
-x = []
-y = []
-hue = []
-for i, b in enumerate(batch_options):
-    x.append(b)
-    y.append(res[i]["Cosine_bsl"][0][0])
-    hue.append("Cosine_bsl")
-
-    x.append(b)
-    y.append(res[i]["Cosine_vinit"][0][0])
-    hue.append("Cosine_vinit")
-
-# ax = sns.scatterplot(x, y, hue)
-ax = sns.barplot(x,y,hue)
-plt.show()
+# sns.scatterplot(x, y, hue)
+# sns.lineplot(x,y,hue)
+# plt.show()
 
 # if __name__ == "__main__":
     # pgv = pgvar_analyser(pg_loadpath="/local-scratch/xlv/SL_optCtrl/runs_log_tests/22-Jun-2020_15-10-53DubinsCarEnv-v0_hand_craft_ppo_vf_boltzmann/ggl.pkl",
@@ -167,8 +291,8 @@ plt.show()
 
 #     import matplotlib.pyplot as plt
 
-#     res_vinit_MC = pickle.load(open("./final2_ggl_max_eigens_vinit_lam_1.pkl", 'rb'))
-#     res_bsl = pickle.load(open("./final2_ggl_max_eigens_baseline.pkl", 'rb'))
+#     res_vinit_MC = pickle.load(open("./theory_analysis_results/variance analysis/final_ggl_max_eigens_vinit_lam_1", 'rb'))
+#     res_bsl = pickle.load(open("./theory_analysis_results/variance analysis/final_ggl_max_eigens_baseline", 'rb'))
 
 #     res_vinit_MC_dict = {}
 #     for r in res_vinit_MC:
@@ -185,13 +309,13 @@ plt.show()
 #     hue = []
 
 #     for id, it in enumerate(ref):
-#         if res_vinit_MC_dict['iter_'+str(id+1)] < 10000:
+#         if res_vinit_MC_dict['iter_'+str(id+1)] < 2000:
 #             x.append(id)
 #             y.append(res_vinit_MC_dict['iter_'+str(id+1)])
 #             hue.append("vinit_MC")
     
 #     for id, it in enumerate(ref):
-#         if res_bsl_dict['iter_'+str(id+1)] < 10000:
+#         if res_bsl_dict['iter_'+str(id+1)] < 2000:
 #             x.append(id)
 #             y.append(res_bsl_dict['iter_'+str(id+1)])
 #             hue.append("bsl")
