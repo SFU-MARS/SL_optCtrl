@@ -317,15 +317,15 @@ def ppo_learn(env, policy,
 
         logger.log("********** Iteration %i ************" % (iters_so_far + 1)) # Current iteration index
 
-        seg = seg_gen.__next__()
-        add_vtarg_and_adv(seg, gamma, lam)
+        # seg = seg_gen.__next__()
+        # add_vtarg_and_adv(seg, gamma, lam)
 
         # if seg.pkl exists, read from it. Only used when we do policy gradient analysis
-        # seg = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/seg.pkl", "rb"))
+        seg = pickle.load(open("./runs_log_tests/experiments_for_calculate_gradient/segments/seg.pkl", "rb"))
 
         # one-time use for saving seg data. Comment it
-        pickle.dump(seg, open("./runs_log_tests/experiments_for_calculate_gradient/segments/seg.pkl", "wb"))
-        return 
+        # pickle.dump(seg, open("./runs_log_tests/experiments_for_calculate_gradient/segments/seg.pkl", "wb"))
+        # return 
 
         ob, ac, tdlamret = seg["ob"], seg["ac"], seg["tdlamret"]
 
@@ -388,7 +388,7 @@ def ppo_learn(env, policy,
             vpred_shaped = vpredbefore.reshape(-1, 1)
             atarg_shaped = atarg.reshape(-1,1)
             tdlamret_shaped = tdlamret.reshape(-1,1)
-            tdtarget_shaped = tdtarget.reshape(-1,1)
+            # tdtarget_shaped = tdtarget.reshape(-1,1)
             rews_shaped = rews.reshape(-1,1)
             event_flags_shaped = np.array(event_flags).reshape(-1,1)
 
@@ -453,11 +453,11 @@ def ppo_learn(env, policy,
         for batch in d.iterate_once(pga_batchsize):
             print("Processing {}".format(i))
             i = i + 1
-            # pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], cur_lrmult)
-            # ggl.append(pol_surr_grads.reshape(-1,1))
+            pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], cur_lrmult)
+            ggl.append(pol_surr_grads.reshape(-1,1))
 
-            # pol_surr_grads_ghost = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost"], cur_lrmult)
-            # ggl_ghost.append(pol_surr_grads_ghost.reshape(-1,1))
+            pol_surr_grads_ghost = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost"], cur_lrmult)
+            ggl_ghost.append(pol_surr_grads_ghost.reshape(-1,1))
 
             # # comment if not needed
             # # lambda = 0.95
@@ -489,16 +489,16 @@ def ppo_learn(env, policy,
             # ggl_ghost_040.append(pol_surr_grads_ghost_040.reshape(-1,1))
 
             # lambda = 0.20
-            pol_surr_grads_020 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_020"], cur_lrmult)
-            ggl_020.append(pol_surr_grads_020.reshape(-1,1))
+            # pol_surr_grads_020 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_020"], cur_lrmult)
+            # ggl_020.append(pol_surr_grads_020.reshape(-1,1))
 
-            pol_surr_grads_ghost_020 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_020"], cur_lrmult)
-            ggl_ghost_020.append(pol_surr_grads_ghost_020.reshape(-1,1))
+            # pol_surr_grads_ghost_020 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_020"], cur_lrmult)
+            # ggl_ghost_020.append(pol_surr_grads_ghost_020.reshape(-1,1))
 
         logger.log("End collecting policy gradients ...")
-        ggl_basedir = "/local-scratch/xlv/SL_optCtrl/theory_analysis_results"
-        # pickle.dump(ggl, open(ggl_basedir + "/ggl.pkl", "wb"))
-        # pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost.pkl", "wb"))
+        ggl_basedir = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/gradients"
+        pickle.dump(ggl, open(ggl_basedir + "/ggl.pkl", "wb"))
+        pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost.pkl", "wb"))
         # pickle.dump(ggl_095, open(ggl_basedir + "/ggl_095.pkl", "wb"))
         # pickle.dump(ggl_ghost_095, open(ggl_basedir + "/ggl_ghost_095.pkl", "wb"))
         # pickle.dump(ggl_080, open(ggl_basedir + "/ggl_080.pkl", "wb"))
@@ -506,9 +506,9 @@ def ppo_learn(env, policy,
         # pickle.dump(ggl_060, open(ggl_basedir + "/ggl_060.pkl", "wb"))
         # pickle.dump(ggl_ghost_060, open(ggl_basedir + "/ggl_ghost_060.pkl", "wb"))
         # pickle.dump(ggl_040, open(ggl_basedir + "/ggl_040.pkl", "wb"))
-        # pickle.dump(ggl_ghost_040, open(ggl_basedir + "/ggl_ghost_040.pkl", "wb"))
-        pickle.dump(ggl_020, open(ggl_basedir + "/ggl_020.pkl", "wb"))
-        pickle.dump(ggl_ghost_020, open(ggl_basedir + "/ggl_ghost_020.pkl", "wb"))
+        # pickle.dump(ggl_ghost_040, open(ggl_basedir + "/ggl_ghost_040.pkl", "wb"))    
+        # pickle.dump(ggl_020, open(ggl_basedir + "/ggl_020.pkl", "wb"))
+        # pickle.dump(ggl_ghost_020, open(ggl_basedir + "/ggl_ghost_020.pkl", "wb"))
         return pi
         #########################################################################################
 
