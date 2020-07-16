@@ -96,7 +96,7 @@ if __name__ == "__main__":
         parser.add_argument("--vf_type", help="vi_gd, boltzmann or mpc, if vf_load is yes", type=str, default="")
         parser.add_argument("--vf_switch", help="yes, no or always", type=str, default="")
 
-        parser.add_argument("--lam", type=float, default=0.95)
+        parser.add_argument("--lam", type=float, default=1.0)
         parser.add_argument("--grad_norm", type=float, default=0.5)
         parser.add_argument("--optim_stepsize", type=float, default=3e-4)
         parser.add_argument("--num_ppo_iters", type=int, default=300)

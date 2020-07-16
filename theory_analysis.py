@@ -78,7 +78,7 @@ def Pearson(x1, x2):
     pass
 
 
-workspace = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/gradients experiments/iteration_30/"
+workspace = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/gradients/100/"
 pg_bsl_all   = pickle.load(open(workspace + "ggl_ghost.pkl", "rb"))
 pg_vinit_all = pickle.load(open(workspace + "ggl.pkl", "rb"))
 
