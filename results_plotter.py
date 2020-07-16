@@ -6,15 +6,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'hard environment', 'baseline')
-basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'hard environment', 'switch')
+basedir1 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'good trap env', 'baseline')
+basedir2 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'good trap env', 'fixed')
+basedir3 = os.path.join(os.environ['PROJ_HOME_3'], 'runs_log_tests', 'good trap env', 'switch')
 
 
-basedir_list = [basedir1, basedir2]
+basedir_list = [basedir1, basedir2, basedir3]
 
 
 showdir = basedir_list
-cues_list=['A2C baseline', 'A2C switch']
+cues_list=['PPO baseline', 'PPO fixed', 'PPO switch']
 
 folder_cue_dict = {}
 for based_dir in basedir_list:
@@ -30,7 +31,9 @@ hues = []
 
 plt.rc('legend',fontsize=8)
 # choice = 'reward'  # or 'success rate'
-choice = 'success rate'
+# choice = 'success rate'
+# choice = 'trap rate'
+choice = 'goal rate'
 
 for k,v in folder_cue_dict.items():
     if os.path.isfile(k):
@@ -46,8 +49,13 @@ for k,v in folder_cue_dict.items():
         cur_stats = pickle.load(open(os.path.join(fullpath, 'result', 'train_reward_iter_' + str(max_iter_idx) + '.pkl'), 'rb'))
     elif choice == 'success rate':
         cur_stats = pickle.load(open(os.path.join(fullpath, 'result', 'eval_success_rate_iter_' + str(max_iter_idx) + '.pkl'), 'rb'))
+    elif choice == "trap rate":
+        cur_stats = np.load(os.path.join(fullpath, 'result', 'train_trap_rate_iter_' + str(max_iter_idx) + '.npy'))
+    elif choice == "goal rate":
+        cur_stats = np.load(os.path.join(fullpath, 'result', 'train_goal_rate_iter_' + str(max_iter_idx) + '.npy'))
     else:
         print("choice is invalid")
+    print(cur_stats)
     stats.extend(cur_stats)
     iterations.extend(range(len(cur_stats)))
     hues.extend([cur_hue]*len(cur_stats))
@@ -60,5 +68,5 @@ print(df)
 ax = sns.lineplot(x="iterations", y=choice, hue='hues', hue_order=cues_list, data=df)
 
 
-plt.savefig("/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/hard environment/successful rate.png")
-# plt.show()
+plt.savefig("/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/good trap env/train_goal_rate.png")
+plt.show()

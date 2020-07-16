@@ -24,8 +24,10 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
     init_policy = ppo.create_policy('pi', env, args=args, vf_load=True if args['vf_load'] == "yes" else False, pol_load=True if args['pol_load'] == "yes" else False)
     ppo.initialize()
 
+
     # load trained policy
     if load and loadpath is not None and loaditer is not None:
+        print("^^^^^^^^^^^^^^^")
         pi = init_policy
         pi.load_model(loadpath, iteration=loaditer)
         pi.save_model(args['MODEL_DIR'], iteration=0)
@@ -78,10 +80,14 @@ def run(env, algorithm, args, params=None, load=False, loadpath=None, loaditer=N
         logger.log("invalid run_type!")
     env.close()
 
+
     # save global ggl in config.py
-    from config import ggl
+    from config import ggl, ggl_ghost
     pickle.dump(ggl, open(args['RUN_DIR'] + "/ggl.pkl", "wb"))
+    pickle.dump(ggl_ghost, open(args['RUN_DIR'] + "/ggl_ghost.pkl", "wb"))
     logger.log("saving ggl done!")
+    logger.log("saving ggl_ghost done!")
+
     return pi
 
 if __name__ == "__main__":
@@ -109,12 +115,10 @@ if __name__ == "__main__":
         parser.add_argument("--difficulty", type=str, default="hard")
 
 
-
-
-
         parser.add_argument("--adv_shift", type=str, default="no")
         parser.add_argument("--seed", type=int, default=0)
         parser.add_argument("--method", type=str, default="ppo")
+        parser.add_argument("--policy_iteration", type=int, default=0)
 
         args = parser.parse_args()
         args = vars(args)
@@ -179,9 +183,15 @@ if __name__ == "__main__":
             trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, args=args)
             trained_policy.save_model(args['MODEL_DIR'])
 
+            # Load model to collect more data in order to calculate gradients
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/experiments for calculate gradient/06-Jul-2020_22-18-22PlanarQuadEnv-v0_hand_craft_ppo_vf_boltzmann/model'
+            # print("load policy iteration: ", args['policy_iteration'])
+            # trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=args['policy_iteration'], args=args)
+            # trained_policy.save_model(args['MODEL_DIR'])
+
             # Load model and continue training
-            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/quad_task_exploration/quad_task_air_space_202002_Francis_goal_angle_0_60/baseline_fixed/09-May-2020_20-33-16PlanarQuadEnv-v0_hand_craft_ppo/model'
-            # trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=0, args=args)
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/07-Jul-2020_00-41-11PlanarQuadEnv-v0_hand_craft_ppo_vf_boltzmann/model'
+            # trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=150, args=args)
             # trained_policy.save_model(args['MODEL_DIR'])
 
             # Load pre-trained model for evaluation
