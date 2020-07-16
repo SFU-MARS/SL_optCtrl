@@ -230,7 +230,7 @@ def ppo_learn(env, policy,
     # print("trainable variables:", var_list)
 
     pol_var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='pi/pol')
-    get_pol_surr_grads = U.function([ob, ac, atarg, ret, lrmult], U.flatgrad(pol_surr, pol_var_list))
+    get_pol_surr_grads = U.function([ob, ac, atarg, lrmult], U.flatgrad(pol_surr, pol_var_list))
 
     if cond_val_update:
         lossandgrad = U.function([ob, ac, atarg, ret, lrmult, criteron], losses + [U.flatgrad(total_loss, var_list)])
@@ -318,9 +318,17 @@ def ppo_learn(env, policy,
         logger.log("********** Iteration %i ************" % (iters_so_far + 1)) # Current iteration index
 
         seg = seg_gen.__next__()
-        add_vtarg_and_adv(seg, gamma, lam, method)
+        add_vtarg_and_adv(seg, gamma, lam)
 
-        ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
+        # if seg.pkl exists, read from it. Only used when we do policy gradient analysis
+        # seg = pickle.load(open("/local-scratch/xlv/SL_optCtrl/theory_analysis_results/seg.pkl", "rb"))
+
+        # one-time use for saving seg data. Comment it
+        pickle.dump(seg, open("./runs_log_tests/experiments_for_calculate_gradient/segments/seg.pkl", "wb"))
+        return 
+
+        ob, ac, tdlamret = seg["ob"], seg["ac"], seg["tdlamret"]
+
         if args['adv_shift'] == "yes":
             logger.log(" --- advantage shift test is enabled --- ")
             tdlamret -= 100
@@ -331,7 +339,23 @@ def ppo_learn(env, policy,
         train_trap = seg['trap']
         mc_rets = seg['mcreturn']
         vpredbefore = seg['vpred']
-        tdtarget = seg['tdtarget']
+
+        atarg = seg["adv"] # with default lambda passed from argument
+        atarg_ghost = seg['adv_ghost'] # with default lambda passed from argument
+
+        # can be commented if not used any more
+        atarg_095 = seg["adv_lam_095"]
+        atarg_080 = seg["adv_lam_080"]
+        atarg_060 = seg["adv_lam_060"]
+        atarg_040 = seg["adv_lam_040"]
+        atarg_020 = seg["adv_lam_020"]    
+
+        atarg_ghost_095 = seg["adv_ghost_lam_095"]
+        atarg_ghost_080 = seg["adv_ghost_lam_080"]
+        atarg_ghost_060 = seg["adv_ghost_lam_060"]
+        atarg_ghost_040 = seg["adv_ghost_lam_040"]
+        atarg_ghost_020 = seg["adv_ghost_lam_020"]    
+
 
         print(len(mc_rets))
         print(len(vpredbefore))
@@ -368,17 +392,17 @@ def ppo_learn(env, policy,
             rews_shaped = rews.reshape(-1,1)
             event_flags_shaped = np.array(event_flags).reshape(-1,1)
 
-            log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, tdtarget_shaped, rews_shaped, event_flags_shaped), axis=1)
+            log_data = np.concatenate((ob, vpred_shaped, atarg_shaped, tdlamret_shaped, rews_shaped, event_flags_shaped), axis=1)
 
             if args['gym_env'] == 'PlanarQuadEnv-v0':
                 log_df = pd.DataFrame(log_data,
-                                            columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'tdtarget','rews', 'events'])
+                                            columns=['x', 'vx', 'z', 'vz', 'phi', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
             elif args['gym_env'] == 'DubinsCarEnv-v0':
                 log_df = pd.DataFrame(log_data,
-                                            columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'tdtarget', 'rews', 'events'])
+                                            columns=['x', 'y', 'theta', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
             elif args['gym_env'] == 'DubinsCarEnv-v1':
                 log_df = pd.DataFrame(log_data,
-                                            columns=['x', 'y', 'theta', 'v', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'tdtarget', 'rews', 'events'])
+                                            columns=['x', 'y', 'theta', 'v', 'w', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', valpred_csv_name, 'atarg', 'tdlamret', 'rews', 'events'])
             else:
                 raise ValueError("invalid env !!!")
             log_df.to_csv(f, header=True)
@@ -386,7 +410,30 @@ def ppo_learn(env, policy,
 
         """ Optimization """
         atarg = (atarg - atarg.mean()) / atarg.std() # standardized advantage function estimate
-        d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)
+        atarg_ghost = (atarg_ghost - atarg_ghost.mean()) / atarg_ghost.std() # standardized advantage function estimate for adv_ghost
+
+        # comment if not needed
+        atarg_095 = (atarg_095 - atarg_095.mean()) / atarg_095.std()
+        atarg_080 = (atarg_080 - atarg_080.mean()) / atarg_080.std()
+        atarg_060 = (atarg_060 - atarg_060.mean()) / atarg_060.std()
+        atarg_040 = (atarg_040 - atarg_040.mean()) / atarg_040.std()
+        atarg_020 = (atarg_020 - atarg_020.mean()) / atarg_020.std()  
+
+        atarg_ghost_095 = (atarg_ghost_095 - atarg_ghost_095.mean()) / atarg_ghost_095.std()
+        atarg_ghost_080 = (atarg_ghost_080 - atarg_ghost_080.mean()) / atarg_ghost_080.std()
+        atarg_ghost_060 = (atarg_ghost_060 - atarg_ghost_060.mean()) / atarg_ghost_060.std()
+        atarg_ghost_040 = (atarg_ghost_040 - atarg_ghost_040.mean()) / atarg_ghost_040.std()
+        atarg_ghost_020 = (atarg_ghost_020 - atarg_ghost_020.mean()) / atarg_ghost_020.std()
+
+
+        # d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret, atarg_ghost=adv_ghost), shuffle=not pi.recurrent)
+        d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret, atarg_ghost=atarg_ghost,
+                        atarg_095 = atarg_095, atarg_ghost_095 = atarg_ghost_095,
+                        atarg_080 = atarg_080, atarg_ghost_080 = atarg_ghost_080,
+                        atarg_060 = atarg_060, atarg_ghost_060 = atarg_ghost_060,
+                        atarg_040 = atarg_040, atarg_ghost_040 = atarg_ghost_040,
+                        atarg_020 = atarg_020, atarg_ghost_020 = atarg_ghost_020), shuffle=not pi.recurrent)
+
         optim_batchsize = optim_batchsize or ob.shape[0]
 
         # update pi.ob_rms based on the most recent ob
@@ -396,6 +443,74 @@ def ppo_learn(env, policy,
 
         logger.log("Optimizing...")
         logger.log(fmt_row(13, loss_names))
+
+        # Here we collect pol_surr gradients with fixed policy network (do not apply adam.update)
+        from config import ggl, ggl_ghost  # global ggl, ggl_ghost from config.py
+        from config import ggl_095, ggl_080, ggl_060, ggl_040, ggl_020, ggl_ghost_095, ggl_ghost_080,  ggl_ghost_060, ggl_ghost_040, ggl_ghost_020
+        logger.log("Start collecting policy gradients for variance analysis ...")
+        pga_batchsize = 1
+        i = 0
+        for batch in d.iterate_once(pga_batchsize):
+            print("Processing {}".format(i))
+            i = i + 1
+            # pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], cur_lrmult)
+            # ggl.append(pol_surr_grads.reshape(-1,1))
+
+            # pol_surr_grads_ghost = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost"], cur_lrmult)
+            # ggl_ghost.append(pol_surr_grads_ghost.reshape(-1,1))
+
+            # # comment if not needed
+            # # lambda = 0.95
+            # pol_surr_grads_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_095"], cur_lrmult)
+            # ggl_095.append(pol_surr_grads_095.reshape(-1,1))
+
+            # pol_surr_grads_ghost_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_095"], cur_lrmult)
+            # ggl_ghost_095.append(pol_surr_grads_ghost_095.reshape(-1,1))
+
+            # # lambda = 0.80
+            # pol_surr_grads_080 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_080"], cur_lrmult)
+            # ggl_080.append(pol_surr_grads_080.reshape(-1,1))
+
+            # pol_surr_grads_ghost_080 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_080"], cur_lrmult)
+            # ggl_ghost_080.append(pol_surr_grads_ghost_080.reshape(-1,1))
+
+            # # lambda = 0.60
+            # pol_surr_grads_060 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_060"], cur_lrmult)
+            # ggl_060.append(pol_surr_grads_060.reshape(-1,1))
+
+            # pol_surr_grads_ghost_060 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_060"], cur_lrmult)
+            # ggl_ghost_060.append(pol_surr_grads_ghost_060.reshape(-1,1))
+
+            # # lambda = 0.40
+            # pol_surr_grads_040 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_040"], cur_lrmult)
+            # ggl_040.append(pol_surr_grads_040.reshape(-1,1))
+
+            # pol_surr_grads_ghost_040 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_040"], cur_lrmult)
+            # ggl_ghost_040.append(pol_surr_grads_ghost_040.reshape(-1,1))
+
+            # lambda = 0.20
+            pol_surr_grads_020 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_020"], cur_lrmult)
+            ggl_020.append(pol_surr_grads_020.reshape(-1,1))
+
+            pol_surr_grads_ghost_020 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_020"], cur_lrmult)
+            ggl_ghost_020.append(pol_surr_grads_ghost_020.reshape(-1,1))
+
+        logger.log("End collecting policy gradients ...")
+        ggl_basedir = "/local-scratch/xlv/SL_optCtrl/theory_analysis_results"
+        # pickle.dump(ggl, open(ggl_basedir + "/ggl.pkl", "wb"))
+        # pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost.pkl", "wb"))
+        # pickle.dump(ggl_095, open(ggl_basedir + "/ggl_095.pkl", "wb"))
+        # pickle.dump(ggl_ghost_095, open(ggl_basedir + "/ggl_ghost_095.pkl", "wb"))
+        # pickle.dump(ggl_080, open(ggl_basedir + "/ggl_080.pkl", "wb"))
+        # pickle.dump(ggl_ghost_080, open(ggl_basedir + "/ggl_ghost_080.pkl", "wb"))
+        # pickle.dump(ggl_060, open(ggl_basedir + "/ggl_060.pkl", "wb"))
+        # pickle.dump(ggl_ghost_060, open(ggl_basedir + "/ggl_ghost_060.pkl", "wb"))
+        # pickle.dump(ggl_040, open(ggl_basedir + "/ggl_040.pkl", "wb"))
+        # pickle.dump(ggl_ghost_040, open(ggl_basedir + "/ggl_ghost_040.pkl", "wb"))
+        pickle.dump(ggl_020, open(ggl_basedir + "/ggl_020.pkl", "wb"))
+        pickle.dump(ggl_ghost_020, open(ggl_basedir + "/ggl_ghost_020.pkl", "wb"))
+        return pi
+        #########################################################################################
 
         # Here we do a bunch of optimization epochs over the data
         start_clip_grad = True  # we also use clip_norm for gradient
@@ -499,8 +614,8 @@ def ppo_learn(env, policy,
             logger.dump_tabular()
 
         """ Evaluation """
-        EVALUATION_FREQUENCY = 1  # 10
-        if iters_so_far % EVALUATION_FREQUENCY == 0:
+        EVALUATION_FREQUENCY = 30  # 10
+        if iters_so_far % EVALUATION_FREQUENCY == 0  or  iters_so_far == args['num_ppo_iters']:
 
             eval_max_iters = 2
             eval_iters_so_far = 0
@@ -564,7 +679,7 @@ def ppo_learn(env, policy,
 
 
         """ Saving model and statistics """
-        MODEL_SAVING_FREQ = 30 # 30 is enough for some learning
+        MODEL_SAVING_FREQ = 5 # 30 is enough for some learning
         if iters_so_far % MODEL_SAVING_FREQ == 0:
             pi.save_model(args['MODEL_DIR'], iteration=iters_so_far)
 
@@ -578,11 +693,11 @@ def ppo_learn(env, policy,
 
             np.save(args['RESULT_DIR'] + '/train_goal_rate_' + 'iter_' + str(iters_so_far) + '.npy', np.array(train_succ_rate))
             np.save(args['RESULT_DIR'] + '/train_trap_rate_' + 'iter_' + str(iters_so_far) + '.npy', np.array(train_trap_rate))
-            np.save(args['RESULT_DIR'] + '/train_trap_rate_' + 'iter_' + str(iters_so_far) + '.npy', np.array(eval_trap_rate))
+            np.save(args['RESULT_DIR'] + '/eval_trap_rate_' + 'iter_' + str(iters_so_far) + '.npy', np.array(eval_trap_rate))
 
 
         """ Plotting and saving statistics """
-        PLOT_FREQUENCY = 30 # 10
+        PLOT_FREQUENCY = 10 # 10
         if iters_so_far % PLOT_FREQUENCY == 0:
             # plot training reward performance
             train_plot_x = np.arange(len(ep_mean_rews)) + 1

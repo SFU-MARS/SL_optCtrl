@@ -132,7 +132,7 @@ def traj_segment_generator(pi, env, horizon, stochastic, difficulty = "hard"):
 
         t += 1
 
-def add_vtarg_and_adv(seg, gamma, lam, method):
+def add_vtarg_and_adv(seg, gamma, lam):
     """
     Compute target value using TD(lambda) estimator, and advantage with GAE(lambda)
     """
@@ -142,40 +142,70 @@ def add_vtarg_and_adv(seg, gamma, lam, method):
     seg["adv"] = gaelam = np.empty(T, 'float32')
     rew = seg["rew"]
     lastgaelam = 0
-    # AMEND: added by xlv for computing Mento-Carlo Return
+    # XLV: for saving Mento-Carlo Return
     G = np.append(seg["rew"], 0)
-    tdtarget = np.empty(T, 'float32')
-    ######## PPO Version ########################################
-    if (method == 'ppo'):
-        print(method)
-        for t in reversed(range(T)):
-            nonterminal = 1-new[t+1]
-            delta = rew[t] + gamma * vpred[t+1] * nonterminal - vpred[t]
-            gaelam[t] = lastgaelam = delta + gamma * lam * nonterminal * lastgaelam
-            # AMEND: added by xlv, update each timestep of G and tdtarget
-            G[t] = rew[t] + gamma * G[t+1] * nonterminal
-            tdtarget[t] = rew[t] + gamma * vpred[t+1] * nonterminal
-        seg["tdlamret"] = seg["adv"] + seg["vpred"]
-        # AMEND: added by xlv, return G except the last element, and tdtarget
-        seg["mcreturn"] = G[:-1]
-        seg["tdtarget"] = tdtarget
-    #############################################################
+    # XLV: for saving vpred_ghost (V^{\pi}) based advantage
+    vpred_ghost = np.append(seg["vpred_ghost"], seg["nextvpred_ghost"]) # this is baseline valnn prediction
+    seg["adv_ghost"] = gaelam_ghost = np.empty(T, 'float32')
+    lastgaelam_ghost = 0
+    for t in reversed(range(T)):
+        nonterminal = 1-new[t+1]
+        # advantage using Vinit (only when we load our dynamics-informed value function)
+        delta = rew[t] + gamma * vpred[t+1] * nonterminal - vpred[t]
+        gaelam[t] = lastgaelam = delta + gamma * lam * nonterminal * lastgaelam
 
-    ######## A2C Version ########################################
-    elif (method == 'a2c'):
-        print(method)
-        tdtarget = np.append(tdtarget, 0)
-        for t in reversed(range(T)):
-            nonterminal = 1 - new[t+1]
-            tdtarget[t] = rew[t] + gamma * tdtarget[t+1] * nonterminal
-            gaelam[t] = lastgaelam = tdtarget[t] - vpred[t]
-            G[t] = gaelam[t]
-        tdtarget = tdtarget[:-1]
+        # XLV: advantage using V^{\pi} (baseline approach using vpred_ghost, only useful for gradient comparison )
+        delta_ghost = rew[t] + gamma * vpred_ghost[t+1] * nonterminal - vpred_ghost[t]
+        gaelam_ghost[t] = lastgaelam_ghost = delta_ghost + gamma * lam * nonterminal * lastgaelam_ghost
 
-        seg["tdtarget"] = tdtarget
-        seg["mcreturn"] = G[:-1]
-        seg["tdlamret"] = tdtarget
-    ##############################################################
+        # XLV: update each timestep of Monte-Carlo Return (a.k.a TD(1))
+        G[t] = rew[t] + gamma * G[t+1] * nonterminal
+    seg["tdlamret"] = seg["adv"] + seg["vpred"]
+    # XLV: return G except the last element
+    seg["mcreturn"] = G[:-1]
+
+
+
+    # For multiple lambda options 
+    seg["adv_lam_095"] = gaelam_095 = np.empty(T, 'float32')
+    lastgaelam_095 = 0
+    seg["adv_lam_080"] = gaelam_080 = np.empty(T, 'float32')
+    lastgaelam_080 = 0
+    seg["adv_lam_060"] = gaelam_060 = np.empty(T, 'float32')
+    lastgaelam_060 = 0
+    seg["adv_lam_040"] = gaelam_040 = np.empty(T, 'float32')
+    lastgaelam_040 = 0
+    seg["adv_lam_020"] = gaelam_020 = np.empty(T, 'float32')
+    lastgaelam_020 = 0
+
+    seg["adv_ghost_lam_095"] = gaelam_095_ghost = np.empty(T, 'float32')
+    lastgaelam_095_ghost = 0
+    seg["adv_ghost_lam_080"] = gaelam_080_ghost = np.empty(T, 'float32')
+    lastgaelam_080_ghost = 0
+    seg["adv_ghost_lam_060"] = gaelam_060_ghost = np.empty(T, 'float32')
+    lastgaelam_060_ghost = 0
+    seg["adv_ghost_lam_040"] = gaelam_040_ghost = np.empty(T, 'float32')
+    lastgaelam_040_ghost = 0
+    seg["adv_ghost_lam_020"] = gaelam_020_ghost = np.empty(T, 'float32')
+    lastgaelam_020_ghost = 0
+
+    for t in reversed(range(T)):
+        nonterminal = 1-new[t+1]
+        delta = rew[t] + gamma * vpred[t+1] * nonterminal - vpred[t]
+        gaelam_095[t] = lastgaelam_095 = delta + gamma * 0.95 * nonterminal * lastgaelam_095
+        gaelam_080[t] = lastgaelam_080 = delta + gamma * 0.80 * nonterminal * lastgaelam_080
+        gaelam_060[t] = lastgaelam_060 = delta + gamma * 0.60 * nonterminal * lastgaelam_060
+        gaelam_040[t] = lastgaelam_040 = delta + gamma * 0.40 * nonterminal * lastgaelam_040
+        gaelam_020[t] = lastgaelam_020 = delta + gamma * 0.20 * nonterminal * lastgaelam_020
+
+
+        delta_ghost = rew[t] + gamma * vpred_ghost[t+1] * nonterminal - vpred_ghost[t]
+        gaelam_095_ghost[t] = lastgaelam_095_ghost = delta_ghost + gamma * 0.95 * nonterminal * lastgaelam_095_ghost
+        gaelam_080_ghost[t] = lastgaelam_080_ghost = delta_ghost + gamma * 0.80 * nonterminal * lastgaelam_080_ghost
+        gaelam_060_ghost[t] = lastgaelam_060_ghost = delta_ghost + gamma * 0.60 * nonterminal * lastgaelam_060_ghost
+        gaelam_040_ghost[t] = lastgaelam_040_ghost = delta_ghost + gamma * 0.40 * nonterminal * lastgaelam_040_ghost
+        gaelam_020_ghost[t] = lastgaelam_020_ghost = delta_ghost + gamma * 0.20 * nonterminal * lastgaelam_020_ghost
+
 
 def add_vtarg_and_adv_ghost(seg, gamma, lam):
     """
