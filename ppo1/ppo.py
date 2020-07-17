@@ -499,7 +499,7 @@ def ppo_learn(env, policy,
             logger.dump_tabular()
 
         """ Evaluation """
-        EVALUATION_FREQUENCY = 1  # 10
+        EVALUATION_FREQUENCY = 30  # 10
         if iters_so_far % EVALUATION_FREQUENCY == 0:
 
             eval_max_iters = 2
