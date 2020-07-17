@@ -321,7 +321,7 @@ def ppo_learn(env, policy,
         # add_vtarg_and_adv(seg, gamma, lam)
 
         # if seg.pkl exists, read from it. Only used when we do policy gradient analysis
-        seg = pickle.load(open("./runs_log_tests/experiments_for_calculate_gradient/segments/seg.pkl", "rb"))
+        seg = pickle.load(open("./runs_log_tests/experiments_for_calculate_gradient/segments/exp2/seg.pkl", "rb"))
 
         # one-time use for saving seg data. Comment it
         # pickle.dump(seg, open("./runs_log_tests/experiments_for_calculate_gradient/segments/seg.pkl", "wb"))
@@ -453,6 +453,8 @@ def ppo_learn(env, policy,
         for batch in d.iterate_once(pga_batchsize):
             print("Processing {}".format(i))
             i = i + 1
+
+            # lambda = 1.00
             pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], cur_lrmult)
             ggl.append(pol_surr_grads.reshape(-1,1))
 
@@ -496,9 +498,9 @@ def ppo_learn(env, policy,
             # ggl_ghost_020.append(pol_surr_grads_ghost_020.reshape(-1,1))
 
         logger.log("End collecting policy gradients ...")
-        ggl_basedir = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/gradients"
-        pickle.dump(ggl, open(ggl_basedir + "/ggl.pkl", "wb"))
-        pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost.pkl", "wb"))
+        ggl_basedir = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp2/100"
+        pickle.dump(ggl, open(ggl_basedir + "/ggl_100.pkl", "wb"))
+        pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost_100.pkl", "wb"))
         # pickle.dump(ggl_095, open(ggl_basedir + "/ggl_095.pkl", "wb"))
         # pickle.dump(ggl_ghost_095, open(ggl_basedir + "/ggl_ghost_095.pkl", "wb"))
         # pickle.dump(ggl_080, open(ggl_basedir + "/ggl_080.pkl", "wb"))

@@ -78,9 +78,9 @@ def Pearson(x1, x2):
     pass
 
 
-workspace = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/gradients/100/"
-pg_bsl_all   = pickle.load(open(workspace + "ggl_ghost.pkl", "rb"))
-pg_vinit_all = pickle.load(open(workspace + "ggl.pkl", "rb"))
+workspace = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp2/100/"
+pg_bsl_all   = pickle.load(open(workspace + "ggl_ghost_100.pkl", "rb"))
+pg_vinit_all = pickle.load(open(workspace + "ggl_100.pkl", "rb"))
 
 
 
@@ -169,12 +169,35 @@ for i, batch_i in enumerate(batch_options):
     Eucliean_y.append(Eucliean_vinit_bsl)
     Eucliean_hue.append("Euclidean_vinit_bsl")
 
-sns.scatterplot(cosine_x,cosine_y,cosine_hue)
-sns.lineplot(cosine_x,cosine_y,cosine_hue)
+sns.scatterplot(cosine_x,cosine_y,cosine_hue, palette=['red', 'blue', 'blue', 'red'])
+ax = sns.lineplot(cosine_x, 
+             cosine_y,
+             cosine_hue,
+             palette=['red', 'blue', 'blue', 'red'])
+ax.lines[1].set_linestyle("--")
+ax.lines[3].set_linestyle("--")
+leg = ax.legend()
+leg_lines = leg.get_lines()
+leg_lines[1].set_linestyle(":")
+leg_lines[3].set_linestyle(":")
+
+
+# plt.show()
 plt.savefig(workspace + 'cosine_distance.pdf')
 plt.clf()
-sns.scatterplot(Eucliean_x, Eucliean_y, Eucliean_hue)
-sns.lineplot(Eucliean_x, Eucliean_y, Eucliean_hue)
+
+
+sns.scatterplot(Eucliean_x, Eucliean_y, Eucliean_hue, palette=['red', 'blue', 'blue', 'red'])
+ax = sns.lineplot(Eucliean_x, Eucliean_y, Eucliean_hue, palette=['red', 'blue', 'blue', 'red'])
+ax.lines[1].set_linestyle("--")
+ax.lines[3].set_linestyle("--")
+leg = ax.legend()
+leg_lines = leg.get_lines()
+leg_lines[1].set_linestyle(":")
+leg_lines[3].set_linestyle(":")
+
+
+# plt.show()
 plt.savefig(workspace + 'eucliean_distance.pdf')
 plt.clf()
 
