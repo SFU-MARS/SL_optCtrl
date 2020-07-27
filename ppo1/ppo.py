@@ -293,6 +293,8 @@ def ppo_learn(env, policy,
     # switch = False
     val_update_criteron = False
 
+    seg_list = []
+
     while True:
         if callback:
             callback(locals(), globals())
@@ -319,6 +321,9 @@ def ppo_learn(env, policy,
 
         seg = seg_gen.__next__()
         add_vtarg_and_adv(seg, gamma, lam, method)
+
+
+        seg_list.append(seg)
 
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
         if args['adv_shift'] == "yes":
@@ -627,6 +632,7 @@ def ppo_learn(env, policy,
                              xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'eval_trap_rate'),
                              title="EVAL")
 
+    pickle.dump(seg_list, open(args["RUN_DIR"] + "/seg.pkl", "wb"))
 
     return pi
     # return pi, ep_mean_lens, ep_mean_rews, suc_counter_list
