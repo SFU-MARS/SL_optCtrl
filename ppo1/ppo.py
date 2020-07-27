@@ -293,6 +293,11 @@ def ppo_learn(env, policy,
     # switch = False
     val_update_criteron = False
 
+    from config import adv_list, adv_list_ghost
+
+    seg_list = []
+
+
     while True:
         if callback:
             callback(locals(), globals())
@@ -317,15 +322,25 @@ def ppo_learn(env, policy,
 
         logger.log("********** Iteration %i ************" % (iters_so_far + 1)) # Current iteration index
 
-        # seg = seg_gen.__next__()
-        # add_vtarg_and_adv(seg, gamma, lam)
+        seg = seg_gen.__next__()
+        add_vtarg_and_adv(seg, gamma, lam)
 
         # if seg.pkl exists, read from it. Only used when we do policy gradient analysis
-        seg = pickle.load(open("./runs_log_tests/experiments_for_calculate_gradient/segments/exp2/seg.pkl", "rb"))
+        # seg = pickle.load(open("/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp3/iter_" + \
+        #       str(args["policy_iteration"]) + "/seg_iter_" + str(args["policy_iteration"]) + "_refill.pkl", "rb"))
 
         # one-time use for saving seg data. Comment it
-        # pickle.dump(seg, open("./runs_log_tests/experiments_for_calculate_gradient/segments/seg.pkl", "wb"))
+
+        # logger.log("The number of episodes: ", len(seg["ep_lens"]))
+        # logger.log("The number of traps: ", Counter(seg["trap"])[True])
+        # logger.log("The number of collisions: ", len(seg["ep_lens"]) - Counter(seg["trap"])[True] - Counter(seg["suc"])[True])
+        # logger.log("The number of goals: ", Counter(seg["suc"])[True])
+
+
+        # pickle.dump(seg, open("./runs_log_tests/experiments_for_calculate_gradient/segments/exp3/seg_iter_" + str(args['policy_iteration']) + ".pkl", "wb"))
         # return 
+
+        seg_list.append(seg)
 
         ob, ac, tdlamret = seg["ob"], seg["ac"], seg["tdlamret"]
 
@@ -343,6 +358,22 @@ def ppo_learn(env, policy,
         atarg = seg["adv"] # with default lambda passed from argument
         atarg_ghost = seg['adv_ghost'] # with default lambda passed from argument
 
+        adv_list.append(atarg)
+        adv_list_ghost.append(atarg_ghost)
+ 
+        # atarg_095 = seg["adv"]
+        # atarg_080 = seg["adv"]
+        # atarg_060 = seg["adv"]
+        # atarg_040 = seg["adv"]
+        # atarg_020 = seg["adv"]    
+
+        # atarg_ghost_095 = seg["adv_ghost"]
+        # atarg_ghost_080 = seg["adv_ghost"]
+        # atarg_ghost_060 = seg["adv_ghost"]
+        # atarg_ghost_040 = seg["adv_ghost"]
+        # atarg_ghost_020 = seg["adv_ghost"]    
+
+
         # can be commented if not used any more
         atarg_095 = seg["adv_lam_095"]
         atarg_080 = seg["adv_lam_080"]
@@ -357,8 +388,8 @@ def ppo_learn(env, policy,
         atarg_ghost_020 = seg["adv_ghost_lam_020"]    
 
 
-        print(len(mc_rets))
-        print(len(vpredbefore))
+        # print(len(mc_rets))
+        # print(len(vpredbefore))
 
         logger.log("Sum of value pred over this iteration: %f" % np.sum(vpredbefore))
         logger.log("Sum of mc return over this iteration: %f" % np.sum(mc_rets))
@@ -448,26 +479,26 @@ def ppo_learn(env, policy,
         from config import ggl, ggl_ghost  # global ggl, ggl_ghost from config.py
         from config import ggl_095, ggl_080, ggl_060, ggl_040, ggl_020, ggl_ghost_095, ggl_ghost_080,  ggl_ghost_060, ggl_ghost_040, ggl_ghost_020
         logger.log("Start collecting policy gradients for variance analysis ...")
-        pga_batchsize = 1
-        i = 0
+        pga_batchsize = 64
+        i = 1
         for batch in d.iterate_once(pga_batchsize):
             print("Processing {}".format(i))
             i = i + 1
 
             # lambda = 1.00
-            pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], cur_lrmult)
-            ggl.append(pol_surr_grads.reshape(-1,1))
+            # pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], cur_lrmult)
+            # ggl.append(pol_surr_grads.reshape(-1,1))
 
-            pol_surr_grads_ghost = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost"], cur_lrmult)
-            ggl_ghost.append(pol_surr_grads_ghost.reshape(-1,1))
+            # pol_surr_grads_ghost = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost"], cur_lrmult)
+            # ggl_ghost.append(pol_surr_grads_ghost.reshape(-1,1))
 
             # # comment if not needed
-            # # lambda = 0.95
-            # pol_surr_grads_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_095"], cur_lrmult)
-            # ggl_095.append(pol_surr_grads_095.reshape(-1,1))
+            # lambda = 0.95
+            pol_surr_grads_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_095"], cur_lrmult)
+            ggl_095.append(pol_surr_grads_095.reshape(-1,1))
 
-            # pol_surr_grads_ghost_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_095"], cur_lrmult)
-            # ggl_ghost_095.append(pol_surr_grads_ghost_095.reshape(-1,1))
+            pol_surr_grads_ghost_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_095"], cur_lrmult)
+            ggl_ghost_095.append(pol_surr_grads_ghost_095.reshape(-1,1))
 
             # # lambda = 0.80
             # pol_surr_grads_080 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_080"], cur_lrmult)
@@ -497,11 +528,14 @@ def ppo_learn(env, policy,
             # pol_surr_grads_ghost_020 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_020"], cur_lrmult)
             # ggl_ghost_020.append(pol_surr_grads_ghost_020.reshape(-1,1))
 
-        logger.log("End collecting policy gradients ...")
-        ggl_basedir = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp2/100"
-        pickle.dump(ggl, open(ggl_basedir + "/ggl_100.pkl", "wb"))
-        pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost_100.pkl", "wb"))
-        # pickle.dump(ggl_095, open(ggl_basedir + "/ggl_095.pkl", "wb"))
+        # logger.log("End collecting policy gradients ...")
+        # ggl_basedir = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp3/iter_" + str(args["policy_iteration"])
+
+        # pickle.dump(adv_list, open(ggl_basedir + "/adv_list.pkl", "wb"))
+        # pickle.dump(adv_list_ghost, open(ggl_basedir + "/adv_list_ghost.pkl", "wb"))
+        # pickle.dump(ggl, open(ggl_basedir + "/ggl_100.pkl", "wb"))
+        # pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost_100.pkl", "wb"))
+        # pickle.dump(ggl_095, open(ggl_basedir + "/ggl_095.pkl", "wb"))    
         # pickle.dump(ggl_ghost_095, open(ggl_basedir + "/ggl_ghost_095.pkl", "wb"))
         # pickle.dump(ggl_080, open(ggl_basedir + "/ggl_080.pkl", "wb"))
         # pickle.dump(ggl_ghost_080, open(ggl_basedir + "/ggl_ghost_080.pkl", "wb"))
@@ -511,7 +545,7 @@ def ppo_learn(env, policy,
         # pickle.dump(ggl_ghost_040, open(ggl_basedir + "/ggl_ghost_040.pkl", "wb"))    
         # pickle.dump(ggl_020, open(ggl_basedir + "/ggl_020.pkl", "wb"))
         # pickle.dump(ggl_ghost_020, open(ggl_basedir + "/ggl_ghost_020.pkl", "wb"))
-        return pi
+        # return pi
         #########################################################################################
 
         # Here we do a bunch of optimization epochs over the data
@@ -529,7 +563,7 @@ def ppo_learn(env, policy,
                     else:
                         *newlosses, g = lossandgrad_clip(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
                                                          cur_lrmult, val_update_criteron)
-                    pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+                    # pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                     # print("gradient:", pol_surr_grads)
                     # print("shape of gradient:", pol_surr_grads.shape)
                 else:
@@ -538,7 +572,7 @@ def ppo_learn(env, policy,
                     else:
                         *newlosses, g = lossandgrad(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"],
                                                     cur_lrmult, val_update_criteron)
-                    pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
+                    # pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], batch["vtarg"], cur_lrmult)
                 if any(np.isnan(g)):
                     logger.log("there are nan in gradients, skip further updating!")
                     break
@@ -550,7 +584,7 @@ def ppo_learn(env, policy,
                     break # break only jump out of the inner loop
                 grads.append(g)
                 losses.append(newlosses)
-                ggl.append(pol_surr_grads.reshape(-1,1))
+                # ggl.append(pol_surr_grads.reshape(-1,1))
             # logger.log(fmt_row(13, np.mean(losses, axis=0)))
 
             grads_shape = np.array(grads).shape
@@ -744,6 +778,11 @@ def ppo_learn(env, policy,
                              xlabel='ppo iterations', figfile=os.path.join(args['FIGURE_DIR'], 'eval_trap_rate'),
                              title="EVAL")
 
+
+    # pickle.dump(ggl, open(ggl_basedir + "/ggl_100.pkl", "wb"))
+    # pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost_100.pkl", "wb"))
+
+    pickle.dump(seg_list, open(args['RUN_DIR'] + "/seg.pkl", "wb"))
 
     return pi
     # return pi, ep_mean_lens, ep_mean_rews, suc_counter_list

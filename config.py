@@ -24,3 +24,9 @@ ggl_ghost_080 = []
 ggl_ghost_060 = []
 ggl_ghost_040 = []
 ggl_ghost_020 = []
+
+
+global adv_list
+global adv_list_ghost
+adv_list = []
+adv_list_ghost = []

@@ -172,13 +172,13 @@ if __name__ == "__main__":
             ppo_params_json = os.environ['PROJ_HOME_3']+'/ppo1/ppo_params.json'
 
             # Start to train the policy from scratch
-            # trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, args=args)
-            # trained_policy.save_model(args['MODEL_DIR'])
+            trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, args=args)
+            trained_policy.save_model(args['MODEL_DIR'])
 
             # Load model to collect more data in order to calculate gradients
-            LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/experiments_for_calculate_gradient/pretrained_model/exp1/model'
-            print("load policy iteration: ", args['policy_iteration'])
-            trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=args['policy_iteration'], args=args)
+            # LOAD_DIR = os.environ['PROJ_HOME_3'] + '/runs_log_tests/19-Jul-2020_02-18-09PlanarQuadEnv-v0_hand_craft_ppo/model'
+            # print("load policy iteration: ", args['policy_iteration'])
+            # trained_policy = run(env=env, algorithm=ppo, params=ppo_params_json, load=True, loadpath=LOAD_DIR, loaditer=args['policy_iteration'], args=args)
             # trained_policy.save_model(args['MODEL_DIR'])
 
             # Load model and continue training
