@@ -238,9 +238,9 @@ for iteration in iterations:
     # sample size (2^x)
 
 
-    plt.rc('legend',fontsize=15)
-    plt.rc('axes', titlesize=20)
-    plt.rc('axes', labelsize=20)  
+    plt.rc('legend',fontsize=25)
+    plt.rc('axes', titlesize=30)
+    plt.rc('axes', labelsize=30)  
 
     import matplotlib.pyplot
     ax = matplotlib.pyplot.figure(figsize=(12.0, 8.0))
@@ -260,10 +260,10 @@ for iteration in iterations:
     ax.lines[3].set_linestyle("--")
 
     for tick in ax.xaxis.get_major_ticks():
-        tick.label.set_fontsize(24)
+        tick.label.set_fontsize(30)
 
     for tick in ax.yaxis.get_major_ticks():
-        tick.label.set_fontsize(24)
+        tick.label.set_fontsize(30)
 
     
     ax.set(xlabel='Sample size $2^{x}$', ylabel='Cosine similarity')  
@@ -318,10 +318,10 @@ for iteration in iterations:
     plt.legend(lines, labels)
 
     for tick in ax.xaxis.get_major_ticks():
-        tick.label.set_fontsize(24)
+        tick.label.set_fontsize(30)
 
     for tick in ax.yaxis.get_major_ticks():
-        tick.label.set_fontsize(24)
+        tick.label.set_fontsize(30)
 
 
     # plt.show()
