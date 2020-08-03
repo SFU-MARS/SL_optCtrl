@@ -80,7 +80,7 @@ def Pearson(x1, x2):
 iterations = ["0", "20", "40", "60", "80"]
 
 for iteration in iterations:
-    workspace = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp3/iter_" + iteration + "/"
+    workspace = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp4/iter_" + iteration + "/"
     print(workspace)
 
     pg_bsl_all   = pickle.load(open(workspace + "ggl_ghost_095.pkl", "rb"))
@@ -238,7 +238,7 @@ for iteration in iterations:
     # sample size (2^x)
 
 
-    plt.rc('legend',fontsize=25)
+    plt.rc('legend',fontsize=28)
     plt.rc('axes', titlesize=30)
     plt.rc('axes', labelsize=30)  
 
@@ -278,55 +278,57 @@ for iteration in iterations:
               'VI-fixed EST v.s. VI-fixed GT', 
               'Benchmark EST v.s. VI-fixed GT']
 
-    plt.legend(lines, labels)
+    # ax.legend(bbox_to_anchor=(2.0, 2.0))
+    # legend_1 = plt.legend(lines[:2], labels[:2], loc = "lower right", bbox_to_anchor=(0., 0, 0., 0))
+    # ax = plt.gca().add_artist(legend_1)
 
+    plt.legend(lines, labels, loc='lower right', bbox_to_anchor=(0., 1.02, 0., 0.102))
 
-
-    # plt.show()
-    plt.savefig(workspace + 'cosine_distance.pdf')
+    plt.show()
+    # plt.savefig(workspace + 'cosine_distance.pdf')
     plt.clf()
 
 
 
 
-    ax = sns.scatterplot(Eucliean_x, Eucliean_y, Eucliean_hue, 
-                         palette=['blue', 'red', 'blue', 'red'], legend = False,
-                         hue_order = ["Euclidean_vinit_bsl", "Euclidean_bsl_bsl", "Euclidean_vinit_vinit", "Euclidean_bsl_vinit"])
+    # ax = sns.scatterplot(Eucliean_x, Eucliean_y, Eucliean_hue, 
+    #                      palette=['blue', 'red', 'blue', 'red'], legend = False,
+    #                      hue_order = ["Euclidean_vinit_bsl", "Euclidean_bsl_bsl", "Euclidean_vinit_vinit", "Euclidean_bsl_vinit"])
 
-    ax.set_xticks(range(len(batch_options)))
+    # ax.set_xticks(range(len(batch_options)))
 
-    ax.set_xticklabels([6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
+    # ax.set_xticklabels([6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
 
-    ax = sns.lineplot(Eucliean_x, Eucliean_y, Eucliean_hue, 
-                      palette=['blue', 'red', 'blue', 'red'],
-                      hue_order = ["Euclidean_vinit_bsl", "Euclidean_bsl_bsl", "Euclidean_vinit_vinit", "Euclidean_bsl_vinit"])
+    # ax = sns.lineplot(Eucliean_x, Eucliean_y, Eucliean_hue, 
+    #                   palette=['blue', 'red', 'blue', 'red'],
+    #                   hue_order = ["Euclidean_vinit_bsl", "Euclidean_bsl_bsl", "Euclidean_vinit_vinit", "Euclidean_bsl_vinit"])
 
-    ax.lines[2].set_linestyle("--")
-    ax.lines[3].set_linestyle("--")
+    # ax.lines[2].set_linestyle("--")
+    # ax.lines[3].set_linestyle("--")
 
-    ax.set(xlabel='Sample size', ylabel='Euclidean distance')    
+    # ax.set(xlabel='Sample size', ylabel='Euclidean distance')    
 
-    lines = [Line2D([0], [0], color="blue", linewidth=3),
-             Line2D([0], [0], color="red", linewidth=3),
-             Line2D([0], [0], color="blue", linewidth=3, linestyle='--'),
-             Line2D([0], [0], color="red", linewidth=3, linestyle='--')]
-    labels = ['VI-fixed EST v.s. Benchmark GT', 
-              'Benchmark EST v.s. Benchmark GT', 
-              'VI-fixed EST v.s. VI-fixed GT', 
-              'Benchmark EST v.s. VI-fixed GT']
+    # lines = [Line2D([0], [0], color="blue", linewidth=3),
+    #          Line2D([0], [0], color="red", linewidth=3),
+    #          Line2D([0], [0], color="blue", linewidth=3, linestyle='--'),
+    #          Line2D([0], [0], color="red", linewidth=3, linestyle='--')]
+    # labels = ['VI-fixed EST v.s. Benchmark GT', 
+    #           'Benchmark EST v.s. Benchmark GT', 
+    #           'VI-fixed EST v.s. VI-fixed GT', 
+    #           'Benchmark EST v.s. VI-fixed GT']
 
-    plt.legend(lines, labels)
+    # plt.legend(lines, labels)
 
-    for tick in ax.xaxis.get_major_ticks():
-        tick.label.set_fontsize(30)
+    # for tick in ax.xaxis.get_major_ticks():
+    #     tick.label.set_fontsize(30)
 
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label.set_fontsize(30)
+    # for tick in ax.yaxis.get_major_ticks():
+    #     tick.label.set_fontsize(30)
 
 
     # plt.show()
-    plt.savefig(workspace + 'eucliean_distance.pdf')
-    plt.clf()
+    # plt.savefig(workspace + 'eucliean_distance.pdf')
+    # plt.clf()
 
 
 #blue dash line -> -> baseline trap
