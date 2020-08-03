@@ -323,7 +323,13 @@ def ppo_learn(env, policy,
         add_vtarg_and_adv(seg, gamma, lam, method)
 
 
-        seg_list.append(seg)
+        # for s in seg:
+        #     print(s)
+
+        import copy
+        temp_seg = copy.deepcopy(seg)
+        seg_list.append(temp_seg)
+
 
         ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
         if args['adv_shift'] == "yes":
