@@ -78,6 +78,8 @@ def Pearson(x1, x2):
     pass
 
 iterations = ["0", "20", "40", "60", "80"]
+# iterations = ["20"]
+
 
 for iteration in iterations:
     workspace = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp4/iter_" + iteration + "/"
@@ -243,7 +245,7 @@ for iteration in iterations:
     plt.rc('axes', labelsize=30)  
 
     import matplotlib.pyplot
-    ax = matplotlib.pyplot.figure(figsize=(12.0, 8.0))
+    ax = matplotlib.pyplot.figure(figsize=(12.0, 9.0))
 
     ax = sns.scatterplot(cosine_x,cosine_y,cosine_hue, palette=['blue', 'red', 'blue', 'red'], legend = False,
                          hue_order = ["Cosine_vinit_bsl", "Cosine_bsl_bsl", "Cosine_vinit_vinit", "Cosine_bsl_vinit"])
@@ -282,10 +284,13 @@ for iteration in iterations:
     # legend_1 = plt.legend(lines[:2], labels[:2], loc = "lower right", bbox_to_anchor=(0., 0, 0., 0))
     # ax = plt.gca().add_artist(legend_1)
 
-    plt.legend(lines, labels, loc='lower right', bbox_to_anchor=(0., 1.02, 0., 0.102))
+    # plt.legend(lines, labels, bbox_to_anchor=(0.8, 0.35, 0, 0))
+    # plt.legend(lines, labels, loc='lower right')
 
-    plt.show()
-    # plt.savefig(workspace + 'cosine_distance.pdf')
+    ax.get_legend().remove()
+
+    # plt.show()
+    plt.savefig(workspace + 'cosine_distance.pdf')
     plt.clf()
 
 

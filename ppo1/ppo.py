@@ -322,12 +322,12 @@ def ppo_learn(env, policy,
 
         logger.log("********** Iteration %i ************" % (iters_so_far + 1)) # Current iteration index
 
-        seg = seg_gen.__next__()
-        add_vtarg_and_adv(seg, gamma, lam)
+        # seg = seg_gen.__next__()
+        # add_vtarg_and_adv(seg, gamma, lam)
 
         # if seg.pkl exists, read from it. Only used when we do policy gradient analysis
-        # seg = pickle.load(open("/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp3/iter_" + \
-        #       str(args["policy_iteration"]) + "/seg_iter_" + str(args["policy_iteration"]) + "_refill.pkl", "rb"))
+        seg = pickle.load(open("/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp6/iter_" + \
+              str(args["policy_iteration"]) + "/seg_iter_" + str(args["policy_iteration"]) + "_refill.pkl", "rb"))
 
         # one-time use for saving seg data. Comment it
 
@@ -336,11 +336,8 @@ def ppo_learn(env, policy,
         # logger.log("The number of collisions: ", len(seg["ep_lens"]) - Counter(seg["trap"])[True] - Counter(seg["suc"])[True])
         # logger.log("The number of goals: ", Counter(seg["suc"])[True])
 
-
-        # pickle.dump(seg, open("./runs_log_tests/experiments_for_calculate_gradient/segments/exp3/seg_iter_" + str(args['policy_iteration']) + ".pkl", "wb"))
+        # pickle.dump(seg, open("./runs_log_tests/experiments_for_calculate_gradient/segments/exp6/seg_iter_" + str(args['policy_iteration']) + ".pkl", "wb"))
         # return 
-
-        seg_list.append(seg)
 
         ob, ac, tdlamret = seg["ob"], seg["ac"], seg["tdlamret"]
 
@@ -375,17 +372,17 @@ def ppo_learn(env, policy,
 
 
         # can be commented if not used any more
-        atarg_095 = seg["adv_lam_095"]
-        atarg_080 = seg["adv_lam_080"]
-        atarg_060 = seg["adv_lam_060"]
-        atarg_040 = seg["adv_lam_040"]
-        atarg_020 = seg["adv_lam_020"]    
+        # atarg_095 = seg["adv_lam_095"]
+        # atarg_080 = seg["adv_lam_080"]
+        # atarg_060 = seg["adv_lam_060"]
+        # atarg_040 = seg["adv_lam_040"]
+        # atarg_020 = seg["adv_lam_020"]    
 
-        atarg_ghost_095 = seg["adv_ghost_lam_095"]
-        atarg_ghost_080 = seg["adv_ghost_lam_080"]
-        atarg_ghost_060 = seg["adv_ghost_lam_060"]
-        atarg_ghost_040 = seg["adv_ghost_lam_040"]
-        atarg_ghost_020 = seg["adv_ghost_lam_020"]    
+        # atarg_ghost_095 = seg["adv_ghost_lam_095"]
+        # atarg_ghost_080 = seg["adv_ghost_lam_080"]
+        # atarg_ghost_060 = seg["adv_ghost_lam_060"]
+        # atarg_ghost_040 = seg["adv_ghost_lam_040"]
+        # atarg_ghost_020 = seg["adv_ghost_lam_020"]    
 
 
         # print(len(mc_rets))
@@ -444,26 +441,27 @@ def ppo_learn(env, policy,
         atarg_ghost = (atarg_ghost - atarg_ghost.mean()) / atarg_ghost.std() # standardized advantage function estimate for adv_ghost
 
         # comment if not needed
-        atarg_095 = (atarg_095 - atarg_095.mean()) / atarg_095.std()
-        atarg_080 = (atarg_080 - atarg_080.mean()) / atarg_080.std()
-        atarg_060 = (atarg_060 - atarg_060.mean()) / atarg_060.std()
-        atarg_040 = (atarg_040 - atarg_040.mean()) / atarg_040.std()
-        atarg_020 = (atarg_020 - atarg_020.mean()) / atarg_020.std()  
+        # atarg_095 = (atarg_095 - atarg_095.mean()) / atarg_095.std()
+        # atarg_080 = (atarg_080 - atarg_080.mean()) / atarg_080.std()
+        # atarg_060 = (atarg_060 - atarg_060.mean()) / atarg_060.std()
+        # atarg_040 = (atarg_040 - atarg_040.mean()) / atarg_040.std()
+        # atarg_020 = (atarg_020 - atarg_020.mean()) / atarg_020.std()  
 
-        atarg_ghost_095 = (atarg_ghost_095 - atarg_ghost_095.mean()) / atarg_ghost_095.std()
-        atarg_ghost_080 = (atarg_ghost_080 - atarg_ghost_080.mean()) / atarg_ghost_080.std()
-        atarg_ghost_060 = (atarg_ghost_060 - atarg_ghost_060.mean()) / atarg_ghost_060.std()
-        atarg_ghost_040 = (atarg_ghost_040 - atarg_ghost_040.mean()) / atarg_ghost_040.std()
-        atarg_ghost_020 = (atarg_ghost_020 - atarg_ghost_020.mean()) / atarg_ghost_020.std()
+        # atarg_ghost_095 = (atarg_ghost_095 - atarg_ghost_095.mean()) / atarg_ghost_095.std()
+        # atarg_ghost_080 = (atarg_ghost_080 - atarg_ghost_080.mean()) / atarg_ghost_080.std()
+        # atarg_ghost_060 = (atarg_ghost_060 - atarg_ghost_060.mean()) / atarg_ghost_060.std()
+        # atarg_ghost_040 = (atarg_ghost_040 - atarg_ghost_040.mean()) / atarg_ghost_040.std()
+        # atarg_ghost_020 = (atarg_ghost_020 - atarg_ghost_020.mean()) / atarg_ghost_020.std()
 
 
         # d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret, atarg_ghost=adv_ghost), shuffle=not pi.recurrent)
         d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret, atarg_ghost=atarg_ghost,
-                        atarg_095 = atarg_095, atarg_ghost_095 = atarg_ghost_095,
-                        atarg_080 = atarg_080, atarg_ghost_080 = atarg_ghost_080,
-                        atarg_060 = atarg_060, atarg_ghost_060 = atarg_ghost_060,
-                        atarg_040 = atarg_040, atarg_ghost_040 = atarg_ghost_040,
-                        atarg_020 = atarg_020, atarg_ghost_020 = atarg_ghost_020), shuffle=not pi.recurrent)
+                        # atarg_095 = atarg_095, atarg_ghost_095 = atarg_ghost_095,
+                        # atarg_080 = atarg_080, atarg_ghost_080 = atarg_ghost_080,
+                        # atarg_060 = atarg_060, atarg_ghost_060 = atarg_ghost_060,
+                        # atarg_040 = atarg_040, atarg_ghost_040 = atarg_ghost_040,
+                        # atarg_020 = atarg_020, atarg_ghost_020 = atarg_ghost_020
+                        ), shuffle=not pi.recurrent)
 
         optim_batchsize = optim_batchsize or ob.shape[0]
 
@@ -486,19 +484,19 @@ def ppo_learn(env, policy,
             i = i + 1
 
             # lambda = 1.00
-            # pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], cur_lrmult)
-            # ggl.append(pol_surr_grads.reshape(-1,1))
+            pol_surr_grads = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg"], cur_lrmult)
+            ggl.append(pol_surr_grads.reshape(-1,1))
 
-            # pol_surr_grads_ghost = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost"], cur_lrmult)
-            # ggl_ghost.append(pol_surr_grads_ghost.reshape(-1,1))
+            pol_surr_grads_ghost = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost"], cur_lrmult)
+            ggl_ghost.append(pol_surr_grads_ghost.reshape(-1,1))
 
             # # comment if not needed
             # lambda = 0.95
-            pol_surr_grads_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_095"], cur_lrmult)
-            ggl_095.append(pol_surr_grads_095.reshape(-1,1))
+            # pol_surr_grads_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_095"], cur_lrmult)
+            # ggl_095.append(pol_surr_grads_095.reshape(-1,1))
 
-            pol_surr_grads_ghost_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_095"], cur_lrmult)
-            ggl_ghost_095.append(pol_surr_grads_ghost_095.reshape(-1,1))
+            # pol_surr_grads_ghost_095 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_095"], cur_lrmult)
+            # ggl_ghost_095.append(pol_surr_grads_ghost_095.reshape(-1,1))
 
             # # lambda = 0.80
             # pol_surr_grads_080 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_080"], cur_lrmult)
@@ -528,13 +526,13 @@ def ppo_learn(env, policy,
             # pol_surr_grads_ghost_020 = get_pol_surr_grads(batch["ob"], batch["ac"], batch["atarg_ghost_020"], cur_lrmult)
             # ggl_ghost_020.append(pol_surr_grads_ghost_020.reshape(-1,1))
 
-        # logger.log("End collecting policy gradients ...")
-        # ggl_basedir = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp3/iter_" + str(args["policy_iteration"])
+        logger.log("End collecting policy gradients ...")
+        ggl_basedir = "/media/anjian/Data/Francis/SL_optCtrl/runs_log_tests/experiments_for_calculate_gradient/segments/exp6/iter_" + str(args["policy_iteration"])
 
         # pickle.dump(adv_list, open(ggl_basedir + "/adv_list.pkl", "wb"))
         # pickle.dump(adv_list_ghost, open(ggl_basedir + "/adv_list_ghost.pkl", "wb"))
-        # pickle.dump(ggl, open(ggl_basedir + "/ggl_100.pkl", "wb"))
-        # pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost_100.pkl", "wb"))
+        pickle.dump(ggl, open(ggl_basedir + "/ggl_100.pkl", "wb"))
+        pickle.dump(ggl_ghost, open(ggl_basedir + "/ggl_ghost_100.pkl", "wb"))
         # pickle.dump(ggl_095, open(ggl_basedir + "/ggl_095.pkl", "wb"))    
         # pickle.dump(ggl_ghost_095, open(ggl_basedir + "/ggl_ghost_095.pkl", "wb"))
         # pickle.dump(ggl_080, open(ggl_basedir + "/ggl_080.pkl", "wb"))
@@ -545,7 +543,7 @@ def ppo_learn(env, policy,
         # pickle.dump(ggl_ghost_040, open(ggl_basedir + "/ggl_ghost_040.pkl", "wb"))    
         # pickle.dump(ggl_020, open(ggl_basedir + "/ggl_020.pkl", "wb"))
         # pickle.dump(ggl_ghost_020, open(ggl_basedir + "/ggl_ghost_020.pkl", "wb"))
-        # return pi
+        return pi
         #########################################################################################
 
         # Here we do a bunch of optimization epochs over the data
