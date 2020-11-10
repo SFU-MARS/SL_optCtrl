@@ -23,11 +23,23 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 # same as the goal and start area definition in "playground.world" file
 # GOAL_STATE = np.array([3.41924, 3.6939, 0])
 
-GOAL_STATE = np.array([3.5, 3.5, np.pi*11/18]) # around 110 degrees as angle
+
+##### Xubo Old Setting #####
+# GOAL_STATE = np.array([3.5, 3.5, np.pi*11/18]) # around 110 degrees as angle
 # GOAL_STATE = np.array([3.5, 3.5, 0])
 # GOAL_STATE = np.array([3.5, 3.5, np.pi*3/4])
-START_STATE = np.array([-0.222404, -3.27274, 0])
+# START_STATE = np.array([-0.222404, -3.27274, 0])
+#############################
 
+##### Env for mbi env1 #####
+START_STATE = np.array([-4, -4, 0])
+GOAL_STATE = np.array([3.5, 3.5, np.pi*11/18]) # around 110 degrees as angle
+OBSTACLE_POS = np.array([(1.0, 2.0, -4.7, -0.7),
+                        (-2.7, -1.7, 1.6, 5),
+                        (-1.7, 2.5, 1.6, 2.6)]) # e.g. [x1, x2, y1, y2]
+GOAL_REGION = np.array([-4, -4, -0.75]) # e.g. [x, y, radius]
+ENV_RANGE = np.array([-4.95, 4.95, -4.95, 4.95]) # e.g. [x1, x2, y1, y2]
+############################
 
 """
 dubins' car 3d model:
@@ -90,7 +102,7 @@ class DubinsCarEnv_v0(gym.Env):
         self.start_state = START_STATE
 
         # goal tolerance definition
-        self.goal_pos_tolerance = 1.0
+        self.goal_pos_tolerance = 0.75 # changed from 1 to 0.75 in mbi_env1
         self.goal_theta_tolerance = 0.75  # around 45 degrees
 
         self.control_reward_coff = 0.01
@@ -144,10 +156,24 @@ class DubinsCarEnv_v0(gym.Env):
 
 
     # added by XLV: temporally for DDPG.
-    def _in_obst(self, contact_data):
-        if len(contact_data.states) != 0:
-            if contact_data.states[0].collision1_name != "" and contact_data.states[0].collision2_name != "":
+    # def _in_obst(self, contact_data):
+    #     if len(contact_data.states) != 0:
+    #         if contact_data.states[0].collision1_name != "" and contact_data.states[0].collision2_name != "":
+    #             return True
+    #     return False
+
+
+    def _in_obst(self, state):
+        x = state[0]
+        y = state[1]
+        for i, obs in enumerate(OBSTACLE_POS):
+            if (obs[0] <= x <= obs[1]  and  obs[2] <= y <= obs[3]):
                 return True
+        if (ENV_RANGE[0] <= x <= ENV_RANGE[1]  and  ENV_RANGE[2] <= y <= ENV_RANGE[3]):
+            return False
+        else:
+            return True
+
         return False
 
 
@@ -158,6 +184,7 @@ class DubinsCarEnv_v0(gym.Env):
         x = state[0]
         y = state[1]
         theta = state[2]
+
 
         vel = 0  # not used any more
 
@@ -229,10 +256,10 @@ class DubinsCarEnv_v0(gym.Env):
             pose.orientation.w = ow
         else:
             pose = Pose()
-            pose.position.x = np.random.uniform(low=START_STATE[0] - 0.5, high=START_STATE[0] + 0.5)
-            pose.position.y = np.random.uniform(low=START_STATE[1] - 0.5, high=START_STATE[1] + 0.5)
+            pose.position.x = np.random.uniform(low=START_STATE[0] - 0.375, high=START_STATE[0] + 0.375)
+            pose.position.y = np.random.uniform(low=START_STATE[1] - 0.375, high=START_STATE[1] + 0.375)
             pose.position.z = self.get_model_state(model_name="mobile_base").pose.position.z
-            theta = np.random.uniform(low=START_STATE[2], high=START_STATE[2] + np.pi)
+            theta = np.random.uniform(low=START_STATE[2], high=START_STATE[2] + np.pi / 4)
             ox, oy, oz, ow = quaternion_from_euler(0.0, 0.0, theta)
             pose.orientation.x = ox
             pose.orientation.y = oy
@@ -351,7 +378,8 @@ class DubinsCarEnv_v0(gym.Env):
         event_flag = None  # {'collision', 'safe', 'goal', 'steps exceeding'}
 
         # 1. Check collision. If something is wrong, go check old code to specify another _in_obst function
-        if self._in_obst(new_contact_data):
+        # if self._in_obst(new_contact_data):
+        if self._in_obst(np.array(obsrv[:2])):
             reward += self.collision_reward
             done = True
             self.step_counter = 0
