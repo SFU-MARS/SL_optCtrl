@@ -107,8 +107,15 @@
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
-        <link name='target'>
+<!--         <link name='target'>
           <pose frame=''>-0.9 4.1 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link> -->
+
+        <link name='target'>
+          <pose frame=''>-0.0 0 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -301,10 +308,6 @@
         <kinematic>0</kinematic>
       </link>
 
-
-
-
-
       <link name='wall_0'>
         <pose frame=''>-0.133521 5.00434 1 0 -0 0</pose>
         <collision name='collision'>
@@ -470,7 +473,9 @@
         <kinematic>0</kinematic>
       </link>
       <link name='target'>
-        <pose frame=''>-0.9 4.1 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <!-- <pose frame=''>-0.9 4.1 0 0 -0 0</pose> -->
+
         <visual name='visual'>
           <geometry>
             <cylinder>

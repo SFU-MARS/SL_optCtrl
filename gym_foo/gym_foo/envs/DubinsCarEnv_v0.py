@@ -33,12 +33,13 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 ##### Env for mbi env1 #####
 START_STATE = np.array([-4, -4, 0])
-GOAL_STATE = np.array([3.5, 3.5, np.pi*11/18]) # around 110 degrees as angle
 OBSTACLE_POS = np.array([(1.0, 2.0, -4.7, -0.7),
                         (-2.7, -1.7, 1.6, 5),
                         (-1.7, 2.5, 1.6, 2.6)]) # e.g. [x1, x2, y1, y2]
-GOAL_REGION = np.array([-4, -4, -0.75]) # e.g. [x, y, radius]
-ENV_RANGE = np.array([-4.95, 4.95, -4.95, 4.95]) # e.g. [x1, x2, y1, y2]
+# GOAL_STATE = np.array([-0.9, -4, -0.75]) # e.g. [x, y, radius]
+GOAL_STATE = np.array([0, 0, np.pi*2]) # e.g. [x, y, degree]
+
+ENV_RANGE = np.array([-4.94, 4.66, -4.7745, 4.9]) # e.g. [x1, x2, y1, y2]
 ############################
 
 """
@@ -106,16 +107,19 @@ class DubinsCarEnv_v0(gym.Env):
         self.goal_theta_tolerance = 0.75  # around 45 degrees
 
         self.control_reward_coff = 0.01
-        self.collision_reward = -2 * 200 * self.control_reward_coff*(10**2)
+        self.collision_reward = -400
         self.goal_reward = 1000
+        self.exceeding_reward = -800
 
         self.pre_obsrv = None
         self.reward_type = reward_type
         self.set_additional_goal = set_additional_goal
 
         self.step_counter = 0
-        self._max_episode_steps = 300
-        logger.log("successfully initialized!!")
+        self._max_episode_steps = 200
+
+        self.car_radius = 0.3
+        logger.log("Gym dubins_car environment successfully initialized!!")
 
     def _laser_scan_callback(self, laser_msg):
         self.laser_data = laser_msg
@@ -167,9 +171,11 @@ class DubinsCarEnv_v0(gym.Env):
         x = state[0]
         y = state[1]
         for i, obs in enumerate(OBSTACLE_POS):
-            if (obs[0] <= x <= obs[1]  and  obs[2] <= y <= obs[3]):
+            if (obs[0] - self.car_radius <= x <= obs[1] + self.car_radius  and  
+                obs[2] - self.car_radius <= y <= obs[3] + self.car_radius):
                 return True
-        if (ENV_RANGE[0] <= x <= ENV_RANGE[1]  and  ENV_RANGE[2] <= y <= ENV_RANGE[3]):
+        if (ENV_RANGE[0] + self.car_radius <= x <= ENV_RANGE[1] - self.car_radius  and  
+            ENV_RANGE[2] + self.car_radius <= y <= ENV_RANGE[3] - self.car_radius):
             return False
         else:
             return True
@@ -324,9 +330,10 @@ class DubinsCarEnv_v0(gym.Env):
 
         # Prepare for receive sensor readings. Laser data as part of obs; contact data used for collision detection
         contact_data = self.get_contact()
-        laser_data   = self.get_laser()
-        new_contact_data = contact_data
-        new_laser_data   = laser_data
+        laser_data = self.get_laser()
+
+        # new_contact_data = contact_data
+        # new_laser_data   = laser_data
 
         # Unpause simulation only for obtaining valid data streaming
         rospy.wait_for_service('/gazebo/unpause_physics')
@@ -335,17 +342,18 @@ class DubinsCarEnv_v0(gym.Env):
         except rospy.ServiceException as e:
             print("/gazebo/unpause_physics service call failed")
 
-        while new_contact_data.header.stamp <= contact_data.header.stamp or \
-                new_laser_data.header.stamp <= laser_data.header.stamp:
-            new_contact_data = self.get_contact()
-            new_laser_data   = self.get_laser()
+        # while new_contact_data.header.stamp <= contact_data.header.stamp or \
+        #         new_laser_data.header.stamp <= laser_data.header.stamp:
+        #     new_contact_data = self.get_contact()
+        #     new_laser_data   = self.get_laser()
+
 
         # Pause the simulation to do other operations
-        rospy.wait_for_service('/gazebo/pause_physics')
-        try:
-            self.pause()
-        except rospy.ServiceException as e:
-            print("/gazebo/pause_physics service call failed")
+        # rospy.wait_for_service('/gazebo/pause_physics')
+        # try:
+        #     self.pause()
+        # except rospy.ServiceException as e:
+        #     print("/gazebo/pause_physics service call failed")
 
         # Call a service to get model state
         dynamic_data = None
@@ -353,7 +361,9 @@ class DubinsCarEnv_v0(gym.Env):
         while dynamic_data is None:
             dynamic_data = self.get_model_state(model_name="mobile_base")
 
-        obsrv = self.get_obsrv(new_laser_data, dynamic_data)
+        # obsrv = self.get_obsrv(new_laser_data, dynamic_data) # Xubo's old version
+        obsrv = self.get_obsrv(laser_data, dynamic_data)
+
 
         # special solution for nan/inf observation (especially in case of any invalid sensor readings)
         if any(np.isnan(np.array(obsrv))) or any(np.isinf(np.array(obsrv))):
@@ -394,8 +404,8 @@ class DubinsCarEnv_v0(gym.Env):
             event_flag = 'goal'
 
         # 3. If reaching maximum episode step, then we reset and give penalty.
-        if self.step_counter >= 300:
-            reward += self.collision_reward
+        if self.step_counter >= self._max_episode_steps:
+            reward += self.exceeding_reward
             done = True
             self.step_counter = 0
             event_flag = 'steps exceeding'

@@ -1,6 +1,7 @@
 <launch>
 
-    <arg name="world_file"  default="$(env BICYCLE_MODEL_PLAYGROUND)"/>
+    <arg name="world_file"  default="/media/sfu_marslab/Data/Francis/SL_optCtrl/worlds/car_mbi_env1.world"/>
+
     <arg name="gui" default="true"/>
     <!-- <arg name="gui" default="false"/> -->
 
@@ -20,7 +21,7 @@
 
     <!-- Gazebo model spawner -->
     <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
-        args="$(optenv ROBOT_INITIAL_POSE) -unpause -urdf -param robot_description -model mobile_base -x 0 -y -3"/>
+        args="$(optenv ROBOT_INITIAL_POSE) -unpause -urdf -param robot_description -model mobile_base -x -4 -y -4"/>
 
     <!-- Velocity muxer -->
       <node pkg="nodelet" type="nodelet" name="mobile_base_nodelet_manager" args="manager"/>
