@@ -480,8 +480,8 @@ class env_dubin_car_3d(object):
 		dataset = pd.DataFrame({'x': state[:, 0],
 								'y': state[:, 1],
 								'theta': state[:, 2],
-								'v': action[:, 0],
-								'w': action[:, 1],
+								'vel': action[:, 0],
+								'ang_vel': action[:, 1],
 								'value': value})
 		dataset.to_csv("./car_3d_samples_q_value.csv")
 		# self.output_env_setting()
@@ -514,4 +514,4 @@ if __name__  ==  "__main__":
 	# env.value_iteration(mode = "boltzmann")
 	# env.plot_3D_result(mode = "max")
 
-	env.generate_q_samples_interpolate(n = 10)
+	env.generate_q_samples_interpolate(n = 1000)
